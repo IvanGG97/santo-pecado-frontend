@@ -1,11 +1,26 @@
+/* src/components/MainLayout/MainLayout.module.css */
+
 .layout {
     display: flex;
+    background-color: #f4f7fa;
 }
 
+/* Este es el contenedor principal que agrupa el Header y el contenido.
+  Ocupa todo el espacio a la derecha del Sidebar.
+*/
+.mainWrapper {
+    display: flex;
+    flex-direction: column; /* Apila los hijos (Header y content) verticalmente */
+    width: calc(100% - 250px); /* Ancho total menos el sidebar */
+    margin-left: 250px;      /* Deja espacio para el sidebar fijo */
+    height: 100vh;           /* Ocupa toda la altura de la pantalla */
+}
+
+/*
+  Esta es el área donde se renderizan tus páginas (Inicio, Empleados, etc.)
+*/
 .content {
-    margin-left: 250px; /* Mismo ancho que el sidebar */
     padding: 2rem;
-    width: calc(100% - 250px);
-    background-color: #f4f7fa; /* Un fondo claro para el contenido */
-    min-height: 100vh;
+    flex-grow: 1; /* ¡Esta es la línea clave! Hace que el contenido ocupe todo el espacio vertical sobrante */
+    overflow-y: auto; /* Si el contenido es muy largo, solo esta área tendrá scroll, no toda la página */
 }

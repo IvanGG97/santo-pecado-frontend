@@ -19,9 +19,9 @@ const InicioPage = () => {
             <header className={styles.header}>
                 <h1>Página de Inicio</h1>
                 {/* 3. Añadimos el botón y le asignamos la función handleLogout */}
-                <button onClick={handleLogout} className={styles.logoutButton}>
+                {/* <button onClick={handleLogout} className={styles.logoutButton}>
                     Cerrar Sesión
-                </button>
+                </button> */}
             </header>
             
             <div className={styles.content}>
