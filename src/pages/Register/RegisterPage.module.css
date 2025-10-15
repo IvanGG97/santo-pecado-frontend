@@ -1,0 +1,267 @@
+.container {
+    max-width: 400px;
+    margin: 40px auto;
+    background-color: #000000;
+    padding: 30px 25px;
+    border-radius: 8px;
+    border: 1px solid #fd002a;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #fff;
+}
+.neonText {
+    color: #fd002a;
+    text-shadow: 0 0 8px #fd002a;
+}
+.img{
+    width: 250px;
+}
+.containerImg {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+
+}
+.label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0000ff;
+    background-color: #323743;
+    color: #fff;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.passwordContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.showPasswordBtn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 18px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.button {
+    margin-top: 30px;
+    width: 50%;
+    background-color: #fd002a;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 15px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover:not(:disabled) {
+    background-color: #e00028;
+}
+
+.buttonDisabled {
+    background-color: #ff6b8b;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.error {
+    color: #ff4d4d;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.switchText {
+    margin-top: 20px;
+    text-align: center;
+    color: #fd002a;
+    font-weight: 500;
+}
+
+.linkButton {
+    background: none;
+    border: none;
+    color: #fd002a;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1em;
+    padding: 0;
+}
+
+
+
+
+
+
+/* .registerContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 20px;
+}
+
+.registerCard {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+.registerHeader {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.registerTitle {
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.registerSubtitle {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.registerForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input,
+.select {
+    padding: 0.75rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: #f5576c;
+}
+
+.input:disabled,
+.select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.errorMessage {
+    background-color: #fee;
+    color: #c33;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #fcc;
+    font-size: 0.9rem;
+}
+
+.registerButton {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.registerButton:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.registerButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.loginPrompt {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e1e5e9;
+}
+
+.loginPrompt p {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.toggleButton {
+    background: none;
+    border: none;
+    color: #f5576c;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.toggleButton:hover {
+    color: #e53e3e;
+}
+
+@media (max-width: 600px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+
+    .registerCard {
+        padding: 1.5rem;
+    }
+} */

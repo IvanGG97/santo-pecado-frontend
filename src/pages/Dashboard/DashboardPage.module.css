@@ -1,0 +1,74 @@
+.dashboardContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.welcomeMessage {
+    font-size: 1.8rem;
+    color: #fd002a;
+}
+
+.logoutButton {
+    background-color: #fd002a;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.logoutButton:hover {
+    background-color: #e00028;
+}
+
+.mainContent h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.employeeList {
+    list-style: none;
+    padding: 0;
+}
+
+.employeeItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.role {
+    background-color: #e0e0e0;
+    color: #555;
+    padding: 0.3rem 0.7rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.error {
+    color: #e00028;
+    background-color: #ffebee;
+    padding: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ffcdd2;
+}
