@@ -16,19 +16,23 @@
     text-align: center;
     color: #fff;
 }
+
 .neonText {
     color: #fd002a;
     text-shadow: 0 0 8px #fd002a;
 }
-.img{
+
+.img {
     width: 250px;
 }
+
 .containerImg {
     display: flex;
     width: 100%;
     justify-content: center;
-
+    margin-bottom: 1rem;
 }
+
 .label {
     display: block;
     font-weight: bold;
@@ -45,23 +49,6 @@
     color: #fff;
     font-size: 16px;
     box-sizing: border-box;
-}
-
-.passwordContainer {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.showPasswordBtn {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    color: #ccc;
-    font-size: 18px;
-    cursor: pointer;
-    user-select: none;
 }
 
 .button {
@@ -95,6 +82,7 @@
     color: #ff4d4d;
     margin-top: 10px;
     text-align: center;
+    font-size: 0.9em;
 }
 
 .switchText {
@@ -115,153 +103,37 @@
     padding: 0;
 }
 
-
-
-
-
-
-/* .registerContainer {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    padding: 20px;
+/* --- NUEVOS ESTILOS PARA LA VALIDACIÓN DE CONTRASEÑA --- */
+.passwordCriteria {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  font-size: 0.85em;
 }
 
-.registerCard {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 500px;
+.passwordCriteria li {
+  margin-bottom: 4px;
+  transition: color 0.3s ease;
 }
 
-.registerHeader {
-    text-align: center;
-    margin-bottom: 2rem;
+/* Estilo para requisito no cumplido (gris) */
+.invalid {
+  color: #888;
 }
 
-.registerTitle {
-    color: #333;
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+/* Estilo para requisito cumplido (verde) */
+.valid {
+  color: #28a745;
 }
 
-.registerSubtitle {
-    color: #666;
-    font-size: 0.9rem;
-    font-weight: 600;
+/* Añadimos un ícono para feedback visual */
+.valid::before {
+    content: '✓ ';
+    margin-right: 5px;
 }
 
-.registerForm {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+.invalid::before {
+    content: '• ';
+    margin-right: 5px;
 }
 
-.formRow {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.formGroup {
-    display: flex;
-    flex-direction: column;
-}
-
-.label {
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.input,
-.select {
-    padding: 0.75rem;
-    border: 2px solid #e1e5e9;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.2s;
-}
-
-.input:focus,
-.select:focus {
-    outline: none;
-    border-color: #f5576c;
-}
-
-.input:disabled,
-.select:disabled {
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-}
-
-.errorMessage {
-    background-color: #fee;
-    color: #c33;
-    padding: 0.75rem;
-    border-radius: 6px;
-    border: 1px solid #fcc;
-    font-size: 0.9rem;
-}
-
-.registerButton {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.registerButton:hover:not(:disabled) {
-    opacity: 0.9;
-}
-
-.registerButton:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.loginPrompt {
-    text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e1e5e9;
-}
-
-.loginPrompt p {
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
-.toggleButton {
-    background: none;
-    border: none;
-    color: #f5576c;
-    cursor: pointer;
-    font-weight: 600;
-    text-decoration: underline;
-}
-
-.toggleButton:hover {
-    color: #e53e3e;
-}
-
-@media (max-width: 600px) {
-    .formRow {
-        grid-template-columns: 1fr;
-    }
-
-    .registerCard {
-        padding: 1.5rem;
-    }
-} */

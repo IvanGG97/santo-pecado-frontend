@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import styles from './RegisterPage.module.css'; 
-import { useState } from 'react';
-
+import styles from './RegisterPage.module.css';
+import Swal from 'sweetalert2';
 
 export default function RegisterPage() {
     const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({ mode: 'onChange' });
     const { registerUser, loading } = useAuth();
     const navigate = useNavigate();
     const [apiError, setApiError] = useState('');
+    
+    // 1. Estado para mostrar los requisitos de la contraseña
+    const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    const password = watch("password", ""); // Para la validación de confirmar contraseña
+    // Observamos el valor de la contraseña en tiempo real
+    const password = watch("password", "");
+
+    // 2. Lógica para validar los requisitos de la contraseña
+    const passwordChecks = {
+        hasSixChars: password.length > 6,
+        hasUpperCase: /[A-Z]/.test(password),
+        hasLowerCase: /[a-z]/.test(password),
+        hasNumber: /\d/.test(password),
+        hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
 
     const onSubmit = async (data) => {
         setApiError('');
@@ -21,14 +33,23 @@ export default function RegisterPage() {
             email: data.email,
             first_name: data.firstName,
             last_name: data.lastName,
-            password: data.password
+            password: data.password,
+            dni: data.dni,
+            telefono: data.telefono,
         };
 
         const result = await registerUser(userData);
 
         if (result.success) {
-            alert('Registro exitoso. Serás redirigido al login para que inicies sesión una vez que un administrador apruebe tu cuenta.');
-            navigate('/login');
+            Swal.fire({
+                title: '¡Registro Exitoso!',
+                text: 'Serás redirigido para que inicies sesión.',
+                icon: 'success',
+                timer: 2500,
+                showConfirmButton: false
+            }).then(() => {
+                navigate('/login');
+            });
         } else {
             setApiError(result.error);
         }
@@ -42,73 +63,84 @@ export default function RegisterPage() {
             <h2 className={`${styles.title} ${styles.neonText}`}>REGÍSTRATE AHORA</h2>
             
             <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Campo Usuario */}
                 <label className={styles.label}>Usuario</label>
-                <input
-                    className={styles.input}
-                    type="text"
-                    placeholder="Ingrese su usuario"
-                    {...register("username", { required: "El usuario es obligatorio" })}
-                />
+                <input className={styles.input} {...register("username", { required: "El usuario es obligatorio" })} />
                 {errors.username && <p className={styles.error}>{errors.username.message}</p>}
 
-                {/* Campo Nombre */}
                 <label className={styles.label}>Nombre</label>
-                <input
-                    className={styles.input}
-                    type="text"
-                    placeholder="Ingrese su nombre"
-                    {...register("firstName", { required: "El nombre es obligatorio" })}
-                />
+                <input className={styles.input} {...register("firstName", { required: "El nombre es obligatorio" })} />
                 {errors.firstName && <p className={styles.error}>{errors.firstName.message}</p>}
                 
-                {/* Campo Apellido */}
                 <label className={styles.label}>Apellido</label>
-                <input
-                    className={styles.input}
-                    type="text"
-                    placeholder="Ingrese su apellido"
-                    {...register("lastName", { required: "El apellido es obligatorio" })}
-                />
+                <input className={styles.input} {...register("lastName", { required: "El apellido es obligatorio" })} />
                 {errors.lastName && <p className={styles.error}>{errors.lastName.message}</p>}
 
-                {/* Campo Correo */}
+                <label className={styles.label}>DNI</label>
+                <input 
+                    className={styles.input}
+                    type="text"
+                    placeholder="Documento Nacional de Identidad"
+                    {...register("dni")} 
+                />
+                
+                <label className={styles.label}>Teléfono</label>
+                <input 
+                    className={styles.input}
+                    type="tel"
+                    placeholder="Número de teléfono"
+                    {...register("telefono")} 
+                />
+
                 <label className={styles.label}>Correo</label>
                 <input
                     className={styles.input}
                     type="email"
-                    placeholder="Ingrese su correo"
                     {...register("email", { 
                         required: "El correo es obligatorio",
                         pattern: {
-                            value: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                            value: /^\S+@\S+\.\S+$/,
                             message: "Correo no válido"
                         }
                     })}
                 />
                 {errors.email && <p className={styles.error}>{errors.email.message}</p>}
 
-                {/* Campo Contraseña */}
                 <label className={styles.label}>Contraseña</label>
                 <input
                     className={styles.input}
                     type="password"
-                    placeholder="Ingrese su contraseña"
+                    // 3. Actualizamos la validación y añadimos el evento onFocus
                     {...register("password", { 
                         required: "La contraseña es obligatoria",
-                        minLength: { value: 6, message: "La contraseña debe tener al menos 6 caracteres" }
+                        validate: {
+                            hasSixChars: v => v.length > 6 || "Debe tener más de 6 caracteres",
+                            hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener al menos una mayúscula",
+                            hasLowerCase: v => /[a-z]/.test(v) || "Debe contener al menos una minúscula",
+                            hasNumber: v => /\d/.test(v) || "Debe contener al menos un número",
+                            hasSpecialChar: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Debe contener al menos un caracter especial",
+                        }
                     })}
+                    onFocus={() => setIsPasswordFocused(true)}
                 />
+                {/* Mostramos el primer error de validación que encuentre react-hook-form */}
                 {errors.password && <p className={styles.error}>{errors.password.message}</p>}
 
-                {/* Campo Confirmar Contraseña */}
+                {/* 4. Lista de requisitos que aparece al hacer focus */}
+                {isPasswordFocused && (
+                    <ul className={styles.passwordCriteria}>
+                        <li className={passwordChecks.hasSixChars ? styles.valid : styles.invalid}>Más de 6 caracteres</li>
+                        <li className={passwordChecks.hasUpperCase ? styles.valid : styles.invalid}>Al menos una mayúscula</li>
+                        <li className={passwordChecks.hasLowerCase ? styles.valid : styles.invalid}>Al menos una minúscula</li>
+                        <li className={passwordChecks.hasNumber ? styles.valid : styles.invalid}>Al menos un número</li>
+                        <li className={passwordChecks.hasSpecialChar ? styles.valid : styles.invalid}>Al menos un carácter especial</li>
+                    </ul>
+                )}
+
                 <label className={styles.label}>Confirmar Contraseña</label>
                 <input
                     className={styles.input}
                     type="password"
-                    placeholder="Confirme su contraseña"
                     {...register("confirmPassword", {
-                        required: "Confirma tu contraseña",
                         validate: value => value === password || "Las contraseñas no coinciden"
                     })}
                 />
@@ -121,7 +153,7 @@ export default function RegisterPage() {
                     className={`${styles.button} ${!isValid || loading ? styles.buttonDisabled : ''}`}
                     disabled={!isValid || loading}
                 >
-                    {loading ? 'Cargando...' : 'Registrarse'}
+                    {loading ? 'Registrando...' : 'Registrarse'}
                 </button>
             </form>
 
@@ -134,3 +166,4 @@ export default function RegisterPage() {
         </div>
     );
 }
+
