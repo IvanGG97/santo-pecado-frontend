@@ -1,0 +1,80 @@
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.addButton {
+    background-color: #28a745;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: top;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.productList {
+    padding-left: 1rem;
+    margin: 0;
+    list-style-type: none; /* Quitamos los puntos de la lista */
+}
+
+.productList li {
+    margin-bottom: 0.25rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.editButton, .deleteButton {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.editButton {
+    background-color: #007bff;
+}
+
+.deleteButton {
+    background-color: #dc3545;
+}
+
+/* --- ESTILOS PARA STOCK AGOTADO --- */
+.outOfStockRow {
+    opacity: 0.6;
+    background-color: #f8f9fa;
+}
+
+.outOfStockBadge {
+    background-color: #dc3545;
+    color: white;
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+

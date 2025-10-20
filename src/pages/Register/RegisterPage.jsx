@@ -11,15 +11,15 @@ export default function RegisterPage() {
     const navigate = useNavigate();
     const [apiError, setApiError] = useState('');
     
-    // 1. Estado para mostrar los requisitos de la contraseña
+    // 1. Estado para controlar la visibilidad de los requisitos de la contraseña
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    // Observamos el valor de la contraseña en tiempo real
+    // Observamos el valor del campo de la contraseña en tiempo real
     const password = watch("password", "");
 
-    // 2. Lógica para validar los requisitos de la contraseña
+    // 2. Objeto con la lógica para validar cada requisito de la contraseña
     const passwordChecks = {
-        hasSixChars: password.length > 6,
+        hasSixChars: password.length >= 6,
         hasUpperCase: /[A-Z]/.test(password),
         hasLowerCase: /[a-z]/.test(password),
         hasNumber: /\d/.test(password),
@@ -42,11 +42,10 @@ export default function RegisterPage() {
 
         if (result.success) {
             Swal.fire({
-                title: '¡Registro Exitoso!',
-                text: 'Serás redirigido para que inicies sesión.',
+                title: '¡Registro casi completo!',
+                text: 'Hemos enviado un enlace de activación a tu correo electrónico. Por favor, revísalo para continuar.',
                 icon: 'success',
-                timer: 2500,
-                showConfirmButton: false
+                confirmButtonText: 'Entendido'
             }).then(() => {
                 navigate('/login');
             });
@@ -113,7 +112,7 @@ export default function RegisterPage() {
                     {...register("password", { 
                         required: "La contraseña es obligatoria",
                         validate: {
-                            hasSixChars: v => v.length > 6 || "Debe tener más de 6 caracteres",
+                            hasSixChars: v => v.length >= 6 || "Debe tener al menos 6 caracteres",
                             hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener al menos una mayúscula",
                             hasLowerCase: v => /[a-z]/.test(v) || "Debe contener al menos una minúscula",
                             hasNumber: v => /\d/.test(v) || "Debe contener al menos un número",
@@ -127,13 +126,13 @@ export default function RegisterPage() {
 
                 {/* 4. Lista de requisitos que aparece al hacer focus */}
                 {isPasswordFocused && (
-                    <ul className={styles.passwordCriteria}>
-                        <li className={passwordChecks.hasSixChars ? styles.valid : styles.invalid}>Más de 6 caracteres</li>
-                        <li className={passwordChecks.hasUpperCase ? styles.valid : styles.invalid}>Al menos una mayúscula</li>
-                        <li className={passwordChecks.hasLowerCase ? styles.valid : styles.invalid}>Al menos una minúscula</li>
-                        <li className={passwordChecks.hasNumber ? styles.valid : styles.invalid}>Al menos un número</li>
-                        <li className={passwordChecks.hasSpecialChar ? styles.valid : styles.invalid}>Al menos un carácter especial</li>
-                    </ul>
+                    <div className={styles.passwordCriteria}>
+                        <p className={passwordChecks.hasSixChars ? styles.valid : styles.invalid}>✓ Al menos 6 caracteres</p>
+                        <p className={passwordChecks.hasUpperCase ? styles.valid : styles.invalid}>✓ Al menos una mayúscula</p>
+                        <p className={passwordChecks.hasLowerCase ? styles.valid : styles.invalid}>✓ Al menos una minúscula</p>
+                        <p className={passwordChecks.hasNumber ? styles.valid : styles.invalid}>✓ Al menos un número</p>
+                        <p className={passwordChecks.hasSpecialChar ? styles.valid : styles.invalid}>✓ Al menos un carácter especial</p>
+                    </div>
                 )}
 
                 <label className={styles.label}>Confirmar Contraseña</label>

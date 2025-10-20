@@ -77,7 +77,7 @@ const EmpleadoPage = () => {
     return (
         <div className={styles.container}>
             <header className={styles.header}>
-                <h1>Empleados / Roles</h1>
+                <h1>EMPLEADOS / USUARIOS</h1>
             </header>
 
             {!showList ? (

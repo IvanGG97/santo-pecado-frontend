@@ -1,0 +1,45 @@
+/* Estilos similares a la página de login */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #121212;
+}
+.card {
+    max-width: 500px;
+    margin: 40px auto;
+    background-color: #1a1a1a;
+    padding: 40px;
+    border-radius: 8px;
+    border: 1px solid #fd002a;
+    color: #fff;
+    text-align: center;
+}
+.success { color: #28a745; }
+.error { color: #dc3545; }
+.activating { color: #fff; }
+.loginButton {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.8rem 2rem;
+    background-color: #fd002a;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+}
+/* Estilo simple para un loader */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #fd002a;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

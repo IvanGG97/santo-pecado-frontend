@@ -11,7 +11,6 @@ export default function LoginPage() {
     const location = useLocation();
     const [apiError, setApiError] = useState('');
 
-    // Averiguamos a dónde redirigir al usuario después del login
     const from = location.state?.from?.pathname || "/inicio";
 
     const onSubmit = async (data) => {
@@ -21,6 +20,8 @@ export default function LoginPage() {
         if (result.success) {
             navigate(from, { replace: true });
         } else {
+            // Ahora, el 'result.error' contendrá el mensaje específico del backend
+            // ya sea "Credenciales inválidas..." o "La cuenta ha sido bloqueada..."
             setApiError(result.error);
         }
     };
@@ -33,31 +34,34 @@ export default function LoginPage() {
             <h2 className={`${styles.title} ${styles.neonText}`}>INICIAR SESIÓN</h2>
 
             <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Campo Usuario */}
                 <label className={styles.label}>Usuario</label>
                 <input
-                    className={styles.input}
-                    type="text"
-                    placeholder="Tu nombre de usuario"
+                    className={styles.input} type="text" placeholder="Tu nombre de usuario"
                     {...register("username", { required: "El usuario es obligatorio" })}
+                    disabled={loading} // El campo solo se deshabilita mientras carga
                 />
                 {errors.username && <p className={styles.error}>{errors.username.message}</p>}
 
-                {/* Campo Contraseña */}
                 <label className={styles.label}>Contraseña</label>
                 <input
-                    className={styles.input}
-                    type="password"
-                    placeholder="Tu contraseña"
+                    className={styles.input} type="password" placeholder="Tu contraseña"
                     {...register("password", { required: "La contraseña es obligatoria" })}
+                    disabled={loading} // El campo solo se deshabilita mientras carga
                 />
                 {errors.password && <p className={styles.error}>{errors.password.message}</p>}
 
+                <div className={styles.forgotPassword}>
+                    <Link to="/recuperar-contrasena" className={styles.linkButton}>
+                        ¿Olvidaste tu contraseña?
+                    </Link>
+                </div>
+
+                {/* Mostramos el error que venga de la API directamente */}
                 {apiError && <p className={styles.error}>{apiError}</p>}
 
                 <button
                     type="submit"
-                    className={`${styles.button} ${!isValid || loading ? styles.buttonDisabled : ''}`}
+                    className={`${styles.button} ${(!isValid || loading) ? styles.buttonDisabled : ''}`}
                     disabled={!isValid || loading}
                 >
                     {loading ? 'Ingresando...' : 'Entrar'}
@@ -73,3 +77,4 @@ export default function LoginPage() {
         </div>
     );
 }
+

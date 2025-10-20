@@ -7,6 +7,10 @@ import LoginPage from './pages/Login/LoginPage';
 import RegisterPage from './pages/Register/RegisterPage';
 import InicioPage from './pages/Inicio/InicioPage';
 import EmpleadoPage from './pages/Empleado/EmpleadoPage';
+import ProductoPage from './pages/Productos/ProductoPage';
+import ActivateAccountPage from './pages/ActivateAccount/ActivateAccountPage';
+import RequestPasswordResetPage from './pages/RequestPasswordReset/RequestPasswordResetPage';
+import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage'; // 1. Importamos la nueva página
 
 // Utilidades
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
@@ -18,15 +22,15 @@ function App() {
       <Router>
         <Routes>
           {/* --- RUTAS PÚBLICAS --- */}
-          {/* Cualquiera puede acceder a estas rutas, no requieren login */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          {/* Redirige la ruta raíz a la página de inicio por defecto */}
+          <Route path="/recuperar-contrasena" element={<RequestPasswordResetPage />} />
+          <Route path="/activar-cuenta/:uidb64/:token" element={<ActivateAccountPage />} />
+          {/* 2. AÑADIMOS LA NUEVA RUTA PARA RESTABLECER LA CONTRASEÑA */}
+          <Route path="/restablecer-contrasena/:uidb64/:token" element={<ResetPasswordPage />} />
           <Route path="/" element={<Navigate to="/inicio" />} />
 
           {/* --- RUTAS PROTEGIDAS CON LAYOUT --- */}
-          {/* Este Route actúa como un contenedor. Primero, verifica si el usuario está logueado. */}
-          {/* Si lo está, renderiza el MainLayout (con el Sidebar). */}
           <Route 
             element={
               <ProtectedRoute>
@@ -34,12 +38,8 @@ function App() {
               </ProtectedRoute>
             }
           >
-            {/* Todas las rutas anidadas aquí adentro se renderizarán dentro del MainLayout */}
-            
             {/* RUTA PARA TODOS LOS USUARIOS LOGUEADOS */}
             <Route path="/inicio" element={<InicioPage />} />
-            
-            {/* --- RUTAS CON PERMISOS ESPECÍFICOS --- */}
             
             {/* RUTA SOLO PARA ADMINS */}
             <Route 
@@ -51,26 +51,18 @@ function App() {
               } 
             />
             
-            {/* Aquí puedes seguir añadiendo tus otras páginas con sus reglas de acceso */}
-            {/* Ejemplo:
+            {/* RUTA PARA ADMINS Y ENCARGADOS */}
             <Route 
-              path="/cajas" 
+              path="/productos"
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
-                  <CajasPage />
+                  <ProductoPage />
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/pedidos" 
-              element={
-                // Esta ruta sería visible para todos los roles
-                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero', 'Cocina']}>
-                  <PedidosPage />
-                </ProtectedRoute>
-              } 
-            />
-            */}
+
+            {/* Aquí puedes seguir añadiendo tus otras páginas con sus reglas de acceso */}
+
           </Route>
         </Routes>
       </Router>
