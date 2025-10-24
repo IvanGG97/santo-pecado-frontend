@@ -1,21 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import apiClient from '../../services/api';
 import styles from './ProductList.module.css';
 import Swal from 'sweetalert2';
 import AddEditProductModal from '../AddEditProductModal/AddEditProductModal';
+import ProductDetailModal from '../ProductDetailModal/ProductDetailModal'; // 1. Importamos el nuevo modal de detalle
 
 const ProductList = () => {
-    const [productos, setProductos] = useState([]);
+    const [allProductos, setAllProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showOnlyAvailable, setShowOnlyAvailable] = useState(true);
+
+    // 2. Nuevos estados para el modal de detalle
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [detailProduct, setDetailProduct] = useState(null);
 
     const fetchProductos = async () => {
         setLoading(true);
         try {
             const response = await apiClient.get('/inventario/productos/');
-            setProductos(response.data);
+            setAllProductos(response.data);
         } catch (error) {
             console.error("Error al cargar productos:", error);
             Swal.fire('Error', 'No se pudieron cargar los productos.', 'error');
@@ -38,6 +44,12 @@ const ProductList = () => {
         setIsModalOpen(true);
     };
 
+    // 3. Nueva función para abrir el modal de detalle
+    const handleViewDetailClick = (product) => {
+        setDetailProduct(product);
+        setIsDetailModalOpen(true);
+    };
+
     const handleDeleteClick = (product) => {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -54,15 +66,29 @@ const ProductList = () => {
                     Swal.fire('¡Eliminado!', 'El producto ha sido eliminado.', 'success');
                     fetchProductos();
                 } catch (error) {
-                    Swal.fire('Error', 'No se pudo eliminar el producto.', 'error');
+                    const errorMessage = error.response?.data?.detail || 'No se pudo eliminar el producto.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acción Bloqueada',
+                        text: errorMessage,
+                    });
                 }
             }
         });
     };
 
-    const filteredProductos = productos.filter(p =>
-        p.producto_nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProductos = useMemo(() => {
+        return allProductos
+            .filter(p => {
+                if (showOnlyAvailable) {
+                    return p.producto_disponible;
+                }
+                return true;
+            })
+            .filter(p =>
+                p.producto_nombre.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+    }, [allProductos, searchTerm, showOnlyAvailable]);
 
     return (
         <div>
@@ -73,6 +99,12 @@ const ProductList = () => {
                     className={styles.searchInput}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                <button 
+                    onClick={() => setShowOnlyAvailable(!showOnlyAvailable)} 
+                    className={styles.toggleButton}
+                >
+                    {showOnlyAvailable ? 'Ver Todos los Productos' : 'Ver Solo Disponibles'}
+                </button>
                 <button onClick={handleAddClick} className={styles.addButton}>
                     + Añadir Producto
                 </button>
@@ -91,7 +123,7 @@ const ProductList = () => {
                     </thead>
                     <tbody>
                         {filteredProductos.map(product => (
-                            <tr key={product.id}>
+                            <tr key={product.id} className={!product.producto_disponible ? styles.unavailableRow : ''}>
                                 <td>
                                     <img 
                                         src={product.producto_imagen || product.producto_imagen_url || 'https://placehold.co/60x60/e1e1e1/777?text=Sin+Imagen'}
@@ -103,7 +135,8 @@ const ProductList = () => {
                                 <td>{product.tipo_producto}</td>
                                 <td>${new Intl.NumberFormat('es-AR').format(product.producto_precio)}</td>
                                 <td className={styles.actions}>
-                                    <button className={styles.actionButton} onClick={() => alert('Detalle de insumos - A implementar')}>Ver Detalle</button>
+                                    {/* 4. Conectamos el botón a la nueva función */}
+                                    <button className={styles.actionButton} onClick={() => handleViewDetailClick(product)}>Ver Detalle</button>
                                     <button className={`${styles.actionButton} ${styles.editButton}`} onClick={() => handleEditClick(product)}>Editar</button>
                                     <button className={`${styles.actionButton} ${styles.deleteButton}`} onClick={() => handleDeleteClick(product)}>Borrar</button>
                                 </td>
@@ -113,6 +146,7 @@ const ProductList = () => {
                 </table>
             )}
 
+            {/* Modal para Añadir/Editar */}
             {isModalOpen && (
                 <AddEditProductModal
                     product={selectedProduct}
@@ -123,8 +157,17 @@ const ProductList = () => {
                     }}
                 />
             )}
+
+            {/* 5. Renderizamos el nuevo modal de detalle */}
+            {isDetailModalOpen && (
+                <ProductDetailModal
+                    product={detailProduct}
+                    onClose={() => setIsDetailModalOpen(false)}
+                />
+            )}
         </div>
     );
 };
 
 export default ProductList;
+

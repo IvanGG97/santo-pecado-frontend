@@ -1,0 +1,93 @@
+/* Estilos muy similares a ProductList.module.css */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.searchInput {
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 300px;
+    font-size: 1rem;
+}
+
+.addButton {
+    background-color: #28a745;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover {
+    background-color: #218838;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.table th, .table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.insumoImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.actionButton {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.actionButton:hover {
+    opacity: 0.8;
+}
+
+.editButton {
+    background-color: #007bff;
+}
+
+.deleteButton {
+    background-color: #dc3545;
+}
+
+/* Estilo para filas con stock bajo */
+.lowStockRow {
+    background-color: #fff3cd; /* Amarillo pálido */
+}
+
+.lowStockRow td {
+    color: #856404; /* Texto oscuro para contraste */
+    font-weight: 500; /* Un poco más de énfasis */
+}
+

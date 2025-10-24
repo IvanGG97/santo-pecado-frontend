@@ -1,0 +1,73 @@
+/* Estilos similares a TipoProductoList.module.css para consistencia */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.addButton {
+    background: #28a745;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.addButton:hover {
+    background-color: #218838;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    vertical-align: middle; /* Centra verticalmente */
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Alinea las acciones a la derecha */
+.actionsHeader {
+    text-align: right;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 0.5rem;
+}
+
+.actionButton {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    color: white;
+    transition: opacity 0.2s;
+}
+
+.actionButton:hover {
+    opacity: 0.8;
+}
+
+.editButton {
+    background-color: #007bff;
+}
+
+.deleteButton {
+    background-color: #dc3545;
+}

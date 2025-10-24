@@ -13,6 +13,11 @@
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover {
+    background-color: #218838;
 }
 
 .table {
@@ -29,12 +34,13 @@
 
 .table th {
     background-color: #f8f9fa;
+    font-weight: 600;
 }
 
 .productList {
     padding-left: 1rem;
     margin: 0;
-    list-style-type: none; /* Quitamos los puntos de la lista */
+    list-style-type: disc;
 }
 
 .productList li {
@@ -63,10 +69,17 @@
     background-color: #dc3545;
 }
 
-/* --- ESTILOS PARA STOCK AGOTADO --- */
-.outOfStockRow {
+/* --- ESTILOS PARA DISPONIBILIDAD Y STOCK --- */
+
+.unavailableRow {
     opacity: 0.6;
-    background-color: #f8f9fa;
+    background-color: #fef2f2; /* Tono rojizo claro para destacar */
+}
+
+/* Para tachar el producto específico que no está disponible */
+.unavailableProduct {
+    text-decoration: line-through;
+    color: #999;
 }
 
 .outOfStockBadge {
@@ -76,5 +89,27 @@
     border-radius: 4px;
     font-size: 0.8em;
     font-weight: bold;
+}
+
+/* Insignias de estado general de la promoción */
+.statusBadge {
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+}
+
+.statusAvailable {
+    background-color: #28a745; /* Verde */
+}
+
+.statusUnavailable {
+    background-color: #6c757d; /* Gris */
+}
+
+/* Mantenemos los botones siempre visibles y funcionales */
+.unavailableRow .actions {
+    opacity: 1;
 }
 

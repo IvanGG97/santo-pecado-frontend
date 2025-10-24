@@ -72,18 +72,21 @@ const PromocionList = () => {
                             <th>Precio</th>
                             <th>Productos Incluidos</th>
                             <th>Stock</th>
+                            <th>Estado</th> {/* ¡NUEVA COLUMNA! */}
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {promociones.map(promo => (
-                            <tr key={promo.id} className={promo.promocion_stock <= 0 ? styles.outOfStockRow : ''}>
+                            // La fila se atenúa si la promoción no está disponible O si el stock es 0
+                            <tr key={promo.id} className={!promo.promocion_disponible || promo.promocion_stock <= 0 ? styles.unavailableRow : ''}>
                                 <td>{promo.promocion_nombre}</td>
                                 <td>${new Intl.NumberFormat('es-AR').format(promo.promocion_precio)}</td>
                                 <td>
                                     <ul className={styles.productList}>
                                         {promo.productos_promocion?.map(item => (
-                                            <li key={item.producto.id}>
+                                            // Se tacha el producto específico si no está disponible
+                                            <li key={item.producto.id} className={!item.producto.producto_disponible ? styles.unavailableProduct : ''}>
                                                 {item.cantidad}x {item.producto.producto_nombre}
                                             </li>
                                         ))}
@@ -94,6 +97,14 @@ const PromocionList = () => {
                                         promo.promocion_stock
                                     ) : (
                                         <span className={styles.outOfStockBadge}>Agotado</span>
+                                    )}
+                                </td>
+                                <td>
+                                    {/* --- INDICADOR DE ESTADO --- */}
+                                    {promo.promocion_disponible ? (
+                                        <span className={`${styles.statusBadge} ${styles.statusAvailable}`}>Disponible</span>
+                                    ) : (
+                                        <span className={`${styles.statusBadge} ${styles.statusUnavailable}`}>No Disponible</span>
                                     )}
                                 </td>
                                 <td className={styles.actions}>

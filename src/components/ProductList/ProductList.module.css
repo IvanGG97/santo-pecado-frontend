@@ -3,6 +3,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    gap: 1rem; /* Añade espacio entre los elementos */
 }
 
 .searchInput {
@@ -22,11 +23,31 @@
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s;
+    white-space: nowrap; /* Evita que el texto se parta */
 }
 
 .addButton:hover {
     background-color: #218838;
 }
+
+/* --- ESTILOS PARA EL NUEVO BOTÓN DE FILTRO --- */
+.toggleButton {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.toggleButton:hover {
+    background-color: #007bff;
+    color: white;
+}
+/* ------------------------------------------- */
 
 .table {
     width: 100%;
@@ -37,6 +58,7 @@
 .table th, .table td {
     padding: 1rem;
     border-bottom: 1px solid #eee;
+    vertical-align: middle; /* Centra verticalmente el contenido de las celdas */
 }
 
 .table th {
@@ -53,6 +75,7 @@
 .actions {
     display: flex;
     gap: 0.5rem;
+    align-items: center; /* Alinea los botones verticalmente */
 }
 
 .actionButton {
@@ -61,6 +84,7 @@
     background-color: #f8f9fa;
     border-radius: 5px;
     cursor: pointer;
+    transition: opacity 0.2s;
 }
 
 .editButton {
@@ -74,3 +98,19 @@
     color: white;
     border-color: #dc3545;
 }
+
+/* --- ESTILO PARA LA FILA DE PRODUCTO NO DISPONIBLE --- */
+.unavailableRow {
+    opacity: 0.5;
+    background-color: #f8f9fa;
+}
+
+/* Evita que los botones se atenúen junto con la fila */
+.unavailableRow .actions {
+    opacity: 1;
+}
+
+.unavailableRow .actions button {
+    pointer-events: all; /* Asegura que los botones sigan siendo clickeables */
+}
+

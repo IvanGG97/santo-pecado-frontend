@@ -16,17 +16,28 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
     const [imageFile, setImageFile] = useState(null);
     const [tiposProducto, setTiposProducto] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [previewImage, setPreviewImage] = useState(null); // Para la vista previa
+    const [previewImage, setPreviewImage] = useState(null);
     const isEditMode = Boolean(product);
 
+    // --- NUEVOS ESTADOS PARA LA RECETA ---
+    const [allInsumos, setAllInsumos] = useState([]);
+    const [receta, setReceta] = useState({}); // { insumoId: cantidad }
+    const [insumoSearch, setInsumoSearch] = useState('');
+
     useEffect(() => {
+        // Cargar tipos de producto
         apiClient.get('/inventario/tipos-producto/')
             .then(res => setTiposProducto(res.data))
             .catch(err => console.error("Error al cargar tipos de producto", err));
+        
+        // Cargar todos los insumos disponibles para la receta
+        apiClient.get('/inventario/insumos/')
+            .then(res => setAllInsumos(res.data))
+            .catch(err => console.error("Error al cargar insumos", err));
     }, []);
 
     useEffect(() => {
-        if (isEditMode && tiposProducto.length > 0) {
+        if (isEditMode && tiposProducto.length > 0 && allInsumos.length > 0) {
             const tipo = tiposProducto.find(t => t.tipo_producto_nombre === product.tipo_producto);
             setFormData({
                 producto_nombre: product.producto_nombre || '',
@@ -36,10 +47,20 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                 producto_imagen_url: product.producto_imagen_url || '',
                 producto_disponible: product.producto_disponible,
             });
-            // Establecemos la imagen de vista previa inicial
             setPreviewImage(product.producto_imagen || product.producto_imagen_url);
+
+            // Pre-cargar la receta existente del producto
+            if (product.receta) {
+                const initialReceta = {};
+                product.receta.forEach(item => {
+                    if(item.insumo) {
+                        initialReceta[item.insumo.id] = item.producto_insumo_cantidad;
+                    }
+                });
+                setReceta(initialReceta);
+            }
         }
-    }, [product, isEditMode, tiposProducto]);
+    }, [product, isEditMode, tiposProducto, allInsumos]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -50,45 +71,103 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImageFile(file);
-            // Creamos una URL local para la vista previa instantánea
             setPreviewImage(URL.createObjectURL(file));
+        } else {
+            setImageFile(null);
         }
     };
 
     const handleDeleteImage = () => {
-        // Limpiamos la vista previa, el archivo seleccionado y la URL
         setPreviewImage(null);
         setImageFile(null);
         setFormData(prev => ({ ...prev, producto_imagen_url: '' }));
-        // Limpiamos el input de archivo por si el usuario quiere volver a seleccionar uno
         const fileInput = document.querySelector('input[name="producto_imagen"]');
-        if (fileInput) {
-            fileInput.value = '';
+        if (fileInput) fileInput.value = '';
+    };
+
+    // --- MANEJADORES DE RECETA CORREGIDOS ---
+    const handleInsumoSelect = (insumoId) => {
+        setReceta(prev => {
+            const newReceta = { ...prev };
+            // Corrección: Usamos hasOwnProperty para chequear la existencia de la clave
+            if (newReceta.hasOwnProperty(insumoId)) {
+                delete newReceta[insumoId]; // Elimina el insumo de la receta
+            } else {
+                newReceta[insumoId] = 1; // Inicia en 1 por defecto
+            }
+            return newReceta;
+        });
+    };
+
+    // Manejador para el input de texto (permite borrar el '0')
+    const handleRecetaQuantityChange = (insumoId, cantidadStr) => {
+        if (cantidadStr === '') {
+            setReceta(prev => ({ ...prev, [insumoId]: '' }));
+            return;
+        }
+        const newCantidad = parseFloat(cantidadStr);
+        if (!isNaN(newCantidad) && newCantidad >= 0) {
+            setReceta(prev => ({ ...prev, [insumoId]: newCantidad }));
         }
     };
 
+    // Manejador para los botones '+' y '-'
+    const handleRecetaQuantityStep = (insumoId, amount) => {
+        setReceta(prev => {
+            const currentQty = parseFloat(prev[insumoId]) || 0;
+            // Usamos el 'amount' para sumar o restar. 
+            // Para la unidad 'gramo' podríamos usar steps de 10 o 50
+            const step = (amount > 0 ? 1 : -1); 
+            let newQty = currentQty + step;
+            if (newQty < 0) newQty = 0;
+            
+            return { ...prev, [insumoId]: newQty };
+        });
+    };
+
+    // --- handleSubmit (SIN CAMBIOS EN LA LÓGICA DE IMAGEN) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
-        const dataToSubmit = new FormData();
-        Object.keys(formData).forEach(key => dataToSubmit.append(key, formData[key]));
+        let payload;
+        let requestFn;
         
+        const recetaPayload = Object.keys(receta)
+            .filter(id => (parseFloat(receta[id]) || 0) > 0) // Filtra cantidades 0 o vacías
+            .map(id => ({
+                insumo_id: parseInt(id),
+                cantidad: parseFloat(receta[id])
+            }));
+
         if (imageFile) {
-            dataToSubmit.append('producto_imagen', imageFile);
-            dataToSubmit.set('producto_imagen_url', '');
-        } else if (!previewImage) {
-            // Si no hay vista previa, significa que el usuario borró la imagen
-            dataToSubmit.set('producto_imagen', '');
-            dataToSubmit.set('producto_imagen_url', '');
+            payload = new FormData();
+            Object.keys(formData).forEach(key => payload.append(key, formData[key]));
+            payload.append('producto_imagen', imageFile);
+            payload.set('producto_imagen_url', '');
+            payload.append('receta', JSON.stringify(recetaPayload));
+
+            requestFn = isEditMode
+                ? () => apiClient.patch(`/inventario/productos/${product.id}/`, payload)
+                : () => apiClient.post('/inventario/productos/', payload);
+
+        } else {
+            payload = { ...formData, receta: recetaPayload };
+            if (isEditMode && !previewImage) {
+                payload.producto_imagen = null;
+                payload.producto_imagen_url = null;
+            } else if (isEditMode && previewImage) {
+                delete payload.producto_imagen;
+                delete payload.producto_imagen_url;
+            }
+
+            requestFn = isEditMode
+                ? () => apiClient.patch(`/inventario/productos/${product.id}/`, payload)
+                : () => apiClient.post('/inventario/productos/', payload);
         }
         
         try {
-            if (isEditMode) {
-                await apiClient.patch(`/inventario/productos/${product.id}/`, dataToSubmit);
-            } else {
-                await apiClient.post('/inventario/productos/', dataToSubmit);
-            }
+            await requestFn();
             Swal.fire('¡Éxito!', `El producto ha sido ${isEditMode ? 'actualizado' : 'creado'}.`, 'success');
             onSuccess();
         } catch (error) {
@@ -100,12 +179,17 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         }
     };
 
+    const filteredInsumos = allInsumos.filter(i => 
+        i.insumo_nombre.toLowerCase().includes(insumoSearch.toLowerCase())
+    );
+
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
                 <button onClick={onClose} className={styles.closeButton}>&times;</button>
                 <h2>{isEditMode ? 'Editar' : 'Añadir'} Producto</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>
+                    {/* ... (campos de Nombre, Descripción, Precio, Tipo) ... */}
                     <div className={styles.formGroup}>
                         <label>Nombre</label>
                         <input name="producto_nombre" value={formData.producto_nombre} onChange={handleChange} className={styles.input} required />
@@ -126,17 +210,14 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         </select>
                     </div>
 
-                    {/* --- SECCIÓN DE IMAGEN MEJORADA --- */}
+                    {/* SECCIÓN DE IMAGEN (sin cambios) */}
                     {previewImage && (
                         <div className={styles.imagePreviewContainer}>
                             <label>Imagen Actual</label>
                             <img src={previewImage} alt="Vista previa" className={styles.imagePreview} />
-                            <button type="button" onClick={handleDeleteImage} className={styles.deleteImageButton}>
-                                Eliminar Imagen
-                            </button>
+                            <button type="button" onClick={handleDeleteImage} className={styles.deleteImageButton}>Eliminar Imagen</button>
                         </div>
                     )}
-
                     <div className={styles.formGroup}>
                         <label>Imagen (Subir Archivo)</label>
                         <input name="producto_imagen" onChange={handleFileChange} className={styles.input} type="file" accept="image/*" />
@@ -146,13 +227,63 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         <input name="producto_imagen_url" value={formData.producto_imagen_url} onChange={handleChange} className={styles.input} type="text" placeholder="https://ejemplo.com/imagen.jpg" autoComplete="off" />
                     </div>
                     
-                     <div className={`${styles.formGroup} ${styles.switchGroup}`}>
+                    {/* --- SECCIÓN DE RECETA (INSUMOS) ACTUALIZADA --- */}
+                    <div className={styles.formGroup}>
+                        <label>Receta / Insumos</label>
+                        <input
+                            type="text"
+                            placeholder="Buscar insumo..."
+                            className={styles.searchInput}
+                            onChange={(e) => setInsumoSearch(e.target.value)}
+                        />
+                        <div className={styles.checkboxContainer}>
+                            {filteredInsumos.map(insumo => (
+                                <div key={insumo.id} className={styles.checkboxItem}>
+                                    <input
+                                        type="checkbox"
+                                        id={`insumo-${insumo.id}`}
+                                        checked={receta.hasOwnProperty(insumo.id)}
+                                        onChange={() => handleInsumoSelect(insumo.id)}
+                                    />
+                                    <img 
+                                        src={insumo.insumo_imagen || insumo.insumo_imagen_url || 'https://placehold.co/40x40/e1e1e1/777?text=N/A'}
+                                        alt={insumo.insumo_nombre}
+                                        className={styles.itemImage}
+                                    />
+                                    <label htmlFor={`insumo-${insumo.id}`} className={styles.itemLabel}>
+                                        <span>{insumo.insumo_nombre}</span>
+                                        <span className={styles.itemUnit}>({insumo.insumo_unidad})</span>
+                                    </label>
+                                    {/* --- STEPPER DE CANTIDAD AÑADIDO --- */}
+                                    {receta.hasOwnProperty(insumo.id) && (
+                                        <div className={styles.quantityStepper}>
+                                            <button type="button" onClick={() => handleRecetaQuantityStep(insumo.id, -1)}>-</button>
+                                            <input
+                                                type="number"
+                                                step="0.001"
+                                                min="0"
+                                                placeholder="Cant."
+                                                className={styles.quantityInput}
+                                                value={receta[insumo.id]}
+                                                onChange={(e) => handleRecetaQuantityChange(insumo.id, e.target.value)}
+                                            />
+                                            <button type="button" onClick={() => handleRecetaQuantityStep(insumo.id, 1)}>+</button>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Switch de "Disponible" */}
+                    <div className={`${styles.formGroup} ${styles.switchGroup}`}>
                         <label>Disponible</label>
                         <div>
                             <input id="disponible-switch" name="producto_disponible" checked={formData.producto_disponible} onChange={handleChange} type="checkbox" className={styles.switchInput} />
                             <label htmlFor="disponible-switch" className={styles.switchLabel}></label>
                         </div>
                     </div>
+                    {/* Botones de acción */}
                     <div className={styles.buttons}>
                         <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
                         <button type="submit" disabled={loading} className={styles.saveButton}>{loading ? 'Guardando...' : 'Guardar'}</button>

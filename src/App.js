@@ -10,7 +10,8 @@ import EmpleadoPage from './pages/Empleado/EmpleadoPage';
 import ProductoPage from './pages/Productos/ProductoPage';
 import ActivateAccountPage from './pages/ActivateAccount/ActivateAccountPage';
 import RequestPasswordResetPage from './pages/RequestPasswordReset/RequestPasswordResetPage';
-import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage'; // 1. Importamos la nueva página
+import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage';
+import StockPage from './pages/Stock/StockPage'; // 1. Importamos la nueva página de Stock
 
 // Utilidades
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
@@ -26,7 +27,6 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/recuperar-contrasena" element={<RequestPasswordResetPage />} />
           <Route path="/activar-cuenta/:uidb64/:token" element={<ActivateAccountPage />} />
-          {/* 2. AÑADIMOS LA NUEVA RUTA PARA RESTABLECER LA CONTRASEÑA */}
           <Route path="/restablecer-contrasena/:uidb64/:token" element={<ResetPasswordPage />} />
           <Route path="/" element={<Navigate to="/inicio" />} />
 
@@ -57,6 +57,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
                   <ProductoPage />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* 2. AÑADIMOS LA NUEVA RUTA PARA STOCK */}
+            <Route 
+              path="/stock"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
+                  <StockPage />
                 </ProtectedRoute>
               } 
             />

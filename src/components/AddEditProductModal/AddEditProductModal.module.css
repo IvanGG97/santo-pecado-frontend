@@ -1,4 +1,4 @@
-/* ... (todos los estilos anteriores sin cambios) ... */
+/* ... (Estilos existentes del modal: backdrop, content, form, inputs, etc.) ... */
 .modalBackdrop {
     position: fixed;
     top: 0;
@@ -25,7 +25,7 @@
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    position: relative;
+    position: relative; 
 }
 
 .closeButton {
@@ -77,7 +77,7 @@
     font-weight: bold;
 }
 
-.input {
+.input, select {
     width: 100%;
     padding: 10px 12px;
     border-radius: 8px;
@@ -87,6 +87,10 @@
     font-size: 1rem;
     box-sizing: border-box;
 }
+/* Asegura que el color del texto en select sea visible */
+select { color: #fff; }
+select option { background-color: #323743; color: #fff; }
+
 
 .error {
     color: #ff4d4d;
@@ -112,70 +116,25 @@
     cursor: pointer;
     transition: all 0.2s;
 }
-
-.cancelButton {
-    background-color: #6c757d;
-    color: white;
-}
-.cancelButton:hover {
-    background-color: #5a6268;
-}
-
-.saveButton {
-    background-color: #28a745;
-    color: white;
-}
-.saveButton:hover {
-    background-color: #218838;
-}
-.saveButton:disabled {
-    background-color: #94d3a2;
-    cursor: not-allowed;
-}
+.cancelButton { background-color: #6c757d; color: white; }
+.saveButton { background-color: #28a745; color: white; }
 
 .switchGroup {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
-.switchInput {
-    height: 0;
-    width: 0;
-    visibility: hidden;
-}
-
+.switchInput { height: 0; width: 0; visibility: hidden; }
 .switchLabel {
-    cursor: pointer;
-    width: 50px;
-    height: 28px;
-    background: #6c757d;
-    display: block;
-    border-radius: 100px;
-    position: relative;
-    transition: background-color 0.3s;
+    cursor: pointer; width: 50px; height: 28px; background: #6c757d;
+    display: block; border-radius: 100px; position: relative; transition: background-color 0.3s;
 }
-
 .switchLabel::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 24px;
-    height: 24px;
-    background: #fff;
-    border-radius: 90px;
-    transition: 0.3s;
+    content: ''; position: absolute; top: 2px; left: 2px; width: 24px; height: 24px;
+    background: #fff; border-radius: 90px; transition: 0.3s;
 }
-
-.switchInput:checked + .switchLabel {
-    background: #28a745;
-}
-
-.switchInput:checked + .switchLabel::after {
-    left: calc(100% - 2px);
-    transform: translateX(-100%);
-}
+.switchInput:checked + .switchLabel { background: #28a745; }
+.switchInput:checked + .switchLabel::after { left: calc(100% - 2px); transform: translateX(-100%); }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
@@ -186,40 +145,137 @@ input:-webkit-autofill:active{
     transition: background-color 5000s ease-in-out 0s;
 }
 
-/* --- NUEVOS ESTILOS PARA LA VISTA PREVIA DE IMAGEN --- */
 .imagePreviewContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    margin-bottom: 1.5rem; text-align: center;
 }
-
 .imagePreview {
-    max-width: 150px;
-    max-height: 150px;
-    border-radius: 8px;
-    border: 2px solid #fd002a;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+    max-width: 150px; max-height: 150px; border-radius: 8px;
+    border: 2px solid #fd002a; margin-top: 0.5rem; margin-bottom: 1rem;
     object-fit: cover;
 }
-
 .deleteImageButton {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: block;
-    margin: 0 auto;
+    background-color: #dc3545; color: white; border: none;
+    padding: 0.5rem 1rem; border-radius: 5px; font-size: 0.9rem;
+    cursor: pointer; display: block; margin: 0 auto;
     transition: background-color 0.2s;
 }
+.deleteImageButton:hover { background-color: #c82333; }
 
-.deleteImageButton:hover {
-    background-color: #c82333;
+/* --- ESTILOS PARA LA SECCIÓN DE RECETA --- */
+.searchInput {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0000ff;
+    background-color: #2c2c2c;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+.checkboxContainer {
+    max-height: 220px;
+    overflow-y: auto;
+    border: 1px solid #ff0000ff;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #323743;
+}
+
+.checkboxItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+.checkboxItem:hover { background-color: #4a4a4a; }
+.checkboxItem:last-child { margin-bottom: 0; }
+
+.checkboxItem input[type="checkbox"] {
+    margin-right: 12px;
+    width: 20px;
+    height: 20px;
+    accent-color: #fd002a;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.itemImage {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    object-fit: cover;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.itemLabel {
+    display: flex;
+    flex-direction: column;
+    font-weight: normal;
+    cursor: pointer;
+    margin-bottom: 0;
+    flex-grow: 1;
+}
+
+.itemUnit {
+    font-size: 0.8em;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.quantityInput {
+    width: 80px;
+    padding: 5px;
+    margin-left: auto;
+    text-align: center;
+    border: 1px solid #555;
+    background-color: #4a4a4a;
+    color: white;
+    border-radius: 5px;
+    -moz-appearance: textfield;
+    flex-shrink: 0;
+}
+
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* --- ESTILOS PARA EL STEPPER DE CANTIDAD --- */
+.quantityStepper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.quantityStepper button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid #fd002a;
+    background-color: #4a4a4a;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding-bottom: 2px;
+}
+
+/* (Sobrescribe .quantityInput para que quepa en el stepper) */
+.quantityStepper .quantityInput {
+    width: 60px;
+    flex-shrink: 1;
+    margin-left: 0;
 }
 
