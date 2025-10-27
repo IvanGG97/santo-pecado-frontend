@@ -51,8 +51,10 @@ const ProductList = () => {
     };
 
     const handleDeleteClick = (product) => {
+        // @ts-ignore
         Swal.fire({
             title: '¿Estás seguro?',
+             // @ts-ignore
             text: `Se eliminará el producto "${product.producto_nombre}".`,
             icon: 'warning',
             showCancelButton: true,
@@ -60,18 +62,40 @@ const ProductList = () => {
             confirmButtonText: 'Sí, ¡eliminar!',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
+            // @ts-ignore
             if (result.isConfirmed) {
                 try {
+                    // @ts-ignore
                     await apiClient.delete(`/inventario/productos/${product.id}/`);
+                    // @ts-ignore
                     Swal.fire('¡Eliminado!', 'El producto ha sido eliminado.', 'success');
-                    fetchProductos();
+                    fetchProductos(); // Recarga la lista
                 } catch (error) {
-                    const errorMessage = error.response?.data?.detail || 'No se pudo eliminar el producto.';
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Acción Bloqueada',
-                        text: errorMessage,
-                    });
+                    // --- MANEJO DEL ERROR ESPECÍFICO ---
+                    // @ts-ignore
+                    if (error.response && error.response.status === 400 && error.response.data.pedidos) {
+                        // Si es el error 400 y viene la lista de IDs de pedidos
+                        const pedidosEnUso = error.response.data.pedidos.map((id) => `N° ${id}`).join(', '); // Formatea los IDs
+                        const mensaje = `Este producto no se puede borrar porque está incluido en los siguientes pedidos: ${pedidosEnUso}.`;
+                        // @ts-ignore
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Acción Bloqueada',
+                            text: mensaje,
+                        });
+                    } else {
+                        // Si es cualquier otro error
+                        console.error("Error al eliminar producto:", error); // Loguea el error completo
+                        // @ts-ignore
+                        const errorMessage = error.response?.data?.detail || 'No se pudo eliminar el producto.';
+                        // @ts-ignore
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage,
+                        });
+                    }
+                    // --- FIN MANEJO DEL ERROR ---
                 }
             }
         });
