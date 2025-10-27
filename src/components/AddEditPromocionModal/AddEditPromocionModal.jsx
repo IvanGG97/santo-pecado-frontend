@@ -3,6 +3,7 @@ import apiClient from '../../services/api';
 import styles from './AddEditPromocionModal.module.css';
 import Swal from 'sweetalert2';
 
+// Versión simplificada: sin subida de archivos locales
 const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         promocion_nombre: '',
@@ -11,7 +12,14 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
         promocion_fecha_hora_fin: '',
         promocion_stock: '',
         promocion_descripcion: '',
+        promocion_imagen_url: '',
+        promocion_estado: true,
     });
+    
+    // Estados de imagen local eliminados
+    // const [imageFile, setImageFile] = useState(null);
+    // const [previewImage, setPreviewImage] = useState(null);
+    
     const [productosSeleccionados, setProductosSeleccionados] = useState({});
     const [productosDisponibles, setProductosDisponibles] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -29,24 +37,31 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
             setFormData({
                 promocion_nombre: promocion.promocion_nombre || '',
                 promocion_precio: promocion.promocion_precio || '',
-                // Formateamos las fechas a YYYY-MM-DD para el input de tipo 'date'
                 promocion_fecha_hora_inicio: promocion.promocion_fecha_hora_inicio ? promocion.promocion_fecha_hora_inicio.slice(0, 10) : '',
                 promocion_fecha_hora_fin: promocion.promocion_fecha_hora_fin ? promocion.promocion_fecha_hora_fin.slice(0, 10) : '',
                 promocion_stock: promocion.promocion_stock || '',
                 promocion_descripcion: promocion.promocion_descripcion || '',
+                promocion_imagen_url: promocion.promocion_imagen_url || '',
+                promocion_estado: promocion.promocion_estado,
             });
             const initialSelection = {};
             promocion.productos_promocion?.forEach(item => {
                 initialSelection[item.producto.id] = item.cantidad;
             });
             setProductosSeleccionados(initialSelection);
+            // setPreviewImage(promocion.promocion_imagen || promocion.promocion_imagen_url); // Eliminado
         }
     }, [promocion, isEditMode]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value
+        }));
     };
+
+    // Funciones 'handleFileChange' y 'handleDeleteImage' eliminadas
 
     const handleProductoSelect = (productoId) => {
         setProductosSeleccionados(prev => {
@@ -68,6 +83,7 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
         });
     };
 
+    // --- handleSubmit SIMPLIFICADO (SOLO JSON) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -83,15 +99,17 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
             return;
         }
 
-        const payload = { ...formData, productos: productosPayload };
-        // --- LÓGICA DE FECHAS CORREGIDA ---
-        // Si la fecha está vacía, la enviamos como null. Si no, la enviamos como está.
-        payload.promocion_fecha_hora_inicio = payload.promocion_fecha_hora_inicio || null;
-        payload.promocion_fecha_hora_fin = payload.promocion_fecha_hora_fin || null;
+        // El payload es siempre un objeto JSON
+        const payload = {
+            ...formData,
+            productos: productosPayload,
+            promocion_fecha_hora_inicio: formData.promocion_fecha_hora_inicio || null,
+            promocion_fecha_hora_fin: formData.promocion_fecha_hora_fin || null,
+        };
         
         try {
             if (isEditMode) {
-                await apiClient.put(`/promocion/promociones/${promocion.id}/`, payload);
+                await apiClient.patch(`/promocion/promociones/${promocion.id}/`, payload);
             } else {
                 await apiClient.post('/promocion/promociones/', payload);
             }
@@ -109,6 +127,7 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
             Swal.fire('Error de Validación', errorMessage, 'error');
         } finally {
             setLoading(false);
+            // No cerramos el modal en caso de error
         }
     };
     
@@ -120,7 +139,6 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
                 <button onClick={onClose} className={styles.closeButton}>&times;</button>
                 <h2>{isEditMode ? 'Editar' : 'Añadir'} Promoción</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* ... (otros campos) ... */}
                     <div className={styles.formGroup}>
                         <label>Nombre de la Promoción</label>
                         <input name="promocion_nombre" value={formData.promocion_nombre} onChange={handleChange} className={styles.input} required />
@@ -138,14 +156,35 @@ const AddEditPromocionModal = ({ promocion, onClose, onSuccess }) => {
                         <textarea name="promocion_descripcion" value={formData.promocion_descripcion} onChange={handleChange} className={styles.textarea}></textarea>
                     </div>
 
-                     {/* --- INPUTS DE FECHA ACTUALIZADOS --- */}
-                     <div className={styles.formGroup}>
+                    <div className={styles.formGroup}>
                         <label>Fecha de Inicio (Opcional)</label>
                         <input name="promocion_fecha_hora_inicio" value={formData.promocion_fecha_hora_inicio} onChange={handleChange} type="date" className={styles.input} />
                     </div>
                     <div className={styles.formGroup}>
                         <label>Fecha de Fin (Opcional)</label>
                         <input name="promocion_fecha_hora_fin" value={formData.promocion_fecha_hora_fin} onChange={handleChange} type="date" className={styles.input} />
+                    </div>
+
+                    {/* --- SECCIÓN DE IMAGEN SIMPLIFICADA --- */}
+                    <div className={styles.formGroup}>
+                        <label>URL de Imagen (Opcional)</label>
+                        <input name="promocion_imagen_url" value={formData.promocion_imagen_url} onChange={handleChange} className={styles.input} type="text" placeholder="https://ejemplo.com/imagen.jpg" autoComplete="off" />
+                    </div>
+                    {/* ------------------------------- */}
+
+                    <div className={`${styles.formGroup} ${styles.switchGroup}`}>
+                        <label>Promoción Activa</label>
+                        <div>
+                            <input
+                                id="promocion-estado-switch"
+                                name="promocion_estado"
+                                type="checkbox"
+                                className={styles.switchInput}
+                                checked={formData.promocion_estado}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="promocion-estado-switch" className={styles.switchLabel}></label>
+                        </div>
                     </div>
                     
                     <div className={styles.formGroup}>

@@ -37,6 +37,14 @@
     font-weight: 600;
 }
 
+/* Estilo para la imagen de la promoción en la tabla */
+.promoImage {
+    width: 60px;
+    height: 60px;
+    border-radius: 5px;
+    object-fit: cover;
+}
+
 .productList {
     padding-left: 1rem;
     margin: 0;

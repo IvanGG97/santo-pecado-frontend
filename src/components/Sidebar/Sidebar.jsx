@@ -16,12 +16,12 @@ const Sidebar = () => {
             <nav className={styles.nav}>
                 <ul>
                     {/* --- ENLACES CONDICIONALES BASADOS EN EL ROL --- */}
-                    
+
                     {/* ENLACE DE INICIO: Visible para Admin y Encargado/Cajero, pero no para Cocina */}
                     {userRole !== 'Cocina' && (
                         <li><NavLink to="/inicio" className={({ isActive }) => isActive ? styles.active : ''}><span>🏠 Inicio</span></NavLink></li>
                     )}
-                    
+
                     {/* ENLACES DE GESTIÓN: Para Admin y Encargado/Cajero */}
                     {(userRole === 'Admin' || userRole === 'Encargado/Cajero') && (
                         <>
@@ -43,8 +43,16 @@ const Sidebar = () => {
                     )}
 
                     {/* ENLACE DE PEDIDOS: Visible para todos los roles, incluido Cocina */}
-                    {(userRole === 'Admin' || userRole === 'Encargado/Cajero' || userRole === 'Cocina') && (
+                    {(userRole === 'Admin' || userRole === 'Encargado/Cajero') && (
                         <li><NavLink to="/pedidos" className={({ isActive }) => isActive ? styles.active : ''}><span>📝 Pedidos</span></NavLink></li>
+                    )}
+
+                    {(userRole === 'Admin' || userRole === 'Cocina' || userRole === 'Encargado/Cajero') && (
+                        <li>
+                            <NavLink to="/cocina" className={({ isActive }) => isActive ? styles.active : ''}>
+                                <span>🍳 Cocina</span>
+                            </NavLink>
+                        </li>
                     )}
                 </ul>
             </nav>

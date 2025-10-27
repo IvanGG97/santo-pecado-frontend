@@ -68,11 +68,12 @@ const PromocionList = () => {
                 <table className={styles.table}>
                     <thead>
                         <tr>
+                            <th>Imagen</th>
                             <th>Nombre</th>
                             <th>Precio</th>
                             <th>Productos Incluidos</th>
                             <th>Stock</th>
-                            <th>Estado</th> {/* ¡NUEVA COLUMNA! */}
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -80,6 +81,13 @@ const PromocionList = () => {
                         {promociones.map(promo => (
                             // La fila se atenúa si la promoción no está disponible O si el stock es 0
                             <tr key={promo.id} className={!promo.promocion_disponible || promo.promocion_stock <= 0 ? styles.unavailableRow : ''}>
+                                <td>
+                                    <img 
+                                        src={promo.promocion_imagen || promo.promocion_imagen_url || 'https://placehold.co/60x60/e1e1e1/777?text=PROMO'}
+                                        alt={promo.promocion_nombre}
+                                        className={styles.promoImage} // Añadimos una clase para la imagen de promo
+                                    />
+                                </td>
                                 <td>{promo.promocion_nombre}</td>
                                 <td>${new Intl.NumberFormat('es-AR').format(promo.promocion_precio)}</td>
                                 <td>

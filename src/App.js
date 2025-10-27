@@ -11,7 +11,10 @@ import ProductoPage from './pages/Productos/ProductoPage';
 import ActivateAccountPage from './pages/ActivateAccount/ActivateAccountPage';
 import RequestPasswordResetPage from './pages/RequestPasswordReset/RequestPasswordResetPage';
 import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage';
-import StockPage from './pages/Stock/StockPage'; // 1. Importamos la nueva página de Stock
+import StockPage from './pages/Stock/StockPage';
+import PedidosPage from './pages/Pedidos/PedidosPage'; // 1. Importamos la nueva página de Pedidos
+import CocinaPage from './pages/Cocina/CocinaPage';
+
 
 // Utilidades
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
@@ -31,7 +34,7 @@ function App() {
           <Route path="/" element={<Navigate to="/inicio" />} />
 
           {/* --- RUTAS PROTEGIDAS CON LAYOUT --- */}
-          <Route 
+          <Route
             element={
               <ProtectedRoute>
                 <MainLayout />
@@ -40,38 +43,54 @@ function App() {
           >
             {/* RUTA PARA TODOS LOS USUARIOS LOGUEADOS */}
             <Route path="/inicio" element={<InicioPage />} />
-            
+
             {/* RUTA SOLO PARA ADMINS */}
-            <Route 
-              path="/empleados" 
+            <Route
+              path="/empleados"
               element={
                 <ProtectedRoute allowedRoles={['Admin']}>
                   <EmpleadoPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* RUTA PARA ADMINS Y ENCARGADOS */}
-            <Route 
+            <Route
               path="/productos"
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
                   <ProductoPage />
                 </ProtectedRoute>
-              } 
+              }
             />
 
-            {/* 2. AÑADIMOS LA NUEVA RUTA PARA STOCK */}
-            <Route 
+            {/* RUTA PARA ADMINS Y ENCARGADOS */}
+            <Route
               path="/stock"
               element={
                 <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
                   <StockPage />
                 </ProtectedRoute>
-              } 
+              }
             />
 
-            {/* Aquí puedes seguir añadiendo tus otras páginas con sus reglas de acceso */}
+            {/* 2. AÑADIMOS LA NUEVA RUTA PARA PEDIDOS */}
+            <Route
+              path="/pedidos"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
+                  <PedidosPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cocina"
+              element={
+                <ProtectedRoute roles={['Cocina', 'Admin', 'Encargado/Cajero']}>
+                  <CocinaPage />
+                </ProtectedRoute>
+              }
+            />
 
           </Route>
         </Routes>

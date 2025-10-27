@@ -1,0 +1,331 @@
+/* --- Estilos Anteriores --- */
+.cocinaContainer {
+    padding: 2rem;
+    background-color: #f4f7fa; /* Un fondo claro */
+    height: calc(100vh - 60px); /* Ajustar según altura del Header */
+    overflow-y: auto; /* Permitir scroll si hay muchos pedidos */
+    position: relative; /* Para posicionar el message box */
+}
+
+.cocinaContainer h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* Botón de refresco manual eliminado de los estilos */
+/* .refreshButton {...} */
+
+
+.tableroComandas {
+    display: grid;
+    /* Ajusta minmax para el ancho mínimo y máximo de las tarjetas */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    position: relative; /* Para el indicador de refresco */
+}
+
+/* Indicador visual de refresco (opcional) */
+.refreshIndicator {
+    position: absolute;
+    top: -10px; /* Ajustar posición */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    z-index: 10;
+    animation: fadeInOut 1s infinite alternate; /* Efecto sutil */
+}
+
+@keyframes fadeInOut {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+
+.loading,
+.noPedidos {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 3rem;
+    grid-column: 1 / -1; /* Ocupa todo el ancho de la grilla */
+}
+
+
+/* --- Estilos ComandaCard (Modificados para fondo sutil) --- */
+.comandaCard {
+    background-color: #ffffff; /* Fondo blanco por defecto */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+    display: flex;
+    flex-direction: column;
+    /* Eliminamos el border-top general */
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    overflow: hidden; /* Asegura que el fondo no se salga */
+}
+.comandaCard:hover {
+     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Nuevos Fondos Sutiles por Estado --- */
+/* Usamos colores pastel muy claros */
+.comandaCard.estado-recibido-bg { background-color: #e0f7fa; } /* Celeste muy claro */
+.comandaCard.estado-en-proceso-bg { background-color: #fff9c4; } /* Amarillo muy claro */
+/* No necesitamos verde/rojo porque se eliminan, pero podrían ser: */
+/* .comandaCard.estado-completado-bg { background-color: #e8f5e9; } */ /* Verde muy claro */
+/* .comandaCard.estado-cancelado-bg { background-color: #ffebee; } */ /* Rojo muy claro */
+
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    background-color: rgba(255, 255, 255, 0.6); /* Fondo semi-transparente para el header */
+}
+.cardHeader h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.estadoActualBadge {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.cardBody {
+    padding: 1.5rem;
+    flex-grow: 1; /* Ocupa el espacio disponible */
+}
+
+.detalleItem {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 1rem;
+}
+.detalleItem:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.cantidad {
+    font-weight: bold;
+    margin-right: 1rem;
+    color: #A50000;
+    font-size: 1.1rem;
+    min-width: 30px;
+}
+
+.itemInfo {
+    display: flex;
+    flex-direction: column;
+}
+
+.nombre {
+    font-weight: 500;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.notas {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.3rem;
+    padding-left: 10px;
+}
+
+.cardFooter {
+    padding: 1rem 1.5rem;
+    background-color: rgba(248, 249, 250, 0.8); /* Footer semi-transparente */
+    border-top: 1px solid #eee;
+    border-radius: 0 0 8px 8px;
+}
+.cardFooter span {
+    font-size: 0.9rem;
+    color: #555;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.botonesEstado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.botonEstado {
+    padding: 0.6rem 1.1rem; /* Un poco más de padding */
+    border: none; /* Sin borde por defecto */
+    background-color: #6c757d; /* Gris por defecto */
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500; /* Un poco más de peso */
+    transition: background-color 0.2s, transform 0.1s;
+    text-transform: uppercase; /* MAYÚSCULAS para destacar */
+    letter-spacing: 0.5px;
+}
+.botonEstado:hover {
+    opacity: 0.9;
+    transform: translateY(-1px); /* Efecto sutil al pasar el mouse */
+}
+.botonEstado:active {
+    transform: translateY(0px); /* Efecto al hacer clic */
+}
+
+/* --- Nuevos Colores Fuertes para Botones --- */
+/* Asegúrate que estos nombres coincidan con el estadoColorMap */
+.botonEstado.boton-recibido { background-color: #007bff; } /* Azul */
+.botonEstado.boton-en-proceso { background-color: #ffc107; color: #333; } /* Amarillo */
+.botonEstado.boton-completado { background-color: #28a745; } /* Verde */
+.botonEstado.boton-cancelado { background-color: #dc3545; } /* Rojo */
+/* Si tienes un estado "Listo" diferente a "Completado" y quieres un botón: */
+/* .botonEstado.boton-listo { background-color: #17a2b8; } */ /* Celeste/Cyan */
+
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #888;
+    text-align: right;
+    display: block;
+}
+
+/* --- Estilos para MessageBox (sin cambios) --- */
+.messageBox {
+    position: sticky; /* Cambiado de absolute a sticky para que se quede arriba */
+    top: 10px; /* Distancia desde la parte superior */
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto; /* Ancho automático basado en contenido */
+    max-width: 600px; /* Ancho máximo para evitar que se extienda demasiado */
+    min-width: 300px; /* Ancho mínimo */
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1001; /* Asegura que esté por encima de otros elementos */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 auto 1rem auto; /* Centra horizontalmente y añade margen inferior */
+    font-weight: 500;
+}
+
+.messageBox.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.messageBox.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.messageBox p {
+    margin: 0;
+    margin-right: 1rem;
+}
+
+.messageBox .closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+.messageBox .closeButton:hover {
+    opacity: 1;
+}
+
+.filtrosContainer {
+    background-color: #fff;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-wrap: wrap; /* Permite que los grupos se apilen en pantallas pequeñas */
+    gap: 1.5rem; /* Espacio entre grupos de filtros */
+    align-items: flex-end; /* Alinea la parte inferior de los grupos */
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column; /* Etiqueta arriba, controles abajo */
+    gap: 0.5rem; /* Espacio entre etiqueta y controles */
+}
+
+.filtroGrupo label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* Botones de Filtro de Estado */
+.botonesFiltroEstado {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se apilen */
+    gap: 0.5rem;
+}
+
+.botonFiltro {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    color: #495057;
+    border-radius: 20px; /* Botones redondeados */
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.botonFiltro:hover {
+    background-color: #e9ecef;
+}
+
+.botonFiltro.activo {
+    background-color: #A50000; /* Color principal */
+    color: white;
+    border-color: #A50000;
+    font-weight: 500;
+}
+
+/* Inputs de Fecha */
+.inputsFecha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inputsFecha label {
+    margin-bottom: 0; /* Anula el margen inferior del label general del grupo */
+    white-space: nowrap; /* Evita que "Desde:" se parta */
+}
+
+.inputFecha {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}

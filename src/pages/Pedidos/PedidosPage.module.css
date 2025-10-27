@@ -1,0 +1,322 @@
+.posContainer {
+    display: flex;
+    height: calc(100vh - 60px); /* Altura total menos el Header */
+    background: #f4f7fa;
+}
+
+/* Columna Izquierda: Catálogo */
+.catalogoContainer {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+.navTabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+.navTabs button {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 500;
+    font-size: 1rem;
+}
+.navTabs button.active {
+    background-color: #A50000;
+    color: white;
+}
+
+.tipoFiltro {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+.tipoFiltro button {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background: #f8f9fa;
+    cursor: pointer;
+}
+.tipoFiltro button.active {
+    background: #fd002a;
+    color: white;
+    border-color: #fd002a;
+}
+
+.gridContainer {
+    flex-grow: 1; /* Ocupa todo el espacio restante */
+    overflow-y: auto; /* Añade scroll si los items no caben */
+    display: grid;
+    /* auto-fit expande las tarjetas para llenar el espacio */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    margin-top: 1rem;
+    border-radius: 8px;
+}
+
+.productCard {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 250px;
+}
+.productCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.productCard img {
+    width: 100%;
+    height: 100px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+.cardBody {
+    padding: 0.75rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.cardTitle {
+    display: block;
+    font-weight: bold;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 0.95rem;
+}
+.cardPrice {
+    display: block;
+    color: #28a745;
+    font-weight: bold;
+    margin-top: 0.5rem;
+}
+
+/* Columna Derecha: Ticket */
+.ticketContainer {
+    flex: 1;
+    background-color: white;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+.ticketContainer h3 {
+    text-align: center;
+    color: #A50000;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 1rem;
+    margin-top: 0;
+}
+
+.ticketItems {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.ticketEmpty {
+    text-align: center;
+    color: #888;
+    padding-top: 2rem;
+}
+
+.ticketItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Centra todo verticalmente */
+    padding: 1rem 0.5rem;
+    border-bottom: 1px dashed #ccc;
+}
+
+/* Estilo para los sub-items de la promo (ej: Doble Cheddar, Fanta) */
+.promoSubItem {
+    padding-left: 1.5rem; /* Añade indentación */
+    background-color: #fdfdfd;
+}
+.promoSubItem .itemInfo .itemNotas {
+    color: #007bff; /* Color diferente para la nota "Parte de..." */
+}
+
+.ticketItemImage {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    object-fit: cover;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.itemInfo {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: 1rem;
+    overflow: hidden;
+}
+.itemNombre {
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.itemNotas {
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.itemAgregados {
+    font-size: 0.85em;
+    color: #28a745;
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 5px;
+}
+.itemAgregados li {
+    margin-bottom: 2px;
+}
+
+.itemActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0; /* Evita que los botones se compriman */
+}
+
+.quantityStepper {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.quantityStepper button {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+}
+.quantityStepper span {
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Estilo para la cantidad fija de un sub-item de promo */
+.promoItemQuantity {
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    padding: 0 4px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.itemPrecio {
+    font-weight: bold;
+    font-size: 1rem;
+    min-width: 60px;
+    text-align: right;
+}
+
+.removeButton {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1rem;
+    line-height: 24px;
+}
+
+.editButton {
+    width: 24px;
+    height: 24px;
+    border: 1px solid #007bff;
+    background-color: #f0f6ff;
+    color: #007bff;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    line-height: 22px;
+    padding: 0;
+}
+
+.ticketTotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    padding: 1rem 0.5rem;
+    border-top: 2px solid #333;
+}
+
+.finalizarButton {
+    background-color: #A50000;
+    color: white;
+    border: none;
+    padding: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin-top: 0.5rem;
+}
+.finalizarButton:hover {
+    background-color: #c00;
+}
+.finalizarButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.vaciarButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 1rem;
+}
+.vaciarButton:hover {
+    background-color: #5a6268;
+}
+.vaciarButton:disabled {
+    background-color: #ccc;
+}
+
