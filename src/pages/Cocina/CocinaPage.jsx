@@ -1,89 +1,140 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 // Asegúrate que esta ruta a tu archivo api.js sea correcta desde src/pages/Cocina/
+
 import apiClient from '../../services/api';
 // Asegúrate que este archivo CSS exista en la misma carpeta (src/pages/Cocina/)
+
 import styles from './CocinaPage.module.css';
 
 // --- Componente Simple de Mensajes ---
+
 const MessageBox = ({ message, type, onClose }) => {
-    // ... (mismo código que antes)
     if (!message) return null;
     return (
+
         <div className={`${styles.messageBox} ${type === 'error' ? styles.error : styles.success}`}>
             <p>{message}</p>
+
             <button onClick={onClose} className={styles.closeButton}>&times;</button>
         </div>
     );
 };
 
-// --- Mapeo de Nombres de Estado a Clases CSS (ACTUALIZADO) ---
-// Asegúrate que los nombres coincidan EXACTAMENTE con los de tu BD
+// --- Mapeo de Nombres de Estado a Clases CSS ---
 const estadoColorMap = {
     'Recibido En Cocina': 'recibido',
     'En Preparación': 'en-proceso',
     'Completado': 'completado',
     'Cancelado': 'cancelado'
-    // Puedes añadir otros si los necesitas para los botones, aunque no se filtren
 };
 
-// --- Componente ComandaCard ---
+// --- Componente ComandaCard (ACTUALIZADO para mostrar cliente) ---
+
 const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
-    // ... (lógica interna de ComandaCard - se mantiene igual, PERO se ajustan los botones)
-    const estadoActual = estadosDisponibles.find(e => e.id === pedido.estado_pedido_id) || { estado_pedido_nombre: 'Desconocido' };
-    // Botones disponibles: todos excepto el actual. Se incluyen 'Completado' y 'Cancelado' aquí.
-    const estadosSiguientes = estadosDisponibles.filter(estado => estado.id !== pedido.estado_pedido_id);
+
+    const estadoActual = estadosDisponibles.find(e => e.estado_pedido_nombre === pedido.estado_pedido) || { estado_pedido_nombre: 'Desconocido' };
+
+    const estadosSiguientes = estadosDisponibles.filter(estado => estado.estado_pedido_nombre !== pedido.estado_pedido); // Comparar por nombre
 
     const cardBgClass = estadoColorMap[estadoActual.estado_pedido_nombre]
+
         ? styles[`estado-${estadoColorMap[estadoActual.estado_pedido_nombre]}-bg`]
         : '';
 
-     // Estados que NO deben aparecer como botón para cambiar
-     const ESTADOS_NO_BOTON = ['Entregado', 'Pendiente']; // Ajusta si tienes otros
+    const ESTADOS_NO_BOTON = ['Entregado', 'Pendiente']; // Estados que no deben aparecer como botón
 
     return (
+
         <div className={`${styles.comandaCard} ${cardBgClass}`}>
-             <div className={styles.cardHeader}>
+
+            <div className={styles.cardHeader}>
+
                 <h3>Pedido #{pedido.id}</h3>
+
                 <span className={styles.estadoActualBadge}>{estadoActual.estado_pedido_nombre}</span>
             </div>
+
+            {/* --- NUEVO: Sección de Información del Cliente --- */}
+            {pedido.cliente && ( // Solo muestra si hay un cliente asociado (objeto cliente existe)
+
+                <div className={styles.clienteInfoSection}>
+
+                    <span className={styles.clienteNombre}>
+                        👤 {pedido.cliente.cliente_nombre} {pedido.cliente.cliente_apellido || ''}
+                    </span>
+                    {pedido.cliente.cliente_direccion && ( // Muestra dirección solo si existe en el objeto cliente
+
+                        <span className={styles.clienteDireccion}>
+                            📍 {pedido.cliente.cliente_direccion}
+                        </span>
+                    )}
+                </div>
+            )}
+            {/* --- FIN Sección Cliente --- */}
+
+
             <div className={styles.cardBody}>
+
                 {pedido.detalles.map((item, index) => (
-                    <div key={`${pedido.id}-${index}`} className={styles.detalleItem}>
+                    // Clave más única
+                    <div key={`${pedido.id}-${index}-${item.producto_nombre || item.notas}`} className={styles.detalleItem}>
+
                         <span className={styles.cantidad}>{item.cantidad}x</span>
+
                         <div className={styles.itemInfo}>
+
                             <span className={styles.nombre}>{item.producto_nombre || item.notas || 'Item'}</span>
+
                             {item.notas && item.notas !== item.producto_nombre && (
+
                                 <span className={styles.notas}>↳ {item.notas}</span>
                             )}
                         </div>
                     </div>
                 ))}
             </div>
+
             <div className={styles.cardFooter}>
                 <span>Cambiar estado a:</span>
+
                 <div className={styles.botonesEstado}>
+
                     {estadosSiguientes.map(estado => {
                         const buttonColorClass = estadoColorMap[estado.estado_pedido_nombre]
+
                             ? styles[`boton-${estadoColorMap[estado.estado_pedido_nombre]}`]
                             : '';
 
-                        // No mostrar botones para estados irrelevantes en cocina
                         if (ESTADOS_NO_BOTON.includes(estado.estado_pedido_nombre)) {
                             return null;
                         }
 
+                        // Obtener el ID del estado para enviar al backend
+
+                        const estadoIdParaUpdate = estadosDisponibles.find(e => e.estado_pedido_nombre === estado.estado_pedido_nombre)?.id;
+
+                        // No mostrar botón si no se encontró el ID (seguridad)
+                        if (!estadoIdParaUpdate) return null;
+
+
                         return (
                             <button
+
                                 key={estado.id}
-                                onClick={() => onUpdateStatus(pedido.id, estado.id, estado.estado_pedido_nombre)}
+
+                                onClick={() => onUpdateStatus(pedido.id, estadoIdParaUpdate, estado.estado_pedido_nombre)} // Enviar ID correcto
+
                                 className={`${styles.botonEstado} ${buttonColorClass}`}
                             >
+
                                 {estado.estado_pedido_nombre}
                             </button>
                         );
                     })}
                 </div>
-                 <small className={styles.timestamp}>
+
+                <small className={styles.timestamp}>
+
                     Recibido: {new Date(pedido.pedido_fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </small>
             </div>
@@ -97,28 +148,28 @@ const CocinaPage = () => {
     const [allPedidos, setAllPedidos] = useState([]); // Guarda TODOS los pedidos
     const [estados, setEstados] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [isFetching, setIsFetching] = useState(false);
+    const [isFetching, setIsFetching] = useState(false); // Para indicar refrescos
     const [message, setMessage] = useState({ text: null, type: 'info' });
 
-    // --- NUEVOS ESTADOS PARA FILTROS ---
+    // Estados para Filtros
     const [selectedStatusFilter, setSelectedStatusFilter] = useState('Recibido En Cocina'); // Estado inicial
     const [dateRange, setDateRange] = useState({ desde: '', hasta: '' });
 
-    // Los nombres exactos de los estados que quieres usar para filtrar
-    const STATUS_FILTERS = ['Recibido En Cocina', 'En Preparación', 'Completado', 'Cancelado', 'Todos'];
+    // Definir filtros de estado disponibles
+    const STATUS_FILTERS = useMemo(() => ['Recibido En Cocina', 'En Preparación', 'Completado', 'Cancelado', 'Todos'], []);
+
 
     const showMessage = (text, type = 'info', duration = 5000) => {
-        // ... (misma función que antes)
         setMessage({ text, type });
         if (duration) {
             setTimeout(() => setMessage(prev => prev.text === text ? { text: null, type: 'info' } : prev), duration);
         }
     };
 
-    // fetchData ahora trae TODOS los pedidos y no filtra por estado final
+    // Función para buscar datos, envuelta en useCallback
     const fetchData = useCallback(async () => {
         let shouldFetch = true;
-        setIsFetching(currentFetching => {
+        setIsFetching(currentFetching => { // Evita llamadas concurrentes
             if (currentFetching) shouldFetch = false;
             return true;
         });
@@ -126,57 +177,65 @@ const CocinaPage = () => {
 
         try {
             const [resPedidos, resEstados] = await Promise.all([
-                apiClient.get('/pedido/pedidos/'),
-                apiClient.get('/pedido/estados/')
+
+                apiClient.get('/pedido/pedidos/'), // Trae todos los pedidos
+
+                apiClient.get('/pedido/estados/')  // Trae los posibles estados
             ]);
 
             const estadosData = resEstados.data;
-            setEstados(estadosData);
+            setEstados(estadosData); // Guardar lista de estados
 
-            // Mapear y añadir ID de estado, SIN FILTRAR por estado final aquí
+            // Procesar pedidos: añadir ID de estado para manejo interno más fácil
+
             const todosLosPedidos = resPedidos.data
+
                 .map(p => ({
                     ...p,
-                    // Asegúrate que el estado_pedido_nombre exista antes de buscar el ID
-                    estado_pedido_id: p.estado_pedido ? (estadosData.find(e => e.estado_pedido_nombre === p.estado_pedido)?.id || null) : null
+                    // Busca el ID correspondiente al nombre del estado que viene de la API
+
+                    estado_pedido_id: estadosData.find(e => e.estado_pedido_nombre === p.estado_pedido)?.id || null
                 }))
-                // Ordenar siempre por fecha ASC (más antiguo primero)
+                // Ordenar por fecha ASC (más antiguo primero)
                 .sort((a, b) => new Date(a.pedido_fecha_hora) - new Date(b.pedido_fecha_hora));
 
             // Actualizar el estado que guarda TODOS los pedidos
+            // Comparación simple para evitar re-renders si los datos no cambiaron realmente
             setAllPedidos(currentPedidos => {
-                const currentSignature = JSON.stringify(currentPedidos.map(p => ({ id: p.id, estado: p.estado_pedido_id })));
-                const newSignature = JSON.stringify(todosLosPedidos.map(p => ({ id: p.id, estado: p.estado_pedido_id })));
+                const currentSignature = JSON.stringify(currentPedidos.map(p => ({ id: p.id, estado: p.estado_pedido_id, cliente: p.cliente?.id }))); // Incluir cliente en la firma
+                const newSignature = JSON.stringify(todosLosPedidos.map(p => ({ id: p.id, estado: p.estado_pedido_id, cliente: p.cliente?.id })));
                 if (currentSignature !== newSignature) {
-                    return todosLosPedidos;
+                    return todosLosPedidos; // Actualiza solo si hay cambios
                 }
-                return currentPedidos;
+                return currentPedidos; // Mantiene el estado anterior si no hay cambios
             });
 
-             setLoading(currentLoading => currentLoading ? false : false);
+            setLoading(false); // Marcar como cargado después de la primera carga exitosa
 
         } catch (err) {
             console.error("Error fetching data:", err);
-            showMessage('Error al cargar los datos.', 'error', null);
-            setLoading(currentLoading => currentLoading ? false : false);
+            showMessage('Error al cargar los datos.', 'error', null); // Mensaje persistente en caso de error
+            setLoading(false); // Importante marcar como no cargando incluso si hay error
         } finally {
-             setIsFetching(false);
+            setIsFetching(false); // Termina el indicador de refresco
         }
-    }, []); // Dependencias vacías
+    }, []); // Dependencias vacías para que useCallback cree la función una sola vez
 
 
-    // Carga inicial y Refresco periódico
+    // Carga inicial y Refresco periódico cada 5 segundos
     useEffect(() => {
-        fetchData();
-        const intervalId = setInterval(fetchData, 5000);
-        return () => clearInterval(intervalId);
-    }, [fetchData]);
+        fetchData(); // Carga inicial
+        const intervalId = setInterval(fetchData, 5000); // Refresca cada 5 seg
+        return () => clearInterval(intervalId); // Limpia el intervalo al desmontar
+    }, [fetchData]); // Depende de la función estable fetchData
 
 
-    // --- LÓGICA DE FILTRADO ---
+    // Lógica de filtrado con useMemo
     const filteredPedidos = useMemo(() => {
+
         return allPedidos.filter(pedido => {
             // 1. Filtro por Estado
+            // Compara el nombre del estado del pedido con el filtro seleccionado
             if (selectedStatusFilter !== 'Todos' && pedido.estado_pedido !== selectedStatusFilter) {
                 return false;
             }
@@ -184,8 +243,8 @@ const CocinaPage = () => {
             // 2. Filtro por Fecha "Desde"
             if (dateRange.desde) {
                 const fechaDesde = new Date(dateRange.desde);
-                // Ajustar para que incluya todo el día
-                fechaDesde.setHours(0, 0, 0, 0);
+                fechaDesde.setHours(0, 0, 0, 0); // Inicio del día
+
                 const fechaPedido = new Date(pedido.pedido_fecha_hora);
                 if (fechaPedido < fechaDesde) {
                     return false;
@@ -195,8 +254,8 @@ const CocinaPage = () => {
             // 3. Filtro por Fecha "Hasta"
             if (dateRange.hasta) {
                 const fechaHasta = new Date(dateRange.hasta);
-                // Ajustar para que incluya todo el día
-                fechaHasta.setHours(23, 59, 59, 999);
+                fechaHasta.setHours(23, 59, 59, 999); // Fin del día
+
                 const fechaPedido = new Date(pedido.pedido_fecha_hora);
                 if (fechaPedido > fechaHasta) {
                     return false;
@@ -206,9 +265,9 @@ const CocinaPage = () => {
             // Si pasa todos los filtros, se incluye
             return true;
         });
-    }, [allPedidos, selectedStatusFilter, dateRange]);
+    }, [allPedidos, selectedStatusFilter, dateRange]); // Recalcula si cambia alguno de estos
 
-    // --- MANEJO DE CAMBIO DE FECHA ---
+    // Manejador para cambio en inputs de fecha
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         setDateRange(prevRange => ({
@@ -217,51 +276,60 @@ const CocinaPage = () => {
         }));
     };
 
-    // handleUpdateStatus ahora actualiza allPedidos
+    // Manejador para actualizar el estado de un pedido
     const handleUpdateStatus = async (pedidoId, nuevoEstadoId, nuevoEstadoNombre) => {
         let shouldUpdate = true;
-         setIsFetching(currentFetching => {
+        setIsFetching(currentFetching => { // Prevenir llamadas concurrentes
             if (currentFetching) shouldUpdate = false;
             return true;
-         });
-         if (!shouldUpdate) return;
+        });
+        if (!shouldUpdate) return;
 
+        // Guardar estado original para posible reversión
         const pedidoOriginal = allPedidos.find(p => p.id === pedidoId);
 
         try {
-            // Actualización optimista en la lista completa
+            // Actualización optimista: Cambia el estado en la lista local inmediatamente
             setAllPedidos(prevPedidos => prevPedidos.map(p =>
+
                 p.id === pedidoId
+                    // Actualiza el ID y el nombre del estado en la copia local
                     ? { ...p, estado_pedido_id: nuevoEstadoId, estado_pedido: nuevoEstadoNombre }
                     : p
             ));
 
+            // Llamada a la API para guardar el cambio en el backend
             await apiClient.patch(`/pedido/pedidos/${pedidoId}/`, {
-                estado_pedido: nuevoEstadoId
+                estado_pedido: nuevoEstadoId // Enviar solo el ID del nuevo estado
             });
-            showMessage('Estado actualizado.', 'success', 3000);
+            showMessage(`Pedido #${pedidoId} actualizado a ${nuevoEstadoNombre}.`, 'success', 3000); // Notificación de éxito
 
         } catch (err) {
             console.error("Error updating status:", err);
-            showMessage('Error al actualizar estado.', 'error');
-            // Revertir en la lista completa
+            showMessage(`Error al actualizar estado del Pedido #${pedidoId}.`, 'error'); // Notificación de error
+            // Revertir cambio optimista en caso de error
             if (pedidoOriginal) {
                 setAllPedidos(prevPedidos => prevPedidos.map(p =>
-                    p.id === pedidoId ? pedidoOriginal : p
+
+                    p.id === pedidoId ? pedidoOriginal : p // Vuelve al estado original guardado
                 ));
             } else {
-                 console.warn("No se encontró el pedido original para revertir estado.");
+                console.warn("No se encontró el pedido original para revertir estado.");
+                fetchData(); // Intenta recargar todo si no se puede revertir
             }
         } finally {
-            setIsFetching(false);
+            setIsFetching(false); // Termina el indicador de proceso
         }
     };
 
-    if (loading) return <div className={styles.loading}>Cargando pedidos...</div>;
+    // Muestra pantalla de carga inicial
+    if (loading) return <div className={styles.loading}>Cargando monitor de cocina...</div>;
 
     return (
+        // Contenedor principal
         <div className={styles.cocinaContainer}>
             <h1>Monitor de Cocina</h1>
+            {/* Componente para mostrar mensajes/notificaciones */}
             <MessageBox
                 message={message.text}
                 type={message.type}
@@ -269,16 +337,20 @@ const CocinaPage = () => {
             />
 
             {/* --- CONTROLES DE FILTRO --- */}
+
             <div className={styles.filtrosContainer}>
                 {/* Filtros de Estado */}
+
                 <div className={styles.filtroGrupo}>
                     <label>Filtrar por Estado:</label>
+
                     <div className={styles.botonesFiltroEstado}>
                         {STATUS_FILTERS.map(status => (
                             <button
                                 key={status}
+                                // Aplica clase 'activo' si es el filtro seleccionado
                                 className={`${styles.botonFiltro} ${selectedStatusFilter === status ? styles.activo : ''}`}
-                                onClick={() => setSelectedStatusFilter(status)}
+                                onClick={() => setSelectedStatusFilter(status)} // Actualiza el estado del filtro al hacer clic
                             >
                                 {status}
                             </button>
@@ -287,50 +359,61 @@ const CocinaPage = () => {
                 </div>
 
                 {/* Filtros de Fecha */}
+
                 <div className={styles.filtroGrupo}>
-                     <label>Filtrar por Fecha:</label>
+                    <label>Filtrar por Fecha:</label>
+
                     <div className={styles.inputsFecha}>
                         <label htmlFor="desde">Desde:</label>
                         <input
                             type="date"
                             id="desde"
-                            name="desde"
+                            name="desde" // Importante: coincide con la clave en dateRange
                             value={dateRange.desde}
-                            onChange={handleDateChange}
+                            onChange={handleDateChange} // Llama al manejador
+
                             className={styles.inputFecha}
                         />
                         <label htmlFor="hasta">Hasta:</label>
                         <input
                             type="date"
                             id="hasta"
-                            name="hasta"
+                            name="hasta" // Importante: coincide con la clave en dateRange
                             value={dateRange.hasta}
-                            onChange={handleDateChange}
+                            onChange={handleDateChange} // Llama al manejador
+
                             className={styles.inputFecha}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* --- TABLERO DE COMANDAS (USA filteredPedidos) --- */}
+            {/* --- TABLERO DE COMANDAS --- */}
+
             <div className={styles.tableroComandas}>
+                {/* Muestra mensaje si no hay pedidos Y no se está actualizando */}
                 {filteredPedidos.length === 0 && !isFetching ? (
+
                     <p className={styles.noPedidos}>No hay pedidos que coincidan con los filtros.</p>
                 ) : (
+                    // Mapea sobre los pedidos filtrados para renderizar las tarjetas
                     filteredPedidos.map(pedido => (
                         <ComandaCard
+
                             key={pedido.id}
-                            pedido={pedido}
-                            estadosDisponibles={estados}
-                            onUpdateStatus={handleUpdateStatus}
+
+                            pedido={pedido} // Pasa el objeto pedido completo (incluye cliente si existe)
+                            estadosDisponibles={estados} // Pasa la lista de posibles estados
+                            onUpdateStatus={handleUpdateStatus} // Pasa la función para cambiar estado
                         />
                     ))
                 )}
-                 {isFetching && allPedidos.length > 0 && <div className={styles.refreshIndicator}>Actualizando...</div>}
+                {/* Indicador visual opcional durante refrescos automáticos (si hay pedidos visibles) */}
+                {isFetching && filteredPedidos.length > 0 && <div className={styles.refreshIndicator}>Actualizando...</div>}
             </div>
         </div>
     );
 };
 
-export default CocinaPage;
+export default CocinaPage; // Asegúrate que el export sea correcto
 

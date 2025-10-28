@@ -1,6 +1,7 @@
 .posContainer {
     display: flex;
-    height: calc(100vh - 60px); /* Altura total menos el Header */
+    height: calc(100vh - 60px);
+    /* Altura total menos el Header */
     background: #f4f7fa;
 }
 
@@ -18,6 +19,7 @@
     gap: 0.5rem;
     flex-shrink: 0;
 }
+
 .navTabs button {
     padding: 0.8rem 1.5rem;
     border: none;
@@ -28,6 +30,7 @@
     font-weight: 500;
     font-size: 1rem;
 }
+
 .navTabs button.active {
     background-color: #A50000;
     color: white;
@@ -39,9 +42,10 @@
     gap: 0.5rem;
     padding: 1rem;
     background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     flex-shrink: 0;
 }
+
 .tipoFiltro button {
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -49,6 +53,7 @@
     background: #f8f9fa;
     cursor: pointer;
 }
+
 .tipoFiltro button.active {
     background: #fd002a;
     color: white;
@@ -56,8 +61,10 @@
 }
 
 .gridContainer {
-    flex-grow: 1; /* Ocupa todo el espacio restante */
-    overflow-y: auto; /* Añade scroll si los items no caben */
+    flex-grow: 1;
+    /* Ocupa todo el espacio restante */
+    overflow-y: auto;
+    /* Añade scroll si los items no caben */
     display: grid;
     /* auto-fit expande las tarjetas para llenar el espacio */
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -74,21 +81,24 @@
     overflow: hidden;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
     flex-direction: column;
     height: 250px;
 }
+
 .productCard:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 .productCard img {
     width: 100%;
     height: 100px;
     object-fit: contain;
     flex-shrink: 0;
 }
+
 .cardBody {
     padding: 0.75rem;
     flex-grow: 1;
@@ -96,6 +106,7 @@
     flex-direction: column;
     justify-content: space-between;
 }
+
 .cardTitle {
     display: block;
     font-weight: bold;
@@ -103,6 +114,7 @@
     overflow-wrap: break-word;
     font-size: 0.95rem;
 }
+
 .cardPrice {
     display: block;
     color: #28a745;
@@ -119,6 +131,7 @@
     flex-direction: column;
     padding: 1rem;
 }
+
 .ticketContainer h3 {
     text-align: center;
     color: #A50000;
@@ -131,6 +144,7 @@
     flex-grow: 1;
     overflow-y: auto;
 }
+
 .ticketEmpty {
     text-align: center;
     color: #888;
@@ -140,18 +154,22 @@
 .ticketItem {
     display: flex;
     justify-content: space-between;
-    align-items: center; /* Centra todo verticalmente */
+    align-items: center;
+    /* Centra todo verticalmente */
     padding: 1rem 0.5rem;
     border-bottom: 1px dashed #ccc;
 }
 
 /* Estilo para los sub-items de la promo (ej: Doble Cheddar, Fanta) */
 .promoSubItem {
-    padding-left: 1.5rem; /* Añade indentación */
+    padding-left: 1.5rem;
+    /* Añade indentación */
     background-color: #fdfdfd;
 }
+
 .promoSubItem .itemInfo .itemNotas {
-    color: #007bff; /* Color diferente para la nota "Parte de..." */
+    color: #007bff;
+    /* Color diferente para la nota "Parte de..." */
 }
 
 .ticketItemImage {
@@ -170,12 +188,14 @@
     margin-right: 1rem;
     overflow: hidden;
 }
+
 .itemNombre {
     font-weight: bold;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
 .itemNotas {
     font-size: 0.85em;
     color: #666;
@@ -184,6 +204,7 @@
     text-overflow: ellipsis;
     overflow: hidden;
 }
+
 .itemAgregados {
     font-size: 0.85em;
     color: #28a745;
@@ -191,6 +212,7 @@
     padding-left: 0;
     margin-top: 5px;
 }
+
 .itemAgregados li {
     margin-bottom: 2px;
 }
@@ -199,7 +221,8 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex-shrink: 0; /* Evita que los botones se compriman */
+    flex-shrink: 0;
+    /* Evita que los botones se compriman */
 }
 
 .quantityStepper {
@@ -207,6 +230,7 @@
     align-items: center;
     gap: 0.3rem;
 }
+
 .quantityStepper button {
     width: 24px;
     height: 24px;
@@ -222,6 +246,7 @@
     padding: 0;
     line-height: 1;
 }
+
 .quantityStepper span {
     font-weight: bold;
     min-width: 20px;
@@ -294,9 +319,11 @@
     transition: background-color 0.2s;
     margin-top: 0.5rem;
 }
+
 .finalizarButton:hover {
     background-color: #c00;
 }
+
 .finalizarButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
@@ -313,10 +340,46 @@
     border-radius: 5px;
     margin-top: 1rem;
 }
+
 .vaciarButton:hover {
     background-color: #5a6268;
 }
+
 .vaciarButton:disabled {
     background-color: #ccc;
 }
 
+.clienteButton {
+    background-color: #007bff;
+    /* Azul primario */
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    /* Similar a vaciar */
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 1rem;
+    /* Espaciado similar a vaciar */
+    transition: background-color 0.2s;
+    display: block;
+    /* Para que ocupe todo el ancho si quieres */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.clienteButton:hover {
+    background-color: #0056b3;
+    /* Azul más oscuro al pasar el mouse */
+}
+
+/* Opcional: Estilo si un cliente está seleccionado */
+.clienteButton.seleccionado {
+    background-color: #17a2b8;
+    /* Un color diferente (ej. cian) */
+}
+
+.clienteButton.seleccionado:hover {
+    background-color: #138496;
+}
