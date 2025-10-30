@@ -14,6 +14,7 @@ import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage';
 import StockPage from './pages/Stock/StockPage';
 import PedidosPage from './pages/Pedidos/PedidosPage'; // 1. Importamos la nueva página de Pedidos
 import CocinaPage from './pages/Cocina/CocinaPage';
+import VentasPage from './pages/Ventas/VentasPage';
 
 
 // Utilidades
@@ -88,6 +89,14 @@ function App() {
               element={
                 <ProtectedRoute roles={['Cocina', 'Admin', 'Encargado/Cajero']}>
                   <CocinaPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ventas"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
+                  <VentasPage />
                 </ProtectedRoute>
               }
             />

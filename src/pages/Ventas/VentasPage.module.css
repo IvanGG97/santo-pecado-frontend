@@ -1,0 +1,688 @@
+/* --- Contenedor Principal --- */
+.ventasContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
+    min-height: 100vh;
+}
+
+.ventasContainer h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* --- Estilos de la Tabla --- */
+.tableContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background-color: #fdfdfd;
+}
+
+.readOnlyRow {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.readOnlyRow td {
+    color: #6c757d;
+}
+
+/* --- Insignias de Estado (Etiquetas) --- */
+.estadoBadge {
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.pagado {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.cancelado {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.pendiente {
+    /* Para 'No Pagado' */
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.default {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* --- Botones de Acciones en Tabla --- */
+.actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.manageButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.manageButton:hover {
+    background-color: #0056b3;
+}
+
+.viewOnlyButton {
+    background-color: #6c757d;
+}
+
+.viewOnlyButton:hover {
+    background-color: #5a6268;
+}
+
+/* --- Estilos del Modal (ManageVentaModal) --- */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    padding: 1rem;
+}
+
+.modalContent {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.modalContent h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.modalSection {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.modalSection:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.modalSection h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #A50000;
+}
+
+/* Lista de Detalles de Pedido */
+.detalleVentaList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.detalleVentaItem {
+    display: flex;
+    align-items: flex-start;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f4f4f4;
+}
+
+.detalleVentaItem:last-child {
+    border-bottom: none;
+}
+
+.detalleQty {
+    font-weight: bold;
+    color: #A50000;
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    min-width: 30px;
+}
+
+.itemInfo {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.detalleNombre {
+    font-weight: 500;
+    color: #333;
+}
+
+.notas {
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+    padding-left: 0.5rem;
+}
+
+.detallePrecio {
+    font-weight: 500;
+    color: #555;
+    margin-left: 1rem;
+    white-space: nowrap;
+}
+
+.detalleTotal {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+    border-top: 2px solid #eee;
+}
+
+/* --- NUEVO: Grid de Info y Controles (Separados) --- */
+.gestionGridInfo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+    /* Menos gap vertical */
+    margin-bottom: 1.5rem;
+    /* Espacio antes de los controles */
+}
+
+.gestionGridInfo div {
+    font-size: 0.95rem;
+}
+
+.gestionGridInfo div strong {
+    color: #555;
+}
+
+.gridItemFull {
+    grid-column: 1 / -1;
+    /* Ocupa todo el ancho */
+}
+
+/* Grid para los controles (Labels y Radios) */
+.gestionGridControls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    /* Label angosto, control ancho */
+    gap: 1rem 1.5rem;
+    align-items: flex-start;
+    /* Alinear al inicio (para grupos de radio) */
+}
+
+.gridLabel {
+    font-weight: 500;
+    text-align: right;
+    color: #555;
+    padding-top: 0.5rem;
+    /* Alinear con el primer radio */
+}
+
+/* --- NUEVO: Estilos para Botones Radio --- */
+.radioGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.radioButton {
+    background-color: #f0f0f0;
+    border: 2px solid #ddd;
+    color: #555;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.radioButton:hover {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+}
+
+.radioButton.radioSelected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* --- FIN Estilos Radio --- */
+
+
+/* Dropdown (por si acaso lo necesitas en el futuro) */
+.dropdown {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    background-color: #fff;
+}
+
+.dropdown:disabled {
+    background-color: #e9ecef;
+}
+
+/* Acciones del Modal */
+.modalActions {
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.readOnlyText {
+    color: #dc3545;
+    /* Rojo */
+    font-style: italic;
+    margin-right: auto;
+    /* Empuja a la izquierda */
+    font-size: 0.9em;
+}
+
+.cancelButton,
+.saveButton {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: #5a6268;
+}
+
+.saveButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.saveButton:hover {
+    background-color: #218838;
+}
+
+.saveButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Fallbacks */
+.loading,
+.errorText {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.errorText {
+    color: #dc3545;
+}
+
+/* --- ESTILOS PARA LA BARRA DE FILTROS --- */
+.filtrosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    /* Permite que los filtros pasen abajo en pantallas chicas */
+    gap: 1.5rem 2rem;
+    /* Espacio entre grupos de filtros */
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Espacio entre label y control */
+}
+
+.filtroGrupo label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* Botones de Filtro de Estado */
+.botonesFiltroEstado {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.botonFiltro {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #555;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.botonFiltro:hover {
+    background-color: #e0e0e0;
+}
+
+.botonFiltro.activo {
+    background-color: #A50000;
+    /* Color primario (rojo oscuro) */
+    color: white;
+    border-color: #A50000;
+}
+
+/* Input de Búsqueda de Empleado */
+.filtroInput {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    min-width: 200px;
+}
+
+/* Inputs de Fecha */
+.inputsFecha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inputsFecha label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.inputFecha {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+/* --- ESTILOS ACTUALIZADOS PARA EL MODAL (Layout Grid) --- */
+/* Grid de Info (Datos fijos) */
+.gestionGridInfo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.gestionGridInfo div {
+    grid-column: span 1;
+}
+
+.gestionGridInfo div strong {
+    color: #555;
+}
+
+.gridItemFull {
+    grid-column: 1 / -1;
+    /* Ocupa todo el ancho */
+}
+
+.gridItem {
+    grid-column: span 1;
+}
+
+/* Grid de Controles (Labels + Radios) */
+.gestionGridControls {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    /* Label angosto, control ancho */
+    gap: 1rem 1.5rem;
+    align-items: flex-start;
+}
+
+.gridLabel {
+    font-weight: 500;
+    text-align: right;
+    color: #555;
+    padding-top: 0.5rem;
+}
+
+/* Grupo de Botones Radio */
+.radioGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.radioButton {
+    background-color: #f0f0f0;
+    border: 2px solid #ddd;
+    color: #555;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.radioButton:hover {
+    background-color: #e0e0e0;
+    border-color: #ccc;
+}
+
+.radioButton.radioSelected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+}
+
+/* --- ESTILOS PARA LA BARRA DE FILTROS --- */
+.filtrosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    /* Espacio entre grupos de filtros */
+    background-color: #ffffff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    align-items: flex-end;
+    /* Alinea los items (incluyendo botones) abajo */
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    /* Espacio entre label y control */
+}
+
+.filtroGrupo label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* Botones de Filtro de Estado */
+.botonesFiltroEstado {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.botonFiltro {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    color: #555;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.botonFiltro:hover {
+    background-color: #e0e0e0;
+}
+
+.botonFiltro.activo {
+    background-color: #A50000;
+    /* Color primario (rojo oscuro) */
+    color: white;
+    border-color: #A50000;
+}
+
+/* Input de Búsqueda de Empleado */
+.filtroInput {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    min-width: 200px;
+    /* Ancho mínimo */
+}
+
+/* Inputs de Fecha */
+.inputsFecha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inputsFecha label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.inputFecha {
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+/* --- NUEVO: Contenedor para los botones Aplicar/Limpiar --- */
+.filtroAcciones {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+    /* Empuja los botones a la derecha */
+}
+
+.botonAplicar,
+.botonLimpiar {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+}
+
+.botonAplicar {
+    background-color: #007bff;
+    /* Azul (como 'Gestionar Venta') */
+    color: white;
+}
+
+.botonAplicar:hover {
+    background-color: #0056b3;
+}
+
+.botonLimpiar {
+    background-color: #6c757d;
+    /* Gris (como 'Ver Detalles') */
+    color: white;
+}
+
+.botonLimpiar:hover {
+    background-color: #5a6268;
+}

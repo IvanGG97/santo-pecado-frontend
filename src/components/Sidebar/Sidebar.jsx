@@ -28,7 +28,7 @@ const Sidebar = () => {
                             <li><NavLink to="/cajas" className={({ isActive }) => isActive ? styles.active : ''}><span>💰 Cajas</span></NavLink></li>
                             <li><NavLink to="/stock" className={({ isActive }) => isActive ? styles.active : ''}><span>📦 Stock</span></NavLink></li>
                             <li><NavLink to="/compras" className={({ isActive }) => isActive ? styles.active : ''}><span>🛒 Compras</span></NavLink></li>
-                            <li><NavLink to="/venta" className={({ isActive }) => isActive ? styles.active : ''}><span>🏷️ Venta</span></NavLink></li>
+                            <li><NavLink to="/ventas" className={({ isActive }) => isActive ? styles.active : ''}><span>🏷️ Venta</span></NavLink></li>
                             <li><NavLink to="/productos" className={({ isActive }) => isActive ? styles.active : ''}><span>🍔 Productos</span></NavLink></li>
                         </>
                     )}
