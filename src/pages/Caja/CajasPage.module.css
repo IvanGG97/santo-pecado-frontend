@@ -1,0 +1,636 @@
+.cajaContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
+    min-height: calc(100vh - 60px);
+}
+
+
+
+
+.historialContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    min-height: 100px;
+}
+
+.addButton {
+    background-color: #28a745;
+    /* Verde (como en la imagen) */
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover {
+    background-color: #218838;
+}
+
+/* Info de caja abierta en la barra */
+.cajaAbiertaInfo {
+    padding: 0.7rem 1.2rem;
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #2a2a2e;
+
+    color: #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #3a3a3e;
+    /* Separador oscuro */
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #1e1e21;
+    /* Header más oscuro */
+    color: #aaa;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.table tbody tr:hover {
+    background-color: #313135;
+}
+
+.filaAbierta {
+    background-color: #313135;
+    /* Fila resaltada para caja abierta */
+    color: #fff;
+    font-weight: 500;
+}
+
+.filaCerrada {
+    color: #999;
+    /* Texto atenuado para cajas cerradas */
+}
+
+/* Insignias de Estado (A/C) */
+.estadoBadge {
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+
+.estadoAbierta {
+    background-color: #2A2A2E;
+    color: #04f43c;
+}
+
+.estadoCerrada {
+    background-color: #2A2A2E;
+    color: #ff0019;
+}
+
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.cerrarButtonSmall {
+    /* (Rojo 'Cerrar Caja') */
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.cerrarButtonSmall:hover {
+    background-color: #c82333;
+}
+
+.viewButton {
+    /* (Botón gris 'Ver Detalles') */
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.viewButton:hover {
+    background-color: #5a6268;
+}
+
+
+.abrirCajaContainer {
+    max-width: 500px;
+    margin: 2rem auto 0 auto;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.abrirCajaContainer h2 {
+    margin-top: 0;
+    color: #A50000;
+}
+
+.abrirCajaContainer p {
+    color: #555;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.montoSugerido {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #28a745;
+    /* Verde */
+    margin: 1rem 0 2rem 0;
+}
+
+.abrirCajaForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.formGroup label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.abrirButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.abrirButton:hover {
+    background-color: #218838;
+}
+
+.abrirButton:disabled {
+    background-color: #ccc;
+}
+
+
+.detalleContainer {
+    background-color: #1e1e21;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    color: #eee;
+}
+
+.detalleHeader {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #333;
+    position: relative;
+    /* Para la insignia flotante */
+}
+
+.detalleHeader h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    color: #eee;
+}
+
+/* Info básica de caja */
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    align-items: center;
+}
+
+.infoGrid div {
+    background-color: #2a2a2e;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.infoGrid span {
+    display: block;
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 0.25rem;
+}
+
+.infoGrid strong {
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.estadoBadgeFlotante {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+}
+
+.cerrarCajaButton {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.5;
+    /* Ajuste para alinear texto */
+    height: 100%;
+}
+
+.cerrarCajaButton:hover {
+    background-color: #c82333;
+}
+
+/* Resumen Financiero */
+.resumenFinanciero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    padding: 1.5rem 0;
+    margin-top: 1.5rem;
+    border-top: 1px solid #333;
+}
+
+@media (max-width: 768px) {
+    .resumenFinanciero {
+        grid-template-columns: 1fr;
+        /* Apila las columnas en móvil */
+    }
+}
+
+.resumenColumna {
+    background-color: #2a2a2e;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.resumenColumna h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #fd002a;
+    border-bottom: 1px solid #444;
+    padding-bottom: 0.5rem;
+}
+
+.resumenItem {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+}
+
+.resumenItem span {
+    color: #aaa;
+}
+
+.resumenItem strong {
+    color: #fff;
+    font-weight: 500;
+}
+
+.resumenItem .negativo {
+    color: #f8d7da;
+    /* Rojo claro */
+}
+
+.resumenTotal {
+    border-top: 1px solid #444;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.resumenTotal span {
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.resumenTotal strong {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #28a745;
+    /* Total en verde */
+}
+
+.resumenColumna:last-of-type .resumenTotal strong {
+    color: #00aeff;
+    /* Total transferencia en azul */
+}
+
+.noDetalle {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #666;
+    font-size: 1.1rem;
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+/* --- Movimientos (Ingresos/Egresos) --- */
+.movimientosTabs {
+    display: flex;
+    background-color: #2a2a2e;
+}
+
+.movimientosTabs button {
+    background: none;
+    border: none;
+    color: #aaa;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    flex-grow: 1;
+    /* Hace que los botones ocupen el espacio */
+    text-align: center;
+}
+
+.movimientosTabs button.tabActivo {
+    color: #fff;
+    border-bottom-color: #fd002a;
+}
+
+.movimientosContent {
+    padding: 2rem;
+    background-color: #2a2a2e;
+}
+
+.movimientoColumna {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.movimientoAddButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Formulario (ahora en modal) */
+.formSimple {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.movimientoList {
+    background-color: #1e1e21;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 1.5rem;
+    flex-grow: 1;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.movimientoList h4 {
+    margin-top: 0;
+    text-align: center;
+    color: #eee;
+    border-bottom: 1px solid #333;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.movimientoItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px dashed #444;
+}
+
+.movimientoItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.movimientoItem span {
+    color: #ccc;
+    font-size: 0.95rem;
+}
+
+.movimientoItem span i {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.movimientoItem strong {
+    font-size: 1rem;
+}
+
+.movimientoItem.ingreso strong {
+    color: #28a745;
+}
+
+.movimientoItem.egreso strong {
+    color: #dc3545;
+}
+
+.noMovimientos {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding-top: 1rem;
+}
+
+/* --- Estilos Genéricos (Inputs, Modales) --- */
+.input,
+.textarea,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: #323743;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus,
+select:focus {
+    border-color: #fd002a;
+    box-shadow: 0 0 0 3px rgba(253, 0, 42, 0.3);
+    outline: none;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #323743 inset !important;
+    -webkit-text-fill-color: #fff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Modal (Cierre y Movimientos) */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+}
+
+.modalContent {
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #fd002a;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modalContent h2 {
+    color: #fd002a;
+    text-shadow: 0 0 8px #fd002a;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.modalContent p {
+    color: #eee;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.modalContent .formGroup {
+    text-align: left;
+}
+
+.modalContent .textarea {
+    background-color: #323743;
+    color: #fff;
+    border-color: #fd002a;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #333;
+}
+
+.cancelButton,
+.saveButton,
+.deleteButton {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: #5a6268;
+}
+
+.saveButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.saveButton:hover {
+    background-color: #218838;
+}
+
+.deleteButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+.deleteButton:hover {
+    background-color: #c82333;
+}
+
+.saveButton:disabled,
+.deleteButton:disabled,
+.abrirButton:disabled {
+    background-color: #ccc;
+    color: #888;
+    cursor: not-allowed;
+}
+

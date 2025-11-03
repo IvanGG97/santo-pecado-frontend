@@ -15,6 +15,8 @@ import StockPage from './pages/Stock/StockPage';
 import PedidosPage from './pages/Pedidos/PedidosPage'; // 1. Importamos la nueva página de Pedidos
 import CocinaPage from './pages/Cocina/CocinaPage';
 import VentasPage from './pages/Ventas/VentasPage';
+import ComprasPage from './pages/Compras/ComprasPage';
+import CajasPage from './pages/Caja/CajasPage';
 
 
 // Utilidades
@@ -100,6 +102,23 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/compras"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
+                  <ComprasPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cajas"
+              element={
+                <ProtectedRoute allowedRoles={['Admin', 'Encargado/Cajero']}>
+                  <CajasPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/inicio" />} />
 
           </Route>
         </Routes>

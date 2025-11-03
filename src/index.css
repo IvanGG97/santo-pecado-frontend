@@ -13,3 +13,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.cierreResumenSwal {
+  text-align: left;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  color: #333;
+}
+
+.cierreResumenSwal p {
+  text-align: left;
+}
+
+.cierreResumenSwal .resumenItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.cierreResumenSwal .resumenTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.cierreResumenSwal .resumenTotal strong {
+  color: #28a745;
+}
+
+.cierreResumenSwal .negativo {
+  color: #dc3545;
+  font-weight: 600;
+}

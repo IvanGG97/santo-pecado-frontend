@@ -42,7 +42,6 @@ const Sidebar = () => {
                         </li>
                     )}
 
-                    {/* ENLACE DE PEDIDOS: Visible para todos los roles, incluido Cocina */}
                     {(userRole === 'Admin' || userRole === 'Encargado/Cajero') && (
                         <li><NavLink to="/pedidos" className={({ isActive }) => isActive ? styles.active : ''}><span>📝 Pedidos</span></NavLink></li>
                     )}

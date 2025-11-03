@@ -1,0 +1,89 @@
+/* --- Contenedor Principal --- */
+.comprasContainer {
+    padding: 2rem;
+    background-color: #f4f7fa;
+    min-height: 100vh;
+}
+
+.comprasContainer h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* --- Barra de Herramientas (para el botón) --- */
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    /* Alinea el botón a la derecha */
+    margin-bottom: 1.5rem;
+}
+
+.addButton {
+    background-color: #A50000;
+    /* Color rojo oscuro principal */
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addButton:hover {
+    background-color: #c00;
+    /* Un rojo más brillante al pasar el mouse */
+}
+
+/* --- Estilos de la Tabla (Similar a VentasPage) --- */
+.tableContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: auto;
+    /* Permite scroll horizontal en pantallas pequeñas */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    /* Evita que la tabla se comprima demasiado */
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background-color: #fdfdfd;
+}
+
+/* --- Estados de Carga y Error --- */
+.loadingText,
+/* Para el <p> de "Cargando..." */
+.errorText {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.errorText {
+    color: #dc3545;
+    /* Rojo para errores */
+}

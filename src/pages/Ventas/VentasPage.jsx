@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import apiClient from '../../services/api'; // Asegúrate que esta ruta sea correcta
-import styles from './VentasPage.module.css'; // Asegúrate de crear este archivo
+import { useNavigate } from 'react-router-dom'; // 1. IMPORTAR useNavigate
+import apiClient from '../../services/api';
+import styles from './VentasPage.module.css';
 import Swal from 'sweetalert2';
 
-// --- Constantes ---
+// --- Constantes (Sin cambios) ---
 const ESTADO_FINAL_PAGADO = 'Pagado';
 const ESTADO_FINAL_CANCELADO = 'Cancelado';
 
-// --- Mapeo de Colores ---
+// --- Mapeo de Colores (Sin cambios) ---
 const estadoColorMap = {
     'Pagado': 'pagado',
     'Cancelado': 'cancelado',
     'No Pagado': 'pendiente',
 };
 
-// --- Opciones de Pago ---
+// --- Opciones de Pago (Sin cambios) ---
 const MEDIOS_DE_PAGO = [
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'transferencia', label: 'Transferencia' },
@@ -77,10 +78,10 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                             <p>No se encontraron detalles de pedido para esta venta.</p>
                         )}
                     </div>
-                     <div className={styles.detalleTotal}>
-                         <strong>Total:</strong>
-                         <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
-                     </div>
+                    <div className={styles.detalleTotal}>
+                        <strong>Total:</strong>
+                        <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
+                    </div>
                 </div>
 
                 <div className={styles.modalSection}>
@@ -95,14 +96,14 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                     </div>
 
                     <div className={styles.gestionGridControls}>
-                         {isReadOnly ? (
+                        {isReadOnly ? (
                             <>
                                 <div className={styles.gridLabel}><strong>Estado:</strong></div>
                                 <div>{venta.estado_venta?.estado_venta_nombre || 'N/A'}</div>
                                 <div className={styles.gridLabel}><strong>Medio de Pago:</strong></div>
                                 <div>{venta.venta_medio_pago}</div>
                             </>
-                         ) : (
+                        ) : (
                             <>
                                 <label className={styles.gridLabel}>Estado de Venta:</label>
                                 <div className={styles.radioGroup}>
@@ -133,7 +134,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                                     ))}
                                 </div>
                             </>
-                         )}
+                        )}
                     </div>
                 </div>
 
@@ -144,7 +145,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                             onClick={handleSaveClick}
                             className={styles.saveButton}
                             disabled={isLoading}
-                        >
+                            á   >
                             {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                         </button>
                     )}
@@ -160,17 +161,22 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
 const VentasPage = () => {
     const [allVentas, setAllVentas] = useState([]);
     const [estadosVenta, setEstadosVenta] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true); // Este 'loading' es para los datos de ventas
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
 
-    // --- ESTADOS PARA LOS INPUTS DE FILTRO ---
-    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado'); // Default "No Pagado"
+    // --- 2. NUEVOS ESTADOS PARA VERIFICACIÓN ---
+    const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
+    const navigate = useNavigate();
+    // --- FIN DE NUEVOS ESTADOS ---
+
+    // --- ESTADOS PARA LOS INPUTS DE FILTRO (Sin cambios) ---
+    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado');
     const [inputEmpleadoSearch, setInputEmpleadoSearch] = useState('');
     const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
 
-    // --- ESTADO PARA LOS FILTROS APLICADOS ---
+    // --- ESTADO PARA LOS FILTROS APLICADOS (Sin cambios) ---
     const [activeFilters, setActiveFilters] = useState({
         status: 'No Pagado',
         empleado: '',
@@ -180,7 +186,7 @@ const VentasPage = () => {
 
     const STATUS_FILTERS = useMemo(() => ['No Pagado', 'Pagado', 'Cancelado', 'Todos'], []);
 
-    // Función de carga
+    // Función de carga (Sin cambios)
     const fetchVentasYEstados = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) setLoading(true);
         try {
@@ -202,29 +208,73 @@ const VentasPage = () => {
         }
     }, []);
 
-    // Carga inicial
+
+    // --- 3. NUEVO useEffect PARA VERIFICAR LA CAJA ---
     useEffect(() => {
-        fetchVentasYEstados(true);
-    }, [fetchVentasYEstados]);
+        const checkCajaStatus = async () => {
+            try {
+                const res = await apiClient.get('/caja/estado/');
+                // Si la caja está abierta (estado es true)
+                if (res.data && res.data.caja_estado === true) {
+                    setIsVerifyingCaja(false); // Permite la carga de la página
+                } else {
+                    // Si la caja está cerrada
+                    Swal.fire({
+                        title: 'Caja Cerrada',
+                        text: 'Para entrar a esta seccion primero debes abrir una caja',
+                        icon: 'warning',
+                        confirmButtonText: 'Ir a Cajas',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            navigate('/cajas'); // Redirige a Cajas
+                        }
+                    });
+                }
+            } catch (err) {
+                // Error de red (ej. API caída)
+                console.error("Error al verificar estado de caja:", err);
+                Swal.fire({
+                    title: 'Error de Conexión',
+                    text: 'No se pudo verificar el estado de la caja. Intente más tarde.',
+                    icon: 'error',
+                    confirmButtonText: 'Ir a Inicio',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                }).then(() => {
+                    navigate('/inicio'); // Redirige a Inicio
+                });
+            }
+        };
 
-    // --- LÓGICA DE FILTRADO COMBINADO ---
+        checkCajaStatus();
+    }, [navigate]);
+    // --- FIN DEL NUEVO useEffect ---
+
+
+    // 4. MODIFICACIÓN Carga inicial (depende de la verificación)
+    useEffect(() => {
+        // Solo carga las ventas si la verificación de caja fue exitosa
+        if (!isVerifyingCaja) {
+            fetchVentasYEstados(true);
+        }
+    }, [fetchVentasYEstados, isVerifyingCaja]); // Añadida dependencia
+
+
+    // --- LÓGICA DE FILTRADO COMBINADO (Sin cambios) ---
     const filteredVentas = useMemo(() => {
-        // Usa activeFilters, no los estados de input
         const termEmpleado = activeFilters.empleado.toLowerCase().trim();
-
         return allVentas.filter(venta => {
-            // 1. Filtro por Estado
             if (activeFilters.status !== 'Todos' && venta.estado_venta?.estado_venta_nombre !== activeFilters.status) {
                 return false;
             }
-            // 2. Filtro por Empleado
             if (termEmpleado) {
                 const nombreCompleto = `${venta.empleado?.first_name || ''} ${venta.empleado?.last_name || ''}`.toLowerCase().trim();
                 if (!nombreCompleto.includes(termEmpleado)) {
                     return false;
                 }
             }
-            // 3. Filtro por Fecha "Desde"
             if (activeFilters.desde) {
                 try {
                     const fechaDesde = new Date(activeFilters.desde);
@@ -235,9 +285,8 @@ const VentasPage = () => {
                     }
                 } catch (e) { console.warn("Fecha 'desde' inválida:", activeFilters.desde); }
             }
-            // 4. Filtro por Fecha "Hasta"
             if (activeFilters.hasta) {
-                 try {
+                try {
                     const fechaHasta = new Date(activeFilters.hasta);
                     fechaHasta.setHours(23, 59, 59, 999);
                     const fechaVenta = new Date(venta.venta_fecha_hora);
@@ -248,9 +297,9 @@ const VentasPage = () => {
             }
             return true;
         });
-    }, [allVentas, activeFilters]); // Depende de allVentas y activeFilters
+    }, [allVentas, activeFilters]);
 
-    // --- Handlers para filtros ---
+    // --- Handlers para filtros (Sin cambios) ---
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         setInputDateRange(prevRange => ({
@@ -261,9 +310,9 @@ const VentasPage = () => {
 
     const handleEmpleadoSearchChange = (e) => {
         setInputEmpleadoSearch(e.target.value);
+
     };
-    
-    // --- NUEVO: Handlers para botones de filtro ---
+
     const handleAplicarFiltros = () => {
         setActiveFilters({
             status: inputStatusFilter,
@@ -274,11 +323,9 @@ const VentasPage = () => {
     };
 
     const handleLimpiarFiltros = () => {
-        // Resetear inputs
         setInputStatusFilter('No Pagado');
         setInputEmpleadoSearch('');
         setInputDateRange({ desde: '', hasta: '' });
-        // Resetear filtros activos
         setActiveFilters({
             status: 'No Pagado',
             empleado: '',
@@ -286,7 +333,6 @@ const VentasPage = () => {
             hasta: ''
         });
     };
-    // --- FIN NUEVO ---
 
     // --- Handlers del Modal (sin cambios) ---
     const handleManageClick = (venta) => {
@@ -302,14 +348,24 @@ const VentasPage = () => {
         fetchVentasYEstados(false);
     };
 
-    // --- Renderizado ---
+    // --- 5. NUEVO RENDERIZADO DE VERIFICACIÓN ---
+    if (isVerifyingCaja) {
+        // Muestra un loader simple mientras verifica la caja
+        return (
+            <div className={styles.ventasContainer} style={{ padding: '2rem', textAlign: 'center' }}>
+                Verificando estado de la caja...
+            </div>
+        );
+    }
+    // --- FIN DE NUEVO RENDERIZADO ---
+
+
+    // --- Renderizado (Sin cambios en el JSX, solo se muestra si isVerifyingCaja es false) ---
     return (
         <div className={styles.ventasContainer}>
             <h1>Gestión de Ventas</h1>
-            
-            {/* --- BARRA DE FILTROS ACTUALIZADA --- */}
+
             <div className={styles.filtrosContainer}>
-                {/* Filtros de Estado */}
                 <div className={styles.filtroGrupo}>
                     <label>Estado Venta:</label>
                     <div className={styles.botonesFiltroEstado}>
@@ -317,7 +373,7 @@ const VentasPage = () => {
                             <button
                                 key={status}
                                 className={`${styles.botonFiltro} ${inputStatusFilter === status ? styles.activo : ''}`}
-                                onClick={() => setInputStatusFilter(status)} // Actualiza el INPUT state
+                                onClick={() => setInputStatusFilter(status)}
                             >
                                 {status}
                             </button>
@@ -325,53 +381,48 @@ const VentasPage = () => {
                     </div>
                 </div>
 
-                {/* Filtro por Empleado */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="empleadoSearch">Empleado:</label>
                     <input
                         type="text"
-                        id="empleadoSearch"
+                        section id="empleadoSearch"
                         placeholder="Nombre o Apellido..."
-                        value={inputEmpleadoSearch} // Controlado por INPUT state
+                        value={inputEmpleadoSearch}
                         onChange={handleEmpleadoSearchChange}
                         className={styles.filtroInput}
                     />
                 </div>
 
-                {/* Filtros de Fecha */}
                 <div className={styles.filtroGrupo}>
-                     <label>Fecha:</label>
-                     <div className={styles.inputsFecha}>
-                         <label htmlFor="desde">Desde:</label>
-                         <input
-                             type="date"
-                             id="desde"
-                             name="desde"
-                             value={inputDateRange.desde} // Controlado por INPUT state
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                         <label htmlFor="hasta">Hasta:</label>
-                         <input
-                             type="date"
-                             id="hasta"
-                             name="hasta"
-                             value={inputDateRange.hasta} // Controlado por INPUT state
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                     </div>
+                    <label>Fecha:</label>
+                    <div className={styles.inputsFecha}>
+                        <label htmlFor="desde">Desde:</label>
+                        <input
+                            type="date"
+                            id="desde"
+                            name="desde"
+                            value={inputDateRange.desde}
+                            á onChange={handleDateChange}
+                            className={styles.inputFecha}
+                        />
+                        <label htmlFor="hasta">Hasta:</label>
+                        <input
+                            type="date"
+                            id="hasta"
+                            name="hasta"
+                            value={inputDateRange.hasta}
+                            onChange={handleDateChange}
+                            className={styles.inputFecha}
+                        />
+                    </div>
                 </div>
 
-                {/* --- NUEVO: Botones de Acción de Filtro --- */}
                 <div className={styles.filtroAcciones}>
                     <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
-            {/* --- FIN BARRA DE FILTROS --- */}
 
-            
             <div className={styles.tableContainer}>
                 {loading ? (
                     <p>Cargando ventas...</p>
@@ -394,7 +445,6 @@ const VentasPage = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* --- USA filteredVentas --- */}
                             {filteredVentas.length === 0 ? (
                                 <tr>
                                     <td colSpan={10} style={{ textAlign: 'center' }}>No se encontraron ventas que coincidan con los filtros.</td>

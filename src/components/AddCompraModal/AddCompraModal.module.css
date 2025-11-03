@@ -1,0 +1,338 @@
+/* --- Estilos del Modal (Oscuro, similar a los otros) --- */
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: #1a1a1a;
+    color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #fd002a;
+    width: 90%;
+    max-width: 900px; /* Más ancho para la tabla de detalles */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.closeButton:hover {
+    color: #fff;
+}
+
+.modalContent h2 {
+    color: #fd002a;
+    text-shadow: 0 0 8px #fd002a;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.form {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 0.5rem;
+}
+
+/* Grid para Proveedor y Método de Pago */
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+/* --- NUEVO: Grupo de Input + Botón (para Proveedor) --- */
+.inputGroup {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+/* Display del proveedor seleccionado */
+.proveedorDisplay {
+    flex-grow: 1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0000ff;
+    background-color: #323743;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+    height: 45px; /* Misma altura que el input/select */
+    line-height: 1.5; /* Centrar verticalmente */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.manageButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+    height: 45px; /* Misma altura */
+    font-size: 0.9rem;
+}
+.manageButton:hover {
+    background-color: #5a6268;
+}
+/* --- FIN NUEVO --- */
+
+.input,
+select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0000ff;
+    background-color: #323743;
+    color: #fff;
+    font-size: 1rem;
+    box-sizing: border-box;
+    height: 45px; /* Altura fija */
+}
+
+select option {
+    background-color: #323743;
+    color: #fff;
+}
+
+/* --- Estilos para la sección de Detalles (Insumos) --- */
+.detallesContainer {
+    margin-top: 2rem;
+    border-top: 1px solid #444;
+    padding-top: 1.5rem;
+}
+.detallesContainer h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #eee;
+}
+
+/* Lista scrollable de detalles */
+.detallesList {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+.noInsumos {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 1rem 0;
+}
+
+/* Fila de la tabla (header y body) */
+/* --- GRID ACTUALIZADO (6 columnas) --- */
+.detalleRow {
+    display: grid;
+    /* Insumo | Cant | U. Compra | Precio | Subtotal | Quitar */
+    grid-template-columns: 2.5fr 1fr 1.2fr 1.5fr 1.5fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #333;
+}
+.detalleRow:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.detallesHeader {
+    font-weight: bold;
+    color: #aaa;
+    border-bottom: 2px solid #555;
+    margin-bottom: 1rem;
+    font-size: 0.8rem; /* Más pequeño */
+    padding-right: 0.5rem; /* Alinea con la lista */
+    padding-left: 0.5rem;
+}
+.detallesHeader .detalleInput, 
+.detallesHeader .removeButton,
+.detallesHeader .subtotal,
+.detallesHeader .detalleSelect {
+    visibility: hidden;
+}
+
+/* Inputs y Selects en la fila */
+.detalleSelect,
+.detalleInput {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ff0000ff;
+    background-color: #323743;
+    color: #fff;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    height: 40px; /* Más bajos */
+}
+
+/* Nombre del insumo (texto) */
+.detalleInsumoNombre {
+    font-size: 0.95rem;
+    padding: 8px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex; /* Para poner la unidad base abajo */
+    flex-direction: column;
+}
+.detalleInsumoNombre small {
+    font-size: 0.8em;
+    color: #aaa;
+    font-style: italic;
+}
+/* --- FIN NUEVO --- */
+
+.subtotal {
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: right;
+    font-size: 0.95rem;
+}
+
+.removeButton {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: background-color 0.2s;
+}
+.removeButton:hover {
+    background-color: #c82333;
+}
+
+.addDetalleButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 0.5rem; /* Más cerca de la lista */
+}
+.addDetalleButton:hover {
+    background-color: #0056b3;
+}
+
+/* --- Total y Botones Finales --- */
+.totalContainer {
+    text-align: right;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #444;
+}
+.totalContainer h3 {
+    color: #28a745;
+    font-size: 1.5rem;
+}
+
+.errorText {
+    color: #f8d7da;
+    background-color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 0.75rem 1rem;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #333;
+    flex-shrink: 0;
+}
+
+.cancelButton,
+.saveButton {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+.cancelButton:hover {
+    background-color: #5a6268;
+}
+
+.saveButton {
+    background-color: #28a745;
+    color: white;
+}
+.saveButton:hover {
+    background-color: #218838;
+}
+.saveButton:disabled {
+    background-color: #94d3a2;
+    cursor: not-allowed;
+}
+
+/* Arreglo para Autocompletar en modo oscuro */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #323743 inset !important;
+    -webkit-text-fill-color: #fff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
