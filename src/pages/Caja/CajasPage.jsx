@@ -6,12 +6,12 @@ import Swal from 'sweetalert2';
 // --- Iconos (Sin cambios) ---
 const IconoIngreso = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
     </svg>
 );
 const IconoEgreso = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-dash-circle-fill" viewBox="0 0 16 16">
-        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z"/>
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7z" />
     </svg>
 );
 
@@ -28,9 +28,9 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
-        
+
         let montoPayload = {};
-        
+
         if (esPrimeraCaja) {
             const monto = parseFloat(montoInicial);
             if (isNaN(monto) || monto < 0) {
@@ -39,16 +39,15 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
                 return;
             }
             montoPayload = { caja_monto_inicial: monto };
-        } 
+        }
         else {
-            montoPayload = {}; 
+            montoPayload = {};
         }
 
         try {
-            // response.data aquí es el objeto INCOMPLETO de la API de /abrir/
             const response = await apiClient.post('/caja/abrir/', montoPayload);
             Swal.fire('¡Éxito!', 'La caja se ha abierto correctamente.', 'success');
-            onCajaAbierta(response.data); // Llama al handler del padre
+            onCajaAbierta(response.data);
         } catch (err) {
             const errorMsg = err.response?.data?.detail || err.response?.data?.caja_monto_inicial?.[0] || "No se pudo abrir la caja.";
             setError(errorMsg);
@@ -61,7 +60,7 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
     return (
         <div className={styles.abrirCajaContainer}>
             <h2>Abrir Caja</h2>
-            
+
             {esPrimeraCaja ? (
                 <>
                     <p>Es la primera vez que se abre la caja. Ingresa el monto inicial.</p>
@@ -104,6 +103,7 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
 };
 
 // --- Modal para INGRESOS/EGRESOS (Sin cambios) ---
+// (Este modal ahora es llamado por CajaDetalleModal)
 const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     const [monto, setMonto] = useState('');
     const [descripcion, setDescripcion] = useState('');
@@ -135,11 +135,10 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
                 [`${tipo}_descripcion`]: descripcion,
                 [`${tipo}_monto`]: montoNum,
             };
-            // Pasamos el cajaId como query param para que el backend sepa dónde registrarlo
             await apiClient.post(`${endpoint}?caja_id=${cajaId}`, payload);
-            
+
             Swal.fire('¡Éxito!', `${tipo.charAt(0).toUpperCase() + tipo.slice(1)} registrado.`, 'success');
-            onMovimientoSuccess(); 
+            onMovimientoSuccess();
             onClose();
         } catch (err) {
             console.error(`Error registrando ${tipo}:`, err.response?.data || err);
@@ -153,7 +152,9 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
+                <div className={styles.closeButtonContainer}>
+                    <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
+                </div>
                 <h2>{title}</h2>
                 <form onSubmit={handleSubmit} className={styles.formSimple}>
                     {error && <p className={styles.errorText}>{error}</p>}
@@ -197,8 +198,14 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
 };
 
 
-// --- Componente para la vista de Detalle de Caja (Sin cambios) ---
-const CajaDetalleView = ({ caja, onCerrarCaja, onRefreshData }) => {
+// --- NUEVO: Componente Modal para Detalle de Caja ---
+// (Este componente reemplaza a CajaDetalleView)
+const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorialRefresh }) => {
+
+    // El modal maneja su propio estado de 'caja'
+    // Se inicializa con la caja que le pasó el padre
+    const [caja, setCaja] = useState(cajaInicial);
+
     const [movimientos, setMovimientos] = useState({ ingresos: [], egresos: [] });
     const [loadingMov, setLoadingMov] = useState(true);
     const [activeTab, setActiveTab] = useState('ingresos');
@@ -206,7 +213,8 @@ const CajaDetalleView = ({ caja, onCerrarCaja, onRefreshData }) => {
     const [modalTipo, setModalTipo] = useState('ingreso');
 
     const isReadOnly = !caja.caja_estado;
-    
+
+    // Función para refrescar la lista de movimientos
     const fetchMovimientos = useCallback(async () => {
         if (!caja.id) return;
         setLoadingMov(true);
@@ -226,177 +234,214 @@ const CajaDetalleView = ({ caja, onCerrarCaja, onRefreshData }) => {
         }
     }, [caja.id]);
 
+    // Carga los movimientos cuando el modal se monta
     useEffect(() => {
         fetchMovimientos();
     }, [fetchMovimientos]);
+
+    // --- LÓGICA DE ACTUALIZACIÓN INTERNA ---
+
+    // Función para refrescar solo los datos de ESTE modal (los totales)
+    const refreshCajaData = async () => {
+        console.log("Refrescando datos internos del modal...");
+        try {
+            // Usamos la API de historial para buscar el objeto 'caja' actualizado
+            const resHistorial = await apiClient.get('/caja/historial/');
+            const cajaActualizada = resHistorial.data.find(c => c.id === caja.id);
+            if (cajaActualizada) {
+                setCaja(cajaActualizada); // Actualiza el estado interno del modal
+            }
+            // También le decimos al padre (CajasPage) que actualice su lista
+            if (onHistorialRefresh) {
+                onHistorialRefresh();
+            }
+        } catch (error) {
+            console.error("Error refrescando datos del modal:", error);
+        }
+    };
 
     const handleOpenMovimientoModal = (tipo) => {
         setModalTipo(tipo);
         setIsMovimientoModalOpen(true);
     };
 
+    // Esta función se llama cuando MovimientoModal tiene éxito
     const handleMovimientoExitoso = () => {
-        fetchMovimientos(); 
-        if(onRefreshData) {
-            onRefreshData(false); // Refresca los datos del padre (totales)
+        fetchMovimientos(); // 1. Refresca la lista de movimientos
+        refreshCajaData();  // 2. Refresca los totales de ESTE modal (y del historial)
+    };
+
+    // Pasa la llamada al padre para abrir el modal de CIERRE
+    const handleCerrarClick = () => {
+        if (onCerrarCajaClick) {
+            onCerrarCajaClick();
         }
+        onClose(); // Cierra este modal de detalle
     };
 
     return (
-        <>
-            <div className={styles.detalleContainer}>
-                <div className={styles.detalleHeader}>
-                    <h3>Detalle de Caja N°{caja.id}</h3>
-                    <div className={styles.infoGrid}>
-                        <div><span>Apertura:</span> <strong>{new Date(caja.caja_fecha_hora_apertura).toLocaleString()}</strong></div>
-                        <div><span>Empleado:</span> <strong>{caja.empleado?.first_name || 'N/A'} {caja.empleado?.last_name || ''}</strong></div>
-                        <div className={styles.estadoBadgeFlotante}>
-                            {isReadOnly ? (
-                                <span className={styles.estadoCerrada}>Cerrada</span>
-                            ) : (
-                                <span className={styles.estadoAbierta}>Abierta</span>
-                            )}
-                        </div>
-                    </div>
+        <div className={styles.modalBackdrop}>
+            {/* Usamos modalContent pero con un tamaño más grande */}
+            <div className={`${styles.modalContent} ${styles.modalDetalleLg}`}>
+                <div className={styles.closeButtonModalContainer}>
+                    <button onClick={onClose} className={styles.closeButtonModal}>&times;</button>
+                </div>
 
-                    <div className={styles.resumenFinanciero}>
-                        <div className={styles.resumenColumna}>
-                            <h4>Resumen de Efectivo</h4>
-                            <div className={styles.resumenItem}><span>(+) Monto Inicial:</span> <strong>${formatCurrency(caja.caja_monto_inicial)}</strong></div>
-                            <div className={styles.resumenItem}><span>(+) Ventas (Efectivo):</span> <strong>${formatCurrency(caja.total_ventas_efectivo)}</strong></div>
-                            <div className={styles.resumenItem}><span>(+) Ingresos Manuales:</span> <strong>${formatCurrency(caja.total_ingresos_manuales)}</strong></div>
-                            <div className={styles.resumenItem}><span>(-) Compras (Efectivo):</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_compras_efectivo)}</strong></div>
-                            <div className={styles.resumenItem}><span>(-) Egresos Manuales:</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_egresos_manuales)}</strong></div>
-                            <div className={`${styles.resumenItem} ${styles.resumenTotal}`}>
-                                <span>(=) Efectivo Esperado:</span>
-                                <strong>${formatCurrency(caja.saldo_calculado_efectivo)}</strong>
+                {/* El contenido de la antigua CajaDetalleView va aquí */}
+                <div className={styles.detalleContainer}>
+                    <div className={styles.detalleHeader}>
+                        <h3>Detalle de Caja N°{caja.id}</h3>
+                        <div className={styles.infoGrid}>
+                            <div><span>Apertura:</span> <strong>{new Date(caja.caja_fecha_hora_apertura).toLocaleString()}</strong></div>
+                            <div><span>Empleado:</span> <strong>{caja.empleado?.first_name || 'N/A'} {caja.empleado?.last_name || ''}</strong></div>
+                            <div className={styles.estadoBadgeFlotante}>
+                                {isReadOnly ? (
+                                    <span className={styles.estadoCerrada}>Cerrada</span>
+                                ) : (
+                                    <span className={styles.estadoAbierta}>Abierta</span>
+                                )}
                             </div>
                         </div>
-                        <div className={styles.resumenColumna}>
-                            <h4>Resumen de Transferencias</h4>
-                            <div className={styles.resumenItem}><span>(+) Ventas (Transf.):</span> <strong>${formatCurrency(caja.total_ventas_transferencia)}</strong></div>
-                            <div className={styles.resumenItem}><span>(-) Compras (Transf.):</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_compras_transferencia)}</strong></div>
-                            <div className={`${styles.resumenItem} ${styles.resumenTotal}`}>
-                                <span>(=) Neto Transferencias:</span>
-                                <strong>${formatCurrency(caja.saldo_calculado_transferencia)}</strong>
+
+                        <div className={styles.resumenFinanciero}>
+                            <div className={styles.resumenColumna}>
+                                <h4>Resumen de Efectivo</h4>
+                                <div className={styles.resumenItem}><span>(+) Monto Inicial:</span> <strong>${formatCurrency(caja.caja_monto_inicial)}</strong></div>
+                                <div className={styles.resumenItem}><span>(+) Ventas (Efectivo):</span> <strong>${formatCurrency(caja.total_ventas_efectivo)}</strong></div>
+                                <div className={styles.resumenItem}><span>(+) Ingresos Manuales:</span> <strong>${formatCurrency(caja.total_ingresos_manuales)}</strong></div>
+                                <div className={styles.resumenItem}><span>(-) Compras (Efectivo):</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_compras_efectivo)}</strong></div>
+                                <div className={styles.resumenItem}><span>(-) Egresos Manuales:</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_egresos_manuales)}</strong></div>
+                                <div className={`${styles.resumenItem} ${styles.resumenTotal}`}>
+                                    <span>(=) Efectivo Esperado:</span>
+                                    <strong>${formatCurrency(caja.saldo_calculado_efectivo)}</strong>
+                                </div>
+                            </div>
+                            <div className={styles.resumenColumna}>
+                                <h4>Resumen de Transferencias</h4>
+                                <div className={styles.resumenItem}><span>(+) Ventas (Transf.):</span> <strong>${formatCurrency(caja.total_ventas_transferencia)}</strong></div>
+                                <div className={styles.resumenItem}><span>(-) Compras (Transf.):</span> <strong className={styles.negativo}>-${formatCurrency(caja.total_compras_transferencia)}</strong></div>
+                                <div className={`${styles.resumenItem} ${styles.resumenTotal}`}>
+                                    <span>(=) Neto Transferencias:</span>
+                                    <strong>${formatCurrency(caja.saldo_calculado_transferencia)}</strong>
+                                </div>
                             </div>
                         </div>
+
+                        {!isReadOnly && (
+                            <button className={styles.cerrarCajaButton} onClick={handleCerrarClick}>
+                                Cerrar Caja
+                            </button>
+                        )}
                     </div>
 
-                    {!isReadOnly && (
-                        <button className={styles.cerrarCajaButton} onClick={onCerrarCaja}>
-                            Cerrar Caja
+                    <div className={styles.movimientosTabs}>
+                        <button
+                            className={activeTab === 'ingresos' ? styles.tabActivo : ''}
+                            onClick={() => setActiveTab('ingresos')}
+                        >
+                            Ingresos (Incl. Ventas)
                         </button>
-                    )}
-                </div>
+                        <button
+                            className={activeTab === 'egresos' ? styles.tabActivo : ''}
+                            onClick={() => setActiveTab('egresos')}
+                        >
+                            Egresos (Incl. Compras)
+                        </button>
+                    </div>
 
-                <div className={styles.movimientosTabs}>
-                    <button 
-                        className={activeTab === 'ingresos' ? styles.tabActivo : ''}
-                        onClick={() => setActiveTab('ingresos')}
-                    >
-                        Ingresos (Incl. Ventas)
-                    </button>
-                    <button 
-                        className={activeTab === 'egresos' ? styles.tabActivo : ''}
-                        onClick={() => setActiveTab('egresos')}
-                    >
-                        Egresos (Incl. Compras)
-                    </button>
-                </div>
-
-                <div className={styles.movimientosContent}>
-                    {loadingMov ? (
-                        <p>Cargando movimientos...</p>
-                    ) : (
-                        activeTab === 'ingresos' ? (
-                            <div className={styles.movimientoColumna}>
-                                {!isReadOnly && (
-                                    <button 
-                                        className={`${styles.movimientoAddButton} ${styles.saveButton}`} 
-                                        onClick={() => handleOpenMovimientoModal('ingreso')}
-                                    >
-                                        <IconoIngreso /> Registrar Ingreso Manual
-                                    </button>
-                                )}
-                                <div className={styles.movimientoList}>
-                                    <h4>Ingresos Registrados</h4>
-                                    {movimientos.ingresos.length === 0 ? (
-                                        <p className={styles.noMovimientos}>Sin ingresos.</p>
-                                    ) : (
-                                        movimientos.ingresos.map(mov => (
-                                            <div key={mov.id} className={`${styles.movimientoItem} ${styles.ingreso} ${mov.tipo.toLowerCase()}`}>
-                                                <span>{mov.descripcion} (<i>{mov.tipo}</i>)</span>
-                                                <strong>+${formatCurrency(mov.monto)}</strong>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
+                    <div className={styles.movimientosContent}>
+                        {loadingMov ? (
+                            <p>Cargando movimientos...</p>
                         ) : (
-                            <div className={styles.movimientoColumna}>
-                                {!isReadOnly && (
-                                    <button 
-                                        className={`${styles.movimientoAddButton} ${styles.deleteButton}`}
-                                        onClick={() => handleOpenMovimientoModal('egreso')}
-                                    >
-                                        <IconoEgreso /> Registrar Egreso Manual
-                                    </button>
-                                )}
-                                <div className={styles.movimientoList}>
-                                    <h4>Egresos Registrados</h4>
-                                    {movimientos.egresos.length === 0 ? (
-                                        <p className={styles.noMovimientos}>Sin egresos.</p>
-                                    ) : (
-                                        movimientos.egresos.map(mov => (
-                                            <div key={mov.id} className={`${styles.movimientoItem} ${styles.egreso} ${mov.tipo.toLowerCase()}`}>
-                                                <span>{mov.descripcion} (<i>{mov.tipo}</i>)</span>
-                                                <strong>-${formatCurrency(mov.monto)}</strong>
-                                            </div>
-                                        ))
+                            activeTab === 'ingresos' ? (
+                                <div className={styles.movimientoColumna}>
+                                    {!isReadOnly && (
+                                        <button
+                                            className={`${styles.movimientoAddButton} ${styles.saveButton}`}
+                                            onClick={() => handleOpenMovimientoModal('ingreso')}
+                                        >
+                                            <IconoIngreso /> Registrar Ingreso Manual
+                                        </button>
                                     )}
+                                    <div className={styles.movimientoList}>
+                                        <h4>Ingresos Registrados</h4>
+                                        {movimientos.ingresos.length === 0 ? (
+                                            <p className={styles.noMovimientos}>Sin ingresos.</p>
+                                        ) : (
+                                            movimientos.ingresos.map(mov => (
+                                                <div key={mov.id} className={`${styles.movimientoItem} ${styles.ingreso} ${mov.tipo.toLowerCase()}`}>
+                                                    <span>{mov.descripcion} (<i>{mov.tipo}</i>)</span>
+                                                    <strong>+${formatCurrency(mov.monto)}</strong>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    )}
+                            ) : (
+                                <div className={styles.movimientoColumna}>
+                                    {!isReadOnly && (
+                                        <button
+                                            className={`${styles.movimientoAddButton} ${styles.deleteButton}`}
+                                            onClick={() => handleOpenMovimientoModal('egreso')}
+                                        >
+                                            <IconoEgreso /> Registrar Egreso Manual
+                                        </button>
+                                    )}
+                                    <div className={styles.movimientoList}>
+                                        <h4>Egresos Registrados</h4>
+                                        {movimientos.egresos.length === 0 ? (
+                                            <p className={styles.noMovimientos}>Sin egresos.</p>
+                                        ) : (
+                                            movimientos.egresos.map(mov => (
+                                                <div key={mov.id} className={`${styles.movimientoItem} ${styles.egreso} ${mov.tipo.toLowerCase()}`}>
+                                                    <span>{mov.descripcion} (<i>{mov.tipo}</i>)</span>
+                                                    <strong>-${formatCurrency(mov.monto)}</strong>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            {isMovimientoModalOpen && !isReadOnly && (
-                <MovimientoModal
-                    tipo={modalTipo}
-                    cajaId={caja.id}
-                    onClose={() => setIsMovimientoModalOpen(false)}
-                    onMovimientoSuccess={handleMovimientoExitoso} 
-                />
-            )}
-        </>
+                {isMovimientoModalOpen && !isReadOnly && (
+                    <MovimientoModal
+                        tipo={modalTipo}
+                        cajaId={caja.id}
+                        onClose={() => setIsMovimientoModalOpen(false)}
+                        onMovimientoSuccess={handleMovimientoExitoso}
+                    />
+                )}
+            </div>
+        </div>
     );
 };
 
-// --- NUEVO: Componente Modal para Confirmar Cierre (Sin cambios) ---
+
+// --- Componente Modal para Confirmar Cierre (Sin cambios) ---
 const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     const [observacion, setObservacion] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleConfirmClick = async () => {
         setIsLoading(true);
-        // onConfirm es la función (handleConfirmarCierre) que hace el PATCH
-        await onConfirm(observacion); 
-        // El padre (CajasPage) se encargará de cerrar el modal
-        // y mostrar el Swal de éxito/error.
-        setIsLoading(false); 
+        await onConfirm(observacion);
+        setIsLoading(false);
     };
 
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
+                <div className={styles.closeButtonContainer}>
+                    <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
+
+                </div>
                 <h2>Confirmar Cierre de Caja</h2>
                 <p>Estás cerrando la <strong>Caja N°{caja.id}</strong>.</p>
                 <p>El sistema usará el siguiente cálculo de efectivo para el Saldo Final:</p>
-                
-                {/* Resumen financiero (reutiliza estilos de .resumenColumna) */}
+
                 <div className={styles.cierreResumenContainer}>
                     <div className={styles.resumenItem}><span>Monto Inicial:</span> <strong>${formatCurrency(caja.caja_monto_inicial)}</strong></div>
                     <div className={styles.resumenItem}><span>(+) Ventas (Efectivo):</span> <strong>${formatCurrency(caja.total_ventas_efectivo)}</strong></div>
@@ -409,8 +454,7 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
                     </div>
                 </div>
 
-                {/* Formulario de Observación */}
-                <form className={styles.formSimple} style={{marginTop: '1.5rem'}}>
+                <form className={styles.formSimple} style={{ marginTop: '1.5rem' }}>
                     <div className={styles.formGroup}>
                         <label>Observación (Opcional)</label>
                         <textarea
@@ -422,14 +466,14 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
                         />
                     </div>
                 </form>
-                
+
                 <div className={styles.buttons}>
                     <button type="button" onClick={onClose} className={styles.cancelButton} disabled={isLoading}>
                         Cancelar
                     </button>
-                    <button 
-                        type="button" 
-                        className={styles.deleteButton} // Usamos el estilo rojo de "eliminar"
+                    <button
+                        type="button"
+                        className={styles.deleteButton}
                         disabled={isLoading}
                         onClick={handleConfirmClick}
                     >
@@ -444,46 +488,50 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
 
 // --- Componente Principal de la Página de Cajas ---
 const CajasPage = () => {
-    const [cajaAbierta, setCajaAbierta] = useState(null); 
+    const [cajaAbierta, setCajaAbierta] = useState(null);
     const [cajasHistorial, setCajasHistorial] = useState([]);
-    const [cajaEnDetalle, setCajaEnDetalle] = useState(null); 
+
+    // --- ESTADO MODIFICADO ---
+    // Ya no es 'cajaEnDetalle', sino 'detalleModalCaja'
+    const [detalleModalCaja, setDetalleModalCaja] = useState(null);
+
     const [montoSugeridoApertura, setMontoSugeridoApertura] = useState(0);
     const [isPrimeraCaja, setIsPrimeraCaja] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
     const [loadingHistorial, setLoadingHistorial] = useState(true);
-    
+
     const [isCerrarModalOpen, setIsCerrarModalOpen] = useState(false);
     const [cajaParaCerrar, setCajaParaCerrar] = useState(null);
 
 
-    // --- 1. fetchData MODIFICADO ---
-    // - Sin dependencias (estable)
-    // - Devuelve los datos que cargó
+    // --- fetchData (Simplificado) ---
+    // - Ya no maneja 'cajaEnDetalle'
+    // - Sigue siendo 'estable' (sin dependencias)
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoadingStatus(true);
             setLoadingHistorial(true);
         }
-        
-        console.log("fetchData: Verificando estado de caja...");
-        let data = { estado: null, historial: [] }; // Objeto para devolver
+
+        console.log("fetchData: Verificando estado y historial...");
+        let data = { estado: null, historial: [] };
 
         try {
             const resEstado = await apiClient.get('/caja/estado/');
-            data.estado = resEstado.data; // Guardamos el estado
+            data.estado = resEstado.data;
 
             if (resEstado.data && resEstado.data.id && resEstado.data.caja_estado === true) {
-                setCajaAbierta(resEstado.data); 
+                setCajaAbierta(resEstado.data);
                 setIsPrimeraCaja(false);
             } else {
-                setCajaAbierta(null); 
+                setCajaAbierta(null);
                 const monto = resEstado.data.monto_sugerido_apertura || 0;
                 setMontoSugeridoApertura(monto);
-                setIsPrimeraCaja(monto === 0 && resEstado.data.caja_estado === false); 
+                setIsPrimeraCaja(monto === 0 && resEstado.data.caja_estado === false);
             }
-            
+
             const resHistorial = await apiClient.get('/caja/historial/');
-            data.historial = resHistorial.data; // Guardamos el historial
+            data.historial = resHistorial.data;
             setCajasHistorial(resHistorial.data);
 
         } catch (err) {
@@ -492,68 +540,53 @@ const CajasPage = () => {
         } finally {
             setLoadingStatus(false);
             setLoadingHistorial(false);
-            return data; // Devuelve los datos leídos
+            return data;
         }
-    }, []); // SIN DEPENDENCIAS
+    }, []);
 
-    // --- 2. useEffect (Carga inicial y Refresco) MODIFICADO ---
+    // --- useEffect (Carga inicial y Refresco) ---
+    // - Ya no actualiza el detalle, solo el historial
     useEffect(() => {
         fetchData(true); // Carga inicial
-        
+
         const intervalId = setInterval(() => {
             console.log("--- Refresco automático (15s) ---");
+            // El refresco ahora solo llama a fetchData.
+            // No interfiere con el modal de detalle.
+            fetchData(false);
+        }, 15000);
 
-            // Función anónima para poder usar async/await
-            const refrescarDatos = async () => {
-                const datosNuevos = await fetchData(false); // Llama al fetch
-
-                // Lógica de refresco de detalle (antes en fetchData)
-                if (cajaEnDetalle) {
-                    const cajaActualizada = datosNuevos.historial.find(c => c.id === cajaEnDetalle.id);
-                    if (cajaActualizada) {
-                        setCajaEnDetalle(cajaActualizada);
-                    } else {
-                        // Si la caja ya no se encuentra (ej. se borró), vuelve al historial
-                        setCajaEnDetalle(null);
-                    }
-                }
-            }
-            
-            refrescarDatos();
-
-        }, 15000); 
-        
         return () => clearInterval(intervalId);
-    }, [fetchData, cajaEnDetalle]); // Depende de fetchData y cajaEnDetalle
+    }, [fetchData]);
 
 
-    // --- 3. handleCajaAbierta MODIFICADO ---
+    // --- Handlers ---
+
+    // --- handleCajaAbierta (Corregido) ---
     const handleCajaAbierta = async (cajaNuevaIncompleta) => {
         console.log("Caja abierta, refrescando datos para obtener objeto completo...");
-        
+
         // 1. Poner la UI en estado de carga
         setLoadingStatus(true);
         setLoadingHistorial(true);
-        
+
         // 2. Llamar a fetchData(true) y ESPERAR que termine
-        //    (fetchData actualizará el historial y el estado de cajaAbierta)
         const datosNuevos = await fetchData(true);
-        
+
         // 3. 'datosNuevos.estado' AHORA tiene la caja abierta completa
         if (datosNuevos.estado && datosNuevos.estado.caja_estado === true) {
             console.log("Datos completos recibidos. Mostrando detalle.", datosNuevos.estado);
-            // 4. Poner el objeto COMPLETO en el estado de detalle
-            setCajaEnDetalle(datosNuevos.estado);
+            // 4. Poner el objeto COMPLETO en el estado del modal de detalle
+            setDetalleModalCaja(datosNuevos.estado);
         } else {
             console.error("FetchData no devolvió una caja abierta después de crearla.");
-            // Si falla, al menos el loading se quitará y mostrará el historial
         }
     };
 
-    // --- handleCerrarCaja (Sin cambios, abre el modal) ---
+    // --- handleCerrarCaja (Sin cambios, abre el modal de confirmación) ---
     const handleCerrarCaja = async () => {
         console.log("1. Botón 'Cerrar Caja' presionado. Verificando estado...");
-        
+
         Swal.fire({
             title: 'Verificando estado...',
             text: 'Consultando la base de datos...',
@@ -566,178 +599,161 @@ const CajasPage = () => {
         let cajaActualizada;
         try {
             const resEstado = await apiClient.get('/caja/estado/');
-            
+
             if (!resEstado.data || !resEstado.data.id || resEstado.data.caja_estado !== true) {
                 console.error("Error de desincronización: La API dice que la caja ya está cerrada.");
                 Swal.fire('Error', 'La caja ya ha sido cerrada. Refrescando...', 'error');
-                fetchData(true); 
-                setCajaEnDetalle(null);
+                fetchData(true);
                 return;
             }
-            
+
             cajaActualizada = resEstado.data;
             console.log("3. Estado verificado. Abriendo modal de cierre.");
-            
+
             setCajaParaCerrar(cajaActualizada);
             setIsCerrarModalOpen(true);
-            Swal.close(); 
+            Swal.close();
 
         } catch (err) {
             console.error("Error al verificar estado antes de cerrar:", err);
             Swal.fire('Error', 'No se pudo verificar el estado de la caja. Intente de nuevo.', 'error');
         }
     };
-    
+
     // --- handleConfirmarCierre (Sin cambios, lógica de PATCH) ---
     const handleConfirmarCierre = async (observacion) => {
         console.log("4. Usuario confirmó cierre. Enviando PATCH a /api/caja/cerrar/.");
-        
+
         try {
             const response = await apiClient.patch('/caja/cerrar/', {
-                caja_observacion: observacion || "" 
+                caja_observacion: observacion || ""
             });
-            
+
             const { caja_saldo_final } = response.data;
             console.log("5. Cierre exitoso en backend. Saldo final:", caja_saldo_final);
-            
+
             setIsCerrarModalOpen(false);
             setCajaParaCerrar(null);
 
             await Swal.fire(
-                'Caja Cerrada', 
-                `La caja se cerró con un Saldo Final (Efectivo) de: $${formatCurrency(caja_saldo_final)}`, 
+                'Caja Cerrada',
+                `La caja se cerró con un Saldo Final (Efectivo) de: $${formatCurrency(caja_saldo_final)}`,
                 'success'
             );
-            
-            fetchData(true); 
-            setCajaEnDetalle(null); 
-        
+
+            fetchData(true);
+
         } catch (err) {
             console.error("Error al *confirmar* el cierre:", err.response?.data || err);
             const errorMsg = err.response?.data?.detail || "No se pudo cerrar la caja.";
-            
+
             Swal.fire('Error', errorMsg, 'error');
-            
+
             if (err.response?.status === 400) {
-                fetchData(true); 
-                setIsCerrarModalOpen(false); 
+                fetchData(true);
+                setIsCerrarModalOpen(false);
                 setCajaParaCerrar(null);
-                setCajaEnDetalle(null); 
             }
         }
     };
-    
-    // --- handleViewDetalle (Sin cambios) ---
-    const handleViewDetalle = (caja) => {
-        setCajaEnDetalle(caja);
-    };
-    
-    // --- handleVolverAlHistorial (Sin cambios) ---
-    const handleVolverAlHistorial = () => {
-        setCajaEnDetalle(null);
-    }
 
-    // --- Renderizado ---
+    // --- handleViewDetalle (AHORA ABRE EL MODAL) ---
+    const handleViewDetalle = (caja) => {
+        setDetalleModalCaja(caja);
+    };
+
 
     if (loadingStatus || loadingHistorial) {
         return <div className={styles.loading}>Cargando Cajas...</div>;
     }
 
+    // --- Renderizado (Ahora solo muestra el historial) ---
     return (
         <div className={styles.cajaContainer}>
-            
-            {cajaEnDetalle ? (
-                // --- VISTA DE DETALLE ---
-                <>
-                    <button 
-                        className={styles.viewButton} 
-                        style={{ marginBottom: '1.5rem', fontWeight: 500, fontSize: '1rem', padding: '0.6rem 1rem' }}
-                        onClick={handleVolverAlHistorial}
-                    >
-                        &larr; Volver al Historial
-                    </button>
-                    <CajaDetalleView 
-                        caja={cajaEnDetalle} 
-                        onCerrarCaja={handleCerrarCaja} 
-                        onRefreshData={() => fetchData(false)}
-                    />
-                </>
-            ) : (
-                // --- VISTA DE HISTORIAL ---
-                <div className={styles.historialContainer}>
-                    <div className={styles.toolbar}>
-                        {!cajaAbierta && (
-                            <AbrirCajaForm 
-                                onCajaAbierta={handleCajaAbierta}
-                                montoSugerido={montoSugeridoApertura}
-                                esPrimeraCaja={isPrimeraCaja}
-                            />
-                        )}
-                        {cajaAbierta && (
-                            <span className={styles.cajaAbiertaInfo}>
-                                Hay una caja abierta (N°{cajaAbierta.id}).
-                            </span>
-                        )}
-                    </div>
 
-                    <table className={styles.table}>
-                        <thead>
+            <div className={styles.historialContainer}>
+                <div className={styles.toolbar}>
+                    {!cajaAbierta && (
+                        <AbrirCajaForm
+                            onCajaAbierta={handleCajaAbierta}
+                            montoSugerido={montoSugeridoApertura}
+                            esPrimeraCaja={isPrimeraCaja}
+                        />
+                    )}
+                    {cajaAbierta && (
+                        <span className={styles.cajaAbiertaInfo}>
+                            Hay una caja abierta (N°{cajaAbierta.id}).
+                        </span>
+                    )}
+                </div>
+
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Número de Caja</th>
+                            <th>Fecha y Hora de Apertura</th>
+                            <th>Fecha y Hora de Cierre</th>
+                            <th>Estado</th>
+                            <th>Monto Inicial</th>
+                            <th>Saldo Final (Efectivo)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {cajasHistorial.length === 0 ? (
                             <tr>
-                                <th>Número de Caja</th>
-                                <th>Fecha y Hora de Apertura</th>
-                                <th>Fecha y Hora de Cierre</th>
-                                <th>Estado</th>
-                                <th>Monto Inicial</th>
-                                <th>Saldo Final (Efectivo)</th>
-                                <th>Acciones</th>
+                                <td colSpan={7} style={{ textAlign: 'center' }}>No hay historial de cajas.</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {cajasHistorial.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} style={{ textAlign: 'center' }}>No hay historial de cajas.</td>
-                                </tr>
-                            ) : (
-                                cajasHistorial.map(caja => (
-                                    <tr key={caja.id} className={caja.caja_estado ? styles.filaAbierta : styles.filaCerrada}>
-                                        <td>Caja N°{caja.id}</td>
-                                        <td>{new Date(caja.caja_fecha_hora_apertura).toLocaleString()}</td>
-                                        <td>{caja.caja_fecha_hora_cierre ? new Date(caja.caja_fecha_hora_cierre).toLocaleString() : '-'}</td>
-                                        <td>
-                                            <span className={`${styles.estadoBadge} ${caja.caja_estado ? styles.estadoAbierta : styles.estadoCerrada}`}>
-                                                {caja.caja_estado ? 'Abierta' : 'Cerrada'}
-                                            </span>
-                                        </td>
-                                        <td>${formatCurrency(caja.caja_monto_inicial)}</td>
-                                        <td>{caja.caja_saldo_final != null ? `$${formatCurrency(caja.caja_saldo_final)}` : '-'}</td>
-                                        <td className={styles.actions}>
-                                            {caja.caja_estado ? (
-                                                <>
-                                                    <button className={styles.viewButton} onClick={() => handleViewDetalle(caja)}>
-                                                        Ver Detalles
-                                                    </button>
-                                                    <button 
-                                                        className={styles.cerrarButtonSmall} 
-                                                        onClick={handleCerrarCaja}
-                                                    >
-                                                        Cerrar Caja
-                                                    </button>
-                                                </>
-                                            ) : (
+                        ) : (
+                            cajasHistorial.map(caja => (
+                                <tr key={caja.id} className={caja.caja_estado ? styles.filaAbierta : styles.filaCerrada}>
+                                    <td>Caja N°{caja.id}</td>
+                                    <td>{new Date(caja.caja_fecha_hora_apertura).toLocaleString()}</td>
+                                    <td>{caja.caja_fecha_hora_cierre ? new Date(caja.caja_fecha_hora_cierre).toLocaleString() : '-'}</td>
+                                    <td>
+                                        <span className={`${styles.estadoBadge} ${caja.caja_estado ? styles.estadoAbierta : styles.estadoCerrada}`}>
+                                            {caja.caja_estado ? 'Abierta' : 'Cerrada'}
+                                        </span>
+                                    </td>
+                                    <td>${formatCurrency(caja.caja_monto_inicial)}</td>
+                                    <td>{caja.caja_saldo_final != null ? `$${formatCurrency(caja.caja_saldo_final)}` : '-'}</td>
+                                    <td className={styles.actions}>
+                                        {caja.caja_estado ? (
+                                            <>
                                                 <button className={styles.viewButton} onClick={() => handleViewDetalle(caja)}>
                                                     Ver Detalles
                                                 </button>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                <button
+                                                    className={styles.cerrarButtonSmall}
+                                                    onClick={handleCerrarCaja}
+                                                >
+                                                    Cerrar Caja
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button className={styles.viewButton} onClick={() => handleViewDetalle(caja)}>
+                                                Ver Detalles
+                                            </button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* --- RENDERIZADO DEL NUEVO MODAL DE DETALLE --- */}
+            {detalleModalCaja && (
+                <CajaDetalleModal
+                    cajaInicial={detalleModalCaja}
+                    onClose={() => setDetalleModalCaja(null)}
+                    onCerrarCajaClick={handleCerrarCaja}
+                    onHistorialRefresh={() => fetchData(false)} // Le dice al padre que refresque el historial
+                />
             )}
-            
-            {/* --- RENDERIZADO DEL NUEVO MODAL DE CIERRE --- */}
+
+            {/* --- RENDERIZADO DEL MODAL DE CIERRE (Sin cambios) --- */}
             {isCerrarModalOpen && cajaParaCerrar && (
                 <CerrarCajaModal
                     caja={cajaParaCerrar}
@@ -754,3 +770,4 @@ const CajasPage = () => {
 };
 
 export default CajasPage;
+

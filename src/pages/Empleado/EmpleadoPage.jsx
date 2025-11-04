@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import apiClient from '../../services/api';
 import styles from './EmpleadoPage.module.css';
 import Swal from 'sweetalert2';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. IMPORTAR useNavigate
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api';
 import styles from './VentasPage.module.css';
 import Swal from 'sweetalert2';
@@ -78,10 +78,10 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                             <p>No se encontraron detalles de pedido para esta venta.</p>
                         )}
                     </div>
-                    <div className={styles.detalleTotal}>
-                        <strong>Total:</strong>
-                        <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
-                    </div>
+                       <div className={styles.detalleTotal}>
+                           <strong>Total:</strong>
+                           <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
+                       </div>
                 </div>
 
                 <div className={styles.modalSection}>
@@ -145,7 +145,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                             onClick={handleSaveClick}
                             className={styles.saveButton}
                             disabled={isLoading}
-                            á   >
+                        >
                             {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                         </button>
                     )}
@@ -157,36 +157,39 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
 };
 
 
-// --- Componente Principal VentasPage (Actualizado con Filtros) ---
+// --- Componente Principal VentasPage ---
 const VentasPage = () => {
     const [allVentas, setAllVentas] = useState([]);
     const [estadosVenta, setEstadosVenta] = useState([]);
-    const [loading, setLoading] = useState(true); // Este 'loading' es para los datos de ventas
+    const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
 
-    // --- 2. NUEVOS ESTADOS PARA VERIFICACIÓN ---
     const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
     const navigate = useNavigate();
-    // --- FIN DE NUEVOS ESTADOS ---
 
-    // --- ESTADOS PARA LOS INPUTS DE FILTRO (Sin cambios) ---
-    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado');
+    // --- ESTADOS PARA LOS INPUTS DE FILTRO ---
+    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado'); 
     const [inputEmpleadoSearch, setInputEmpleadoSearch] = useState('');
     const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
+    // --- NUEVOS ESTADOS DE INPUT ---
+    const [inputIdVenta, setInputIdVenta] = useState('');
+    const [inputIdPedido, setInputIdPedido] = useState('');
 
-    // --- ESTADO PARA LOS FILTROS APLICADOS (Sin cambios) ---
+    // --- ESTADO PARA LOS FILTROS APLICADOS (MODIFICADO) ---
     const [activeFilters, setActiveFilters] = useState({
         status: 'No Pagado',
         empleado: '',
         desde: '',
         hasta: '',
+        idVenta: '', // <-- NUEVO
+        idPedido: '' // <-- NUEVO
     });
 
     const STATUS_FILTERS = useMemo(() => ['No Pagado', 'Pagado', 'Cancelado', 'Todos'], []);
 
-    // Función de carga (Sin cambios)
+    // Función de carga (sin cambios)
     const fetchVentasYEstados = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) setLoading(true);
         try {
@@ -209,16 +212,14 @@ const VentasPage = () => {
     }, []);
 
 
-    // --- 3. NUEVO useEffect PARA VERIFICAR LA CAJA ---
+    // useEffect para verificar la caja (sin cambios)
     useEffect(() => {
         const checkCajaStatus = async () => {
             try {
                 const res = await apiClient.get('/caja/estado/');
-                // Si la caja está abierta (estado es true)
                 if (res.data && res.data.caja_estado === true) {
-                    setIsVerifyingCaja(false); // Permite la carga de la página
+                    setIsVerifyingCaja(false); 
                 } else {
-                    // Si la caja está cerrada
                     Swal.fire({
                         title: 'Caja Cerrada',
                         text: 'Para entrar a esta seccion primero debes abrir una caja',
@@ -228,12 +229,11 @@ const VentasPage = () => {
                         allowEscapeKey: false,
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            navigate('/cajas'); // Redirige a Cajas
+                            navigate('/cajas'); 
                         }
                     });
                 }
             } catch (err) {
-                // Error de red (ej. API caída)
                 console.error("Error al verificar estado de caja:", err);
                 Swal.fire({
                     title: 'Error de Conexión',
@@ -243,63 +243,84 @@ const VentasPage = () => {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                 }).then(() => {
-                    navigate('/inicio'); // Redirige a Inicio
+                    navigate('/inicio'); 
                 });
             }
         };
 
         checkCajaStatus();
     }, [navigate]);
-    // --- FIN DEL NUEVO useEffect ---
 
 
-    // 4. MODIFICACIÓN Carga inicial (depende de la verificación)
+    // Carga inicial (depende de la verificación) (sin cambios)
     useEffect(() => {
-        // Solo carga las ventas si la verificación de caja fue exitosa
         if (!isVerifyingCaja) {
             fetchVentasYEstados(true);
         }
-    }, [fetchVentasYEstados, isVerifyingCaja]); // Añadida dependencia
+    }, [fetchVentasYEstados, isVerifyingCaja]); 
 
 
-    // --- LÓGICA DE FILTRADO COMBINADO (Sin cambios) ---
+    // --- LÓGICA DE FILTRADO COMBINADO (MODIFICADA) ---
     const filteredVentas = useMemo(() => {
         const termEmpleado = activeFilters.empleado.toLowerCase().trim();
+        // --- NUEVO: Obtener términos de ID ---
+        const termIdVenta = activeFilters.idVenta.trim();
+        const termIdPedido = activeFilters.idPedido.trim();
+
         return allVentas.filter(venta => {
+            // 1. Filtro por Estado
             if (activeFilters.status !== 'Todos' && venta.estado_venta?.estado_venta_nombre !== activeFilters.status) {
                 return false;
             }
+            // 2. Filtro por Empleado
             if (termEmpleado) {
                 const nombreCompleto = `${venta.empleado?.first_name || ''} ${venta.empleado?.last_name || ''}`.toLowerCase().trim();
                 if (!nombreCompleto.includes(termEmpleado)) {
                     return false;
                 }
             }
+            // 3. Filtro por Fecha "Desde"
             if (activeFilters.desde) {
                 try {
-                    const fechaDesde = new Date(activeFilters.desde);
-                    fechaDesde.setHours(0, 0, 0, 0);
+                    const fechaDesde = new Date(activeFilters.desde + 'T00:00:00'); // Asegurar inicio del día
                     const fechaVenta = new Date(venta.venta_fecha_hora);
                     if (fechaVenta < fechaDesde) {
                         return false;
                     }
                 } catch (e) { console.warn("Fecha 'desde' inválida:", activeFilters.desde); }
             }
+            // 4. Filtro por Fecha "Hasta"
             if (activeFilters.hasta) {
                 try {
-                    const fechaHasta = new Date(activeFilters.hasta);
-                    fechaHasta.setHours(23, 59, 59, 999);
+                    const fechaHasta = new Date(activeFilters.hasta + 'T23:59:59'); // Asegurar fin del día
                     const fechaVenta = new Date(venta.venta_fecha_hora);
                     if (fechaVenta > fechaHasta) {
                         return false;
                     }
                 } catch (e) { console.warn("Fecha 'hasta' inválida:", activeFilters.hasta); }
             }
+
+            // --- NUEVO: 5. Filtro por ID Venta ---
+            if (termIdVenta) {
+                // Comparamos como string para que '12' coincida con '123'
+                if (!String(venta.id).startsWith(termIdVenta)) {
+                    return false;
+                }
+            }
+
+            // --- NUEVO: 6. Filtro por ID Pedido ---
+            if (termIdPedido) {
+                // Usamos optional chaining (?.), convertimos a string
+                if (!String(venta.pedido?.id || '').startsWith(termIdPedido)) {
+                    return false;
+                }
+            }
+
             return true;
         });
-    }, [allVentas, activeFilters]);
+    }, [allVentas, activeFilters]); 
 
-    // --- Handlers para filtros (Sin cambios) ---
+    // --- Handlers para filtros ---
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         setInputDateRange(prevRange => ({
@@ -310,27 +331,44 @@ const VentasPage = () => {
 
     const handleEmpleadoSearchChange = (e) => {
         setInputEmpleadoSearch(e.target.value);
-
     };
-
+    
+    // --- NUEVO: Handlers para inputs de ID ---
+    const handleIdVentaChange = (e) => {
+        setInputIdVenta(e.target.value);
+    };
+    const handleIdPedidoChange = (e) => {
+        setInputIdPedido(e.target.value);
+    };
+    
+    // --- handleAplicarFiltros (MODIFICADO) ---
     const handleAplicarFiltros = () => {
         setActiveFilters({
             status: inputStatusFilter,
             empleado: inputEmpleadoSearch,
             desde: inputDateRange.desde,
-            hasta: inputDateRange.hasta
+            hasta: inputDateRange.hasta,
+            idVenta: inputIdVenta,   // <-- NUEVO
+            idPedido: inputIdPedido  // <-- NUEVO
         });
     };
 
+    // --- handleLimpiarFiltros (MODIFICADO) ---
     const handleLimpiarFiltros = () => {
+        // Resetear inputs
         setInputStatusFilter('No Pagado');
         setInputEmpleadoSearch('');
         setInputDateRange({ desde: '', hasta: '' });
+        setInputIdVenta('');   // <-- NUEVO
+        setInputIdPedido('');  // <-- NUEVO
+        // Resetear filtros activos
         setActiveFilters({
             status: 'No Pagado',
             empleado: '',
             desde: '',
-            hasta: ''
+            hasta: '',
+            idVenta: '',   // <-- NUEVO
+            idPedido: '' // <-- NUEVO
         });
     };
 
@@ -348,24 +386,22 @@ const VentasPage = () => {
         fetchVentasYEstados(false);
     };
 
-    // --- 5. NUEVO RENDERIZADO DE VERIFICACIÓN ---
+    // --- Renderizado de Verificación (sin cambios) ---
     if (isVerifyingCaja) {
-        // Muestra un loader simple mientras verifica la caja
         return (
             <div className={styles.ventasContainer} style={{ padding: '2rem', textAlign: 'center' }}>
                 Verificando estado de la caja...
             </div>
         );
     }
-    // --- FIN DE NUEVO RENDERIZADO ---
-
-
-    // --- Renderizado (Sin cambios en el JSX, solo se muestra si isVerifyingCaja es false) ---
+    
+    // --- Renderizado Principal (MODIFICADO CON NUEVOS INPUTS) ---
     return (
         <div className={styles.ventasContainer}>
             <h1>Gestión de Ventas</h1>
-
+            
             <div className={styles.filtrosContainer}>
+                {/* Filtros de Estado */}
                 <div className={styles.filtroGrupo}>
                     <label>Estado Venta:</label>
                     <div className={styles.botonesFiltroEstado}>
@@ -381,48 +417,79 @@ const VentasPage = () => {
                     </div>
                 </div>
 
+                {/* --- NUEVO: Filtro por ID Venta --- */}
+                <div className={styles.filtroGrupo}>
+                    <label htmlFor="idVentaSearch">ID Venta:</label>
+                    <input
+                        type="number" // 'number' para mostrar teclado numérico en móviles
+                        id="idVentaSearch"
+                        placeholder="Buscar por ID Venta..."
+                        value={inputIdVenta}
+                        onChange={handleIdVentaChange}
+                        className={styles.filtroInput}
+                    />
+                </div>
+
+                {/* --- NUEVO: Filtro por ID Pedido --- */}
+                <div className={styles.filtroGrupo}>
+                    <label htmlFor="idPedidoSearch">ID Pedido:</label>
+                    <input
+                        type="number"
+                        id="idPedidoSearch"
+                        placeholder="Buscar por ID Pedido..."
+                        value={inputIdPedido}
+                        onChange={handleIdPedidoChange}
+                        className={styles.filtroInput}
+                    />
+                </div>
+                
+                {/* Filtro por Empleado */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="empleadoSearch">Empleado:</label>
                     <input
                         type="text"
-                        section id="empleadoSearch"
+                        id="empleadoSearch"
                         placeholder="Nombre o Apellido..."
-                        value={inputEmpleadoSearch}
+                        value={inputEmpleadoSearch} 
                         onChange={handleEmpleadoSearchChange}
                         className={styles.filtroInput}
                     />
                 </div>
 
+                {/* Filtros de Fecha */}
                 <div className={styles.filtroGrupo}>
-                    <label>Fecha:</label>
-                    <div className={styles.inputsFecha}>
-                        <label htmlFor="desde">Desde:</label>
-                        <input
-                            type="date"
-                            id="desde"
-                            name="desde"
-                            value={inputDateRange.desde}
-                            á onChange={handleDateChange}
-                            className={styles.inputFecha}
-                        />
-                        <label htmlFor="hasta">Hasta:</label>
-                        <input
-                            type="date"
-                            id="hasta"
-                            name="hasta"
-                            value={inputDateRange.hasta}
-                            onChange={handleDateChange}
-                            className={styles.inputFecha}
-                        />
-                    </div>
+                     <label>Fecha:</label>
+                     <div className={styles.inputsFecha}>
+                         <label htmlFor="desde">Desde:</label>
+                         <input
+                             type="date"
+                             id="desde"
+                             name="desde"
+                             value={inputDateRange.desde} 
+                             onChange={handleDateChange}
+                             className={styles.inputFecha}
+                         />
+                         <label htmlFor="hasta">Hasta:</label>
+                         <input
+                             type="date"
+                             id="hasta"
+                             name="hasta"
+                             value={inputDateRange.hasta} 
+                             onChange={handleDateChange}
+                             className={styles.inputFecha}
+                         />
+                     </div>
                 </div>
 
+                {/* Botones de Acción de Filtro */}
                 <div className={styles.filtroAcciones}>
                     <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
-
+            
+            {/* --- Resto del renderizado (Tabla, etc.) sin cambios --- */}
+            
             <div className={styles.tableContainer}>
                 {loading ? (
                     <p>Cargando ventas...</p>

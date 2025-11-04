@@ -11,23 +11,27 @@ const METODOS_PAGO = [
     { value: 'transferencia', label: 'Transferencia Bancaria' }
 ];
 
-// --- NUEVO: Helper para unidades ---
+// --- Helper para unidades (MODIFICADO) ---
 const getUnidadesDeCompra = (unidadBase) => {
     if (unidadBase === 'Gramos') {
         return ['Gramos', 'Kg'];
     }
     if (unidadBase === 'Unidad') {
-        return ['Unidad', 'Docena'];
+        // --- CORRECCIÓN AQUÍ ---
+        return ['Unidad', 'Docena', 'Fardo (x6)']; // Añadido 'Fardo (x6)'
     }
     // Añadir más conversiones si es necesario (ej: Litro, Ml)
     return [unidadBase]; // Devuelve solo la base si no hay conversión
 };
 
-// --- NUEVO: Helper de conversión ---
+// --- Helper de conversión (MODIFICADO) ---
 const getConversionFactor = (unidadCompra, unidadBase) => {
     if (unidadCompra === unidadBase) return 1.0;
     if (unidadBase === 'Gramos' && unidadCompra === 'Kg') return 1000;
     if (unidadBase === 'Unidad' && unidadCompra === 'Docena') return 12;
+    // --- CORRECCIÓN AQUÍ ---
+    if (unidadBase === 'Unidad' && unidadCompra === 'Fardo (x6)') return 6; // Añadida la conversión de Fardo
+    
     // Añadir más
     return 1.0; // Fallback
 };
@@ -36,7 +40,6 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
     const [proveedores, setProveedores] = useState([]); // Lista para el modal de gestión
     const [loading, setLoading] = useState(true); // Carga inicial (proveedores)
     
-    // --- ESTADO MODIFICADO ---
     const [selectedProveedor, setSelectedProveedor] = useState(null); // Ahora guarda el OBJETO
     const [selectedMetodoPago, setSelectedMetodoPago] = useState('efectivo');
     
@@ -106,9 +109,6 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
         setDetalles(prevDetalles => 
             prevDetalles.map(item => {
                 if (item.id !== id) return item;
-
-                // Si cambia la unidad, mantiene el precio (que ahora es por la nueva unidad)
-                // Si cambia cantidad o precio, solo actualiza ese valor
                 return { ...item, [name]: value };
             })
         );
@@ -116,9 +116,7 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
 
     // --- Manejador del CRUD de Proveedor (Actualizado) ---
     const handleProveedorManagerSuccess = (proveedor) => {
-        // Actualiza la lista local por si se editó o creó uno nuevo
         fetchProveedores(); 
-        // Selecciona el proveedor (objeto)
         setSelectedProveedor(proveedor);
         setIsProveedorModalOpen(false);
     };
@@ -152,13 +150,11 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
             // --- LÓGICA DE CONVERSIÓN ---
             const factor = getConversionFactor(unidad_compra, insumo_unidad_base);
             
-            // Cantidad a guardar en BD (en unidad base)
-            const backend_cantidad = numCantidad * factor;
-            // Precio a guardar en BD (precio por unidad base)
-            // Manejar división por cero si el factor es 0 (aunque no debería)
-            const backend_precio_unitario = factor > 0 ? (numPrecio / factor) : 0; 
+            const backend_cantidad_raw = numCantidad * factor;
+            const backend_precio_unitario_raw = factor > 0 ? (numPrecio / factor) : 0; 
             // --- FIN LÓGICA ---
-
+            const backend_cantidad = Math.round(backend_cantidad_raw * 100) / 100;
+            const backend_precio_unitario = Math.round(backend_precio_unitario_raw * 100) / 100;
             detallesValidos.push({
                 insumo: insumo,
                 detalle_compra_cantidad: backend_cantidad,
@@ -205,7 +201,6 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
                             <div className={styles.formGrid}>
                                 <div className={styles.formGroup}>
                                     <label htmlFor="proveedor">Proveedor</label>
-                                    {/* --- CAMBIO: Buscador de Proveedor --- */}
                                     <div className={styles.inputGroup}>
                                         <div className={styles.proveedorDisplay}>
                                             {selectedProveedor ? selectedProveedor.proveedor_nombre : "Ningún proveedor seleccionado"}
@@ -346,9 +341,6 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
                 <InsumoSearchModal
                     onClose={() => setIsInsumoModalOpen(false)}
                     onInsumoSelected={handleInsumoSelected}
-                    // Pasamos los insumos ya cargados para no recargarlos
-                    // (Asumiendo que InsumoSearchModal acepta esta prop)
-                    // Si no, InsumoSearchModal cargará los suyos
                 />
             )}
 
@@ -356,8 +348,6 @@ const AddCompraModal = ({ onClose, onSuccess }) => {
                 <ProveedorManagerModal
                     onClose={() => setIsProveedorModalOpen(false)}
                     onProveedorSeleccionado={handleProveedorManagerSuccess}
-                    // Pasamos los proveedores ya cargados
-                    // (Asumiendo que ProveedorManagerModal acepta esta prop)
                     initialProveedores={proveedores} 
                 />
             )}

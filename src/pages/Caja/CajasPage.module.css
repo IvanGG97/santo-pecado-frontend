@@ -634,3 +634,57 @@ input:-webkit-autofill:active {
     cursor: not-allowed;
 }
 
+.modalDetalleLg {
+    max-width: 900px; /* Más ancho que el modal estándar */
+}
+
+/* El .detalleContainer ahora vive dentro de un modal, 
+   quitamos los bordes/sombras que ya pone el .modalContent */
+.modalDetalleLg .detalleContainer {
+    box-shadow: none;
+    border-radius: 0;
+    /* Quitamos el fondo, ya lo pone el modalContent */
+    background-color: transparent; 
+}
+
+/* El header del detalle dentro del modal */
+.modalDetalleLg .detalleHeader {
+    padding-top: 0; /* Menos padding arriba porque ya está el 'x' */
+}
+.closeButtonModalContainer{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.closeButtonModal {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.closeButtonModal:hover {
+    color: #fff;
+}
+
+.closeButtonContainer{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+.closeButton:hover {
+    color: #fff;
+}
