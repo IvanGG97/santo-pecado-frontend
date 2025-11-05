@@ -12,12 +12,13 @@ import ActivateAccountPage from './pages/ActivateAccount/ActivateAccountPage';
 import RequestPasswordResetPage from './pages/RequestPasswordReset/RequestPasswordResetPage';
 import ResetPasswordPage from './pages/ResetPassword/ResetPasswordPage';
 import StockPage from './pages/Stock/StockPage';
-import PedidosPage from './pages/Pedidos/PedidosPage'; // 1. Importamos la nueva página de Pedidos
+import PedidosPage from './pages/Pedidos/PedidosPage';
 import CocinaPage from './pages/Cocina/CocinaPage';
 import VentasPage from './pages/Ventas/VentasPage';
 import ComprasPage from './pages/Compras/ComprasPage';
 import CajasPage from './pages/Caja/CajasPage';
-
+import CartaPage from './pages/Carta/CartaPage';
+import BienvenidoPage from './pages/Bienvenido/BienvenidoPage';
 
 // Utilidades
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
@@ -36,16 +37,42 @@ function App() {
           <Route path="/restablecer-contrasena/:uidb64/:token" element={<ResetPasswordPage />} />
           <Route path="/" element={<Navigate to="/inicio" />} />
 
+          
           {/* --- RUTAS PROTEGIDAS CON LAYOUT --- */}
           <Route
             element={
-              <ProtectedRoute>
+              <ProtectedRoute> {/* <-- Esto protege a TODOS los hijos (requiere login) */}
                 <MainLayout />
               </ProtectedRoute>
             }
           >
-            {/* RUTA PARA TODOS LOS USUARIOS LOGUEADOS */}
+            {/* --- RUTA /inicio MODIFICADA ---
+              Ahora es el "router de roles". Todos los usuarios logueados 
+              llegan aquí, e InicioPage decide qué mostrar o a dónde redirigir.
+            */}
             <Route path="/inicio" element={<InicioPage />} />
+
+            {/* --- NUEVAS RUTAS PARA CLIENTES --- */}
+            <Route
+              path="/carta"
+              element={
+                // Todos los roles pueden ver la carta
+                <ProtectedRoute allowedRoles={['Cliente', 'Admin', 'Encargado/Cajero', 'Cocina']}>
+                  <CartaPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bienvenido"
+              element={
+                // Solo los clientes ven la bienvenida
+                <ProtectedRoute allowedRoles={['Cliente']}>
+                  <BienvenidoPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* --- RUTAS DE STAFF --- */}
 
             {/* RUTA SOLO PARA ADMINS */}
             <Route
@@ -76,8 +103,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* 2. AÑADIMOS LA NUEVA RUTA PARA PEDIDOS */}
+            
             <Route
               path="/pedidos"
               element={
@@ -89,7 +115,8 @@ function App() {
             <Route
               path="/cocina"
               element={
-                <ProtectedRoute roles={['Cocina', 'Admin', 'Encargado/Cajero']}>
+                // Corregido: "roles" debe ser "allowedRoles" (asumiendo tu componente)
+                <ProtectedRoute allowedRoles={['Cocina', 'Admin', 'Encargado/Cajero']}>
                   <CocinaPage />
                 </ProtectedRoute>
               }
@@ -128,4 +155,3 @@ function App() {
 }
 
 export default App;
-

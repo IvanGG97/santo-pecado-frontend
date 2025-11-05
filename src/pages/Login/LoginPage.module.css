@@ -110,3 +110,35 @@
     padding: 0;
 }
 
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Ajusta el padding del input para que el texto no se oculte 
+detrás del icono. Asumiendo que el icono tiene ~40px de espacio.
+*/
+.passwordWrapper .input {
+    /* Asumiendo que .input ya tiene padding, le añadimos espacio a la derecha */
+    padding-right: 40px; 
+}
+
+/* Botón del icono (ojo) */
+.passwordToggleIcon {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* 10px desde la derecha */
+    transform: translateY(-50%); /* Centrado vertical perfecto */
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888; /* Color gris para el icono */
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.passwordToggleIcon:hover {
+    color: #fbfbfb; /* Color más oscuro al pasar el mouse */
+}

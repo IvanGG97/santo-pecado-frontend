@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import styles from './LoginPage.module.css'; 
+import { Eye, EyeOff } from 'lucide-react'; // 1. IMPORTAMOS LOS ICONOS
 
 export default function LoginPage() {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm({ mode: 'onChange' });
@@ -10,6 +11,9 @@ export default function LoginPage() {
     const navigate = useNavigate();
     const location = useLocation();
     const [apiError, setApiError] = useState('');
+
+    // --- 2. AÑADIMOS EL ESTADO PARA VISIBILIDAD ---
+    const [showPassword, setShowPassword] = useState(false);
 
     const from = location.state?.from?.pathname || "/inicio";
 
@@ -20,10 +24,13 @@ export default function LoginPage() {
         if (result.success) {
             navigate(from, { replace: true });
         } else {
-            // Ahora, el 'result.error' contendrá el mensaje específico del backend
-            // ya sea "Credenciales inválidas..." o "La cuenta ha sido bloqueada..."
             setApiError(result.error);
         }
+    };
+
+    // --- 3. FUNCIÓN PARA CAMBIAR LA VISIBILIDAD ---
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
     return (
@@ -38,16 +45,34 @@ export default function LoginPage() {
                 <input
                     className={styles.input} type="text" placeholder="Tu nombre de usuario"
                     {...register("username", { required: "El usuario es obligatorio" })}
-                    disabled={loading} // El campo solo se deshabilita mientras carga
+                    disabled={loading} 
                 />
                 {errors.username && <p className={styles.error}>{errors.username.message}</p>}
 
                 <label className={styles.label}>Contraseña</label>
-                <input
-                    className={styles.input} type="password" placeholder="Tu contraseña"
-                    {...register("password", { required: "La contraseña es obligatoria" })}
-                    disabled={loading} // El campo solo se deshabilita mientras carga
-                />
+
+                {/* --- 4. SECCIÓN DE CONTRASEÑA MODIFICADA --- */}
+                <div className={styles.passwordWrapper}>
+                    <input
+                        className={styles.input} 
+                        // El tipo ahora es dinámico
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Tu contraseña"
+                        {...register("password", { required: "La contraseña es obligatoria" })}
+                        disabled={loading} 
+                    />
+                    {/* Botón para cambiar visibilidad */}
+                    <button 
+                        type="button" 
+                        className={styles.passwordToggleIcon} 
+                        onClick={togglePasswordVisibility}
+                        tabIndex="-1" // Evita que el botón sea enfocable con Tab
+                    >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
+                {/* --- FIN DE LA MODIFICACIÓN --- */}
+
                 {errors.password && <p className={styles.error}>{errors.password.message}</p>}
 
                 <div className={styles.forgotPassword}>
@@ -56,7 +81,6 @@ export default function LoginPage() {
                     </Link>
                 </div>
 
-                {/* Mostramos el error que venga de la API directamente */}
                 {apiError && <p className={styles.error}>{apiError}</p>}
 
                 <button
@@ -77,4 +101,3 @@ export default function LoginPage() {
         </div>
     );
 }
-
