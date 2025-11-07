@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import apiClient from '../../services/api';
 // Asumiendo que usa los estilos de SelectClienteModal como dijimos
-import styles from '../SelectClienteModal/SelectClienteModal.module.css'; 
+import styles from '../SelectClienteModal/SelectClienteModal.module.css';
 
 // Hook de Debounce
 const useDebounce = (value, delay) => {
@@ -48,16 +48,20 @@ const ProveedorForm = ({ initialData = {}, onSubmit, onCancel, isLoading, error,
     const handleSubmit = (e) => {
         e.preventDefault();
         // Ajusta la validación a los campos requeridos del proveedor
-        if (!formData.proveedor_nombre || !formData.proveedor_telefono || !formData.proveedor_dni) {
-            alert('Nombre, DNI/CUIT y Teléfono son obligatorios.');
+        if (!formData.proveedor_nombre) {
+            alert('Nombre es obligatorios.');
             return;
         }
+        // if (!formData.proveedor_nombre || !formData.proveedor_telefono || !formData.proveedor_dni) {
+        //     alert('Nombre, DNI/CUIT y Teléfono son obligatorios.');
+        //     return;
+        // }
         onSubmit(formData);
     };
 
     if (!styles) { // Safeguard
-         console.error("Error: 'styles' prop no fue pasada a ProveedorForm");
-         return <p>Error al cargar formulario...</p>;
+        console.error("Error: 'styles' prop no fue pasada a ProveedorForm");
+        return <p>Error al cargar formulario...</p>;
     }
 
     return (
@@ -66,8 +70,8 @@ const ProveedorForm = ({ initialData = {}, onSubmit, onCancel, isLoading, error,
             <div className={styles.formGrid}>
                 {/* Asegúrate que los placeholders coincidan */}
                 <input type="text" name="proveedor_nombre" placeholder="* Nombre" value={formData.proveedor_nombre} onChange={handleInputChange} required className={styles.inputField} />
-                <input type="text" name="proveedor_dni" placeholder="* DNI/CUIT" value={formData.proveedor_dni} onChange={handleInputChange} required className={styles.inputField} />
-                <input type="text" name="proveedor_telefono" placeholder="* Teléfono" value={formData.proveedor_telefono} onChange={handleInputChange} required className={styles.inputField} />
+                <input type="text" name="proveedor_dni" placeholder="DNI/CUIT" value={formData.proveedor_dni} onChange={handleInputChange} className={styles.inputField} />
+                <input type="text" name="proveedor_telefono" placeholder="Teléfono" value={formData.proveedor_telefono} onChange={handleInputChange} className={styles.inputField} />
                 <input type="text" name="proveedor_direccion" placeholder="Dirección" value={formData.proveedor_direccion} onChange={handleInputChange} className={styles.inputField} />
                 <input type="email" name="proveedor_email" placeholder="Email" value={formData.proveedor_email} onChange={handleInputChange} className={styles.inputField} />
             </div>
@@ -87,7 +91,7 @@ const ProveedorForm = ({ initialData = {}, onSubmit, onCancel, isLoading, error,
 // Modal Principal de Gestión de Proveedores
 const ProveedorManagerModal = ({ onClose, onProveedorSeleccionado }) => {
     // (Estados...)
-    const [activeView, setActiveView] = useState('search'); 
+    const [activeView, setActiveView] = useState('search');
     const [allProveedores, setAllProveedores] = useState([]);
     const [loadingAll, setLoadingAll] = useState(false);
     const [errorAll, setErrorAll] = useState('');
@@ -103,11 +107,11 @@ const ProveedorManagerModal = ({ onClose, onProveedorSeleccionado }) => {
 
     // --- CORRECCIÓN 2: Mover useMemo al nivel superior ---
     const emptyProveedor = useMemo(() => ({
-         proveedor_dni: '',
-         proveedor_nombre: '',
-         proveedor_direccion: '',
-         proveedor_telefono: '',
-         proveedor_email: '',
+        proveedor_dni: '',
+        proveedor_nombre: '',
+        proveedor_direccion: '',
+        proveedor_telefono: '',
+        proveedor_email: '',
     }), []);
     // --- FIN CORRECCIÓN 2 ---
 
@@ -142,7 +146,7 @@ const ProveedorManagerModal = ({ onClose, onProveedorSeleccionado }) => {
             try {
                 // Filtramos localmente (ya que cargamos todos)
                 const term = debouncedSearchTermSuggest.toLowerCase();
-                const filtrados = allProveedores.filter(p => 
+                const filtrados = allProveedores.filter(p =>
                     p.proveedor_nombre.toLowerCase().includes(term) ||
                     p.proveedor_dni.includes(term) ||
                     p.proveedor_telefono.includes(term)
@@ -251,17 +255,17 @@ const ProveedorManagerModal = ({ onClose, onProveedorSeleccionado }) => {
                                 </ul>
                             )}
                         </div>
-                         <div className={styles.divider}>O</div>
-                         <button onClick={() => { setItemToEdit(null); setActiveView('create'); setErrorSubmit(''); }} className={styles.createButtonInline}>
-                             + Crear Nuevo Proveedor
-                         </button>
+                        <div className={styles.divider}>O</div>
+                        <button onClick={() => { setItemToEdit(null); setActiveView('create'); setErrorSubmit(''); }} className={styles.createButtonInline}>
+                            + Crear Nuevo Proveedor
+                        </button>
                     </div>
                 )}
 
                 {activeView === 'manage' && (
                     <div className={styles.viewContainer}>
-                         <button onClick={() => setActiveView('search')} className={styles.switchViewButton}>Volver a Búsqueda Rápida</button>
-                         <div className={styles.manageToolbar}>
+                        <button onClick={() => setActiveView('search')} className={styles.switchViewButton}>Volver a Búsqueda Rápida</button>
+                        <div className={styles.manageToolbar}>
                             <input
                                 type="text"
                                 placeholder="Filtrar lista..."
@@ -269,31 +273,31 @@ const ProveedorManagerModal = ({ onClose, onProveedorSeleccionado }) => {
                                 onChange={(e) => setSearchTermManage(e.target.value)}
                                 className={styles.searchInput}
                             />
-                             <button onClick={() => { setItemToEdit(null); setActiveView('create'); setErrorSubmit(''); }} className={styles.addButton}>
-                                 + Añadir Proveedor
-                             </button>
-                         </div>
-                         {loadingAll && <p className={styles.loadingText}>Cargando...</p>}
-                         {errorAll && <p className={styles.errorText}>{errorAll}</p>}
-                         {!loadingAll && !errorAll && (
-                             <div className={styles.clientListContainer}>
-                                 {filteredProveedoresManage.length > 0 ? (
-                                     filteredProveedoresManage.map(p => (
-                                         <div key={p.id} className={styles.clientListItem}>
-                                             <div className={styles.clientInfo} onClick={() => handleSelectProveedor(p)} title="Seleccionar este proveedor">
-                                                 <strong>{p.proveedor_nombre}</strong>
-                                                 <small>Tel: {p.proveedor_telefono} {p.proveedor_direccion ? `- ${p.proveedor_direccion}` : ''}</small>
-                                             </div>
-                                             <div className={styles.clientActions}>
-                                                 <button onClick={() => handleEditClick(p)} className={styles.editButton}>Editar</button>
-                                             </div>
-                                         </div>
-                                     ))
-                                 ) : (
-                                     <p className={styles.noResultsText}>No hay proveedores.</p>
-                                 )}
-                             </div>
-                         )}
+                            <button onClick={() => { setItemToEdit(null); setActiveView('create'); setErrorSubmit(''); }} className={styles.addButton}>
+                                + Añadir Proveedor
+                            </button>
+                        </div>
+                        {loadingAll && <p className={styles.loadingText}>Cargando...</p>}
+                        {errorAll && <p className={styles.errorText}>{errorAll}</p>}
+                        {!loadingAll && !errorAll && (
+                            <div className={styles.clientListContainer}>
+                                {filteredProveedoresManage.length > 0 ? (
+                                    filteredProveedoresManage.map(p => (
+                                        <div key={p.id} className={styles.clientListItem}>
+                                            <div className={styles.clientInfo} onClick={() => handleSelectProveedor(p)} title="Seleccionar este proveedor">
+                                                <strong>{p.proveedor_nombre}</strong>
+                                                <small>Tel: {p.proveedor_telefono} {p.proveedor_direccion ? `- ${p.proveedor_direccion}` : ''}</small>
+                                            </div>
+                                            <div className={styles.clientActions}>
+                                                <button onClick={() => handleEditClick(p)} className={styles.editButton}>Editar</button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className={styles.noResultsText}>No hay proveedores.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 
