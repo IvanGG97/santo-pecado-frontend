@@ -105,12 +105,20 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
                                 // --- LÓGICA WORKFLOW: Filtrar botones ---
                                 const ordenNuevo = estadoOrden[estado.estado_pedido_nombre] || 0;
 
-                                // 1. No mostrar si es un estado anterior (Y NO es Cancelado)
-                                if (ordenNuevo < ordenActual && estado.estado_pedido_nombre !== 'Cancelado') {
+                                // 1. No mostrar si es el estado actual
+                                if (ordenNuevo === ordenActual) {
                                     return null;
                                 }
-                                // 2. No mostrar si es el estado actual
-                                if (ordenNuevo === ordenActual) {
+
+                                // 2. Definir las excepciones (siempre se puede cancelar)
+                                const esCancelado = estado.estado_pedido_nombre === 'Cancelado';
+
+                                // 3. Definir el paso lógico siguiente
+                                // (Ej: Si ordenActual=1, esSiguientePaso es true solo si ordenNuevo=2)
+                                const esSiguientePaso = ordenNuevo === ordenActual + 1;
+
+                                // 4. Mostrar el botón SOLAMENTE si es "Cancelado" O si es el "Siguiente Paso"
+                                if (!esCancelado && !esSiguientePaso) {
                                     return null;
                                 }
                                 // --- FIN LÓGICA WORKFLOW ---

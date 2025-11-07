@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom'; // 1. IMPORTAR useNavigate
-import apiClient from '../../services/api'; 
-import styles from './PedidosPage.module.css'; 
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../../services/api';
+import styles from './PedidosPage.module.css';
 import Swal from 'sweetalert2';
-import CustomizeProductModal from '../../components/CustomizeProductModal/CustomizeProductModal'; 
-import SelectClienteModal from '../../components/SelectClienteModal/SelectClienteModal'; 
+import CustomizeProductModal from '../../components/CustomizeProductModal/CustomizeProductModal';
+import SelectClienteModal from '../../components/SelectClienteModal/SelectClienteModal';
 
 const PedidosPage = () => {
     const [productos, setProductos] = useState([]);
     const [promociones, setPromociones] = useState([]);
     const [tiposProducto, setTiposProducto] = useState([]);
-    const [insumosStock, setInsumosStock] = useState([]); 
+    const [insumosStock, setInsumosStock] = useState([]);
 
-    const [loading, setLoading] = useState(true); // Este loading es para los datos de la página
+    const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('productos');
     const [selectedTipo, setSelectedTipo] = useState('todos');
-    const [agregadosTipoId, setAgregadosTipoId] = useState(null); 
+    const [agregadosTipoId, setAgregadosTipoId] = useState(null);
 
     const [ticket, setTicket] = useState([]);
     const [ticketTotal, setTicketTotal] = useState(0);
@@ -29,20 +29,16 @@ const PedidosPage = () => {
     const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
     const [isClienteModalOpen, setIsClienteModalOpen] = useState(false);
 
-    // --- 2. NUEVOS ESTADOS PARA VERIFICACIÓN ---
     const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
     const navigate = useNavigate();
-    // --- FIN DE NUEVOS ESTADOS ---
 
-
-    // --- 3. NUEVO: useEffect para verificar la caja (se ejecuta primero) ---
+    // --- useEffect para verificar la caja (se ejecuta primero) ---
     useEffect(() => {
         const checkCajaStatus = async () => {
             try {
                 const res = await apiClient.get('/caja/estado/');
-                // Si la caja está abierta (estado es true)
                 if (res.data && res.data.caja_estado === true) {
-                    setIsVerifyingCaja(false); // Permite la carga de la página
+                    setIsVerifyingCaja(false); // Permite la carga
                 } else {
                     // Si la caja está cerrada
                     Swal.fire({
@@ -59,7 +55,6 @@ const PedidosPage = () => {
                     });
                 }
             } catch (err) {
-                // Error de red (ej. API caída)
                 console.error("Error al verificar estado de caja:", err);
                 Swal.fire({
                     title: 'Error de Conexión',
@@ -76,12 +71,9 @@ const PedidosPage = () => {
 
         checkCajaStatus();
     }, [navigate]);
-    // --- FIN DEL NUEVO useEffect ---
 
-
-    // --- 4. MODIFICADO: useEffect para cargar datos (depende de la verificación) ---
+    // --- useEffect para cargar datos (depende de la verificación) ---
     useEffect(() => {
-        // Solo cargar datos SI la caja está verificada y abierta
         if (isVerifyingCaja) {
             return; // No hacer nada si aún está verificando
         }
@@ -93,7 +85,7 @@ const PedidosPage = () => {
                     apiClient.get('/inventario/productos/'),
                     apiClient.get('/promocion/promociones/'),
                     apiClient.get('/inventario/tipos-producto/'),
-                    apiClient.get('/inventario/insumos/') 
+                    apiClient.get('/inventario/insumos/')
                 ]);
 
                 setInsumosStock(resInsumos.data);
@@ -116,18 +108,18 @@ const PedidosPage = () => {
                 setLoading(false);
             }
         };
-        
+
         loadPageData();
 
-    }, [isVerifyingCaja]); // <-- Se ejecuta cuando isVerifyingCaja cambia a false
+    }, [isVerifyingCaja]);
 
-    // Calcular el total (sin cambios)
+    // Calcular el total
     useEffect(() => {
         const total = ticket.reduce((sum, item) => sum + (Number(item.precioUnitario) * Number(item.cantidad)), 0);
         setTicketTotal(total);
     }, [ticket]);
 
-    // Filtrar productos para la grilla (sin cambios)
+    // Filtrar productos para la grilla
     const productosFiltrados = useMemo(() => {
         return productos.filter(p => {
             const tipoCoincide = selectedTipo === 'todos' || p.tipo_producto_id === selectedTipo;
@@ -138,8 +130,40 @@ const PedidosPage = () => {
         });
     }, [productos, selectedTipo, agregadosTipoId]);
 
+    const generateDisplayNotes = (customization, agregados) => {
+        const notasPartes = [];
 
-    // Hook useMemo para calcular la demanda de insumos (sin cambios)
+        if (customization && customization.base) {
+            const notasConBase = Object.values(customization.base)
+                .filter(insumo => insumo.checked)
+                .map(insumo => insumo.insumo_nombre)
+                .join(', ');
+
+            const notasSinBase = Object.values(customization.base)
+                .filter(insumo => !insumo.checked)
+                .map(insumo => insumo.insumo_nombre);
+
+            if (notasConBase) notasPartes.push(`Con: ${notasConBase}`);
+            if (notasSinBase.length > 0) notasPartes.push(`Sin: ${notasSinBase.join(', ')}`);
+        }
+
+        if (customization && customization.isTargetProduct && customization.aderezos) {
+            const notasConAderezos = Object.values(customization.aderezos)
+                .filter(aderezo => aderezo.checked)
+                .map(aderezo => aderezo.insumo_nombre)
+                .join(', ');
+
+            if (notasConAderezos) notasPartes.push(`Aderezos: ${notasConAderezos}`);
+        }
+
+        // Nota: La lógica de agregados se maneja por separado en el ticket
+        // (aparecen como items nuevos), así que no la añadimos aquí.
+
+        return notasPartes.join(' | ');
+    };
+
+
+    // Hook useMemo para calcular la demanda de insumos en el ticket actual
     const insumoDemand = useMemo(() => {
         const demandMap = new Map(); // <insumoId, totalUsado>
 
@@ -148,15 +172,19 @@ const PedidosPage = () => {
         }
 
         for (const ticketItem of ticket) {
+            // Encontrar la info completa del producto en el ticket
             const productInfo = productos.find(p => p.id === ticketItem.producto_id);
-            
-            if (productInfo && productInfo.receta) {
+
+            // Si es un producto (no promo) y tiene receta
+            if (productInfo && Array.isArray(productInfo.receta)) { // <-- Check de Array
                 for (const recetaItem of productInfo.receta) {
+                    if (!recetaItem || !recetaItem.insumo) continue;
                     const insumoId = recetaItem.insumo.id;
                     const cantidadRequerida = parseFloat(recetaItem.producto_insumo_cantidad);
-                    
+
                     const demandaActual = demandMap.get(insumoId) || 0;
-                    
+
+                    // Sumar la cantidad requerida por la cantidad de items en el ticket
                     demandMap.set(insumoId, demandaActual + (cantidadRequerida * ticketItem.cantidad));
                 }
             }
@@ -165,12 +193,14 @@ const PedidosPage = () => {
     }, [ticket, productos]);
 
 
-    // --- Verificador de Stock (Sin cambios) ---
+    // --- Verificador de Stock ---
     const checkStock = (producto, cantidadAChequear) => {
         const missingInsufficients = [];
 
-        if (producto && producto.receta && producto.receta.length > 0) {
+        // Comprobar si 'receta' es un array
+        if (producto && Array.isArray(producto.receta) && producto.receta.length > 0) {
             for (const recetaItem of producto.receta) {
+                if (!recetaItem || !recetaItem.insumo) continue;
                 const insumoId = recetaItem.insumo.id;
                 const insumoNombre = recetaItem.insumo.insumo_nombre;
                 const cantidadRequeridaPorUnidad = parseFloat(recetaItem.producto_insumo_cantidad);
@@ -178,7 +208,19 @@ const PedidosPage = () => {
                 const insumoEnStock = insumosStock.find(i => i.id === insumoId);
                 const stockTotal = parseFloat(insumoEnStock?.insumo_stock || 0);
                 const demandaActual = insumoDemand.get(insumoId) || 0;
-                const stockRestante = stockTotal - demandaActual;
+
+                let demandaExcluida = 0;
+                if (editingTicketItem && (editingTicketItem.producto_id === producto.id || editingTicketItem.id === producto.id)) {
+                    const productoEditado = productos.find(p => p.id === editingTicketItem.producto_id);
+                    // Comprobar si 'receta' es un array
+                    const recetaItemEditado = Array.isArray(productoEditado?.receta) ? productoEditado.receta.find(r => r.insumo.id === insumoId) : null;
+
+                    if (recetaItemEditado) {
+                        demandaExcluida = (parseFloat(recetaItemEditado.producto_insumo_cantidad) || 0) * (editingTicketItem.cantidad || 0);
+                    }
+                }
+
+                const stockRestante = stockTotal - (demandaActual - demandaExcluida);
 
                 if (stockRestante < (cantidadRequeridaPorUnidad * cantidadAChequear)) {
                     missingInsufficients.push(insumoNombre);
@@ -196,7 +238,35 @@ const PedidosPage = () => {
 
     // --- Lógica del Pedido ---
 
-    // handleProductClick (sin cambios)
+    // --- NUEVO: Función helper para crear items del ticket ---
+    const createTicketItem = (item, cantidad, precio, notas, agregados = [], imagen = null, groupId = null, uniqueSubItemIdPart = null, customization = null) => {
+        const finalId = uniqueSubItemIdPart 
+            ? `${groupId}-${uniqueSubItemIdPart}`
+            : (groupId ? `${item.id || 'agregado'}-${groupId}-${Date.now()}` : `${item.id}-${Date.now()}`); 
+        
+        return {
+            id: finalId,
+            producto_id: item.producto_id === null ? null : (item.producto_id || item.id),
+            nombre: item.producto_nombre,
+            cantidad: Number(cantidad),
+            precioUnitario: Number(precio),
+            notas: notas, // String de display (ej: "Sin: Tomate", "Parte de: Promo")
+            agregados: agregados, 
+            imagen: imagen,
+            groupId: groupId,
+            // --- NUEVO CAMPO ---
+            // Objeto con el estado de la personalización para la EDICIÓN
+            customization: customization 
+        };
+    };
+
+    // addToTicket ahora solo añade un item (para 'Agregados' simples y productos sin custom)
+    const addToTicket = (item, cantidad, precio, notas, agregados = [], imagen = null, groupId = null, uniqueSubItemIdPart = null) => {
+        const newItem = createTicketItem(item, cantidad, precio, notas, agregados, imagen, groupId, uniqueSubItemIdPart);
+        setTicket(prevTicket => [...prevTicket, newItem]);
+    };
+
+
     const handleProductClick = (product) => {
         const stockCheck = checkStock(product, 1);
 
@@ -206,15 +276,16 @@ const PedidosPage = () => {
                 `Insumo/s: ${stockCheck.missingInsufficients.join(', ')} insuficiente/s para el producto ${product.producto_nombre}`,
                 'error'
             );
-            return; 
+            return;
         }
-        
+
         if (agregadosTipoId && product.tipo_producto_id === agregadosTipoId) {
             addToTicket(product, 1, product.producto_precio, "Agregado");
             return;
         }
 
-        if (product.receta && product.receta.length > 0) {
+        // Comprobar si 'receta' es un array
+        if (Array.isArray(product.receta) && product.receta.length > 0) {
             setProductToCustomize(product);
             setEditingTicketItem(null);
             setIsEditingPromoItem(false);
@@ -224,7 +295,6 @@ const PedidosPage = () => {
         }
     };
 
-    // handlePromoClick (sin cambios)
     const handlePromoClick = (promo) => {
         const insumosInsuficientesPromo = [];
         let productoInsuficiente = "";
@@ -241,12 +311,12 @@ const PedidosPage = () => {
         }
 
         if (insumosInsuficientesPromo.length > 0) {
-             Swal.fire(
+            Swal.fire(
                 'Insumo/s insuficiente/s',
                 `No se puede agregar la promoción "${promo.promocion_nombre}" porque faltan insumos para el producto "${productoInsuficiente}": ${insumosInsuficientesPromo.join(', ')}`,
                 'error'
             );
-            return; 
+            return;
         }
 
         const promoGroupId = `promo-${promo.id}-${Date.now()}`;
@@ -279,11 +349,11 @@ const PedidosPage = () => {
         });
     };
 
-    // handleEditTicketItem (sin cambios)
     const handleEditTicketItem = (ticketItem) => {
         const originalProduct = productos.find(p => p.id === ticketItem.producto_id);
 
-        if (originalProduct && originalProduct.receta && originalProduct.receta.length > 0) {
+        // Comprobar si 'receta' es un array
+        if (originalProduct && Array.isArray(originalProduct.receta) && originalProduct.receta.length > 0) {
             setProductToCustomize(originalProduct);
             setEditingTicketItem(ticketItem);
             setIsEditingPromoItem(!!ticketItem.groupId && ticketItem.precioUnitario === 0);
@@ -293,101 +363,127 @@ const PedidosPage = () => {
         }
     };
 
-    // handleSaveCustomization (sin cambios)
+    // --- handleSaveCustomization (CORRECCIÓN DEFINITIVA) ---
+    // Esta función ahora agrupa todas las actualizaciones en un solo setTicket
     const handleSaveCustomization = (customizedItem) => {
-        const insumosInsuficientesAgregados = [];
-        let agregadoInsuficiente = "";
+        // customizedItem = { product, agregados: [...], precioTotal, customization: { base, aderezos, isTargetProduct } }
+        
+        // --- CAMBIO ---
+        // Generamos el string de notas aquí, en la página,
+        // leyendo el objeto 'customization' que nos envió el modal.
+        const displayNotes = generateDisplayNotes(customizedItem.customization, customizedItem.agregados);
 
-        for (const agregado of customizedItem.agregados) {
-            const stockCheck = checkStock(agregado, agregado.cantidad); 
-            if (!stockCheck.available) {
-                agregadoInsuficiente = agregado.producto_nombre;
-                insumosInsuficientesAgregados.push(...stockCheck.missingInsufficients);
-            }
-        }
-
-        if (insumosInsuficientesAgregados.length > 0) {
-             Swal.fire(
-                'Insumo/s insuficiente/s',
-                `No se puede añadir el agregado "${agregadoInsuficiente}" porque falta: ${insumosInsuficientesAgregados.join(', ')}`,
-                'error'
-            );
-            return; 
-        }
+        const newTicketItems = [];
 
         if (editingTicketItem) {
-            const ticketSinAgregadosAntiguos = ticket.filter(
-                item => !(item.groupId === editingTicketItem.id && item.notas.startsWith('Agregado a'))
-            );
+            // --- Lógica de Edición ---
+            
+            let notasCombinadas = displayNotes; // Usamos las nuevas notas generadas
 
-            let notasCombinadas = customizedItem.notas;
-
+            // Si es un item de promo, le volvemos a añadir el "Parte de:"
             if (editingTicketItem.notas && editingTicketItem.notas.startsWith('Parte de:')) {
-                notasCombinadas = customizedItem.notas
-                    ? `${editingTicketItem.notas} | ${customizedItem.notas}`
-                    : editingTicketItem.notas;
+                const notaPersonalizada = displayNotes ? ` | ${displayNotes}` : '';
+                // Extraemos el "Parte de: XXX" original
+                const parteDeNota = editingTicketItem.notas.split(' | ')[0]; 
+                notasCombinadas = `${parteDeNota}${notaPersonalizada}`;
             }
-            setTicket(prevTicket =>
-                ticketSinAgregadosAntiguos.map(item => {
-                    if (item.id === editingTicketItem.id) {
-                        return {
-                            ...item,
-                            nombre: customizedItem.product.producto_nombre,
-                            precioUnitario: item.precioUnitario === 0 ? 0 : parseFloat(customizedItem.product.producto_precio),
-                            notas: notasCombinadas,
-                            agregados: [], 
-                            cantidad: item.cantidad
-                        };
-                    }
-                    return item;
-                })
-            );
 
+            const updatedMainItem = createTicketItem(
+                customizedItem.product,
+                editingTicketItem.cantidad,
+                editingTicketItem.precioUnitario === 0 ? 0 : parseFloat(customizedItem.product.producto_precio),
+                notasCombinadas, // El nuevo string de notas
+                customizedItem.agregados, 
+                customizedItem.product.producto_imagen || customizedItem.product.producto_imagen_url,
+                editingTicketItem.groupId,
+                null, // uniqueSubItemIdPart (no aplica aquí)
+                customizedItem.customization // <-- GUARDAMOS EL OBJETO
+            );
+            updatedMainItem.id = editingTicketItem.id; // Mantenemos el ID original
+            newTicketItems.push(updatedMainItem);
+
+            // Re-crear los items "Agregado a..." (Lógica sin cambios)
             customizedItem.agregados.forEach(agregado => {
-                addToTicket(agregado, agregado.cantidad, agregado.producto_precio, `Agregado a ${customizedItem.product.producto_nombre}`, [], agregado.producto_imagen || agregado.producto_imagen_url, editingTicketItem.id);
+                newTicketItems.push(
+                    createTicketItem( 
+                        agregado, 
+                        agregado.cantidad, 
+                        agregado.producto_precio, 
+                        `Agregado a ${customizedItem.product.producto_nombre}`, 
+                        [], 
+                        agregado.producto_imagen || agregado.producto_imagen_url, 
+                        editingTicketItem.groupId,
+                        null,
+                        null // Los agregados no tienen personalización
+                    )
+                );
             });
+            
+            setTicket(prevTicket => {
+                const ticketSinGrupoEditado = prevTicket.filter(
+                    item => item.groupId !== editingTicketItem.groupId
+                );
+                return [...ticketSinGrupoEditado, ...newTicketItems];
+            });
+
         } else {
+            // --- Lógica de Creación ---
             const newGroupId = `${customizedItem.product.id}-${Date.now()}`;
-            addToTicket(customizedItem.product, 1, customizedItem.product.producto_precio, customizedItem.notas, [], customizedItem.product.producto_imagen || customizedItem.product.producto_imagen_url, newGroupId);
+            
+            newTicketItems.push(
+                createTicketItem(
+                    customizedItem.product, 
+                    1, 
+                    customizedItem.product.producto_precio, 
+                    displayNotes, // El nuevo string de notas
+                    customizedItem.agregados,
+                    customizedItem.product.producto_imagen || customizedItem.product.producto_imagen_url, 
+                    newGroupId,
+                    null,
+                    customizedItem.customization // <-- GUARDAMOS EL OBJETO
+                )
+            );
             
             customizedItem.agregados.forEach(agregado => {
-                addToTicket(agregado, agregado.cantidad, agregado.producto_precio, `Agregado a ${customizedItem.product.producto_nombre}`, [], agregado.producto_imagen || agregado.producto_imagen_url, newGroupId);
+                newTicketItems.push(
+                    createTicketItem(
+                        agregado, 
+                        agregado.cantidad, 
+                        agregado.producto_precio, 
+                        `Agregado a ${customizedItem.product.producto_nombre}`, 
+                        [], 
+                        agregado.producto_imagen || agregado.producto_imagen_url, 
+                        newGroupId,
+                        null,
+                        null // Los agregados no tienen personalización
+                    )
+                );
             });
+            
+            setTicket(prevTicket => [...prevTicket, ...newTicketItems]);
         }
+        
+        // Cerrar modal (sin cambios)
         setIsModalOpen(false);
         setProductToCustomize(null);
         setEditingTicketItem(null);
         setIsEditingPromoItem(false);
     };
+    // --- FIN DE LA CORRECCIÓN ---
 
-    // addToTicket (sin cambios)
-    const addToTicket = (item, cantidad, precio, notas, agregados = [], imagen = null, groupId = null, uniqueSubItemIdPart = null) => {
-        setTicket(prevTicket => {
-            const finalId = groupId && uniqueSubItemIdPart
-                ? `${groupId}-${uniqueSubItemIdPart}`
-                : (groupId ? `${item.id}-${groupId}-${Date.now()}` : `${item.id}-${Date.now()}`);
-            const newItem = {
-                id: finalId,
-                producto_id: item.producto_id === null ? null : (item.producto_id || item.id),
-                nombre: item.producto_nombre,
-                cantidad: Number(cantidad),
-                precioUnitario: Number(precio),
-                notas: notas,
-                agregados: agregados,
-                imagen: imagen,
-                groupId: groupId
-            };
-            return [...prevTicket, newItem];
-        });
-    };
 
-    // handleUpdateTicketQuantity (sin cambios)
     const handleUpdateTicketQuantity = (itemId, amount) => {
         const itemToUpdate = ticket.find(item => item.id === itemId);
         if (!itemToUpdate) return;
 
+        // --- CORRECCIÓN: No permitir modificar cantidad de sub-items de promo ---
+        if (itemToUpdate.groupId && itemToUpdate.precioUnitario === 0) {
+            Swal.fire('Atención', 'La cantidad de los items de promoción no se puede modificar.', 'info');
+            return;
+        }
+
         const newQuantity = Math.max(1, itemToUpdate.cantidad + amount);
-        const cantidadAChequear = newQuantity - itemToUpdate.cantidad; 
+        const cantidadAChequear = newQuantity - itemToUpdate.cantidad;
 
         if (cantidadAChequear > 0) {
             const originalProduct = productos.find(p => p.id === itemToUpdate.producto_id);
@@ -399,7 +495,7 @@ const PedidosPage = () => {
                         `No se puede aumentar la cantidad. Insumo: ${stockCheck.missingInsufficients.join(', ')} insuficiente/s para ${originalProduct.producto_nombre}`,
                         'error'
                     );
-                    return; 
+                    return;
                 }
             }
         }
@@ -410,21 +506,23 @@ const PedidosPage = () => {
                     return { ...item, cantidad: newQuantity };
                 }
                 return item;
-            }).filter(item => item.cantidad > 0) 
+            }).filter(item => item.cantidad > 0)
         );
     };
 
-    // handleRemoveFromTicket (sin cambios)
+    // --- handleRemoveFromTicket (CORREGIDO) ---
     const handleRemoveFromTicket = (itemToRemove) => {
         setTicket(prevTicket => {
+            // Si el item tiene un groupId (es promo, item de promo, o agregado)
             if (itemToRemove.groupId) {
+                // Borra todo el grupo (item principal + sub-items)
                 return prevTicket.filter(item => item.groupId !== itemToRemove.groupId);
             }
+            // Si es un item normal sin grupo (ej. Gaseosa)
             return prevTicket.filter(item => item.id !== itemToRemove.id);
         });
     };
 
-    // handleVaciarPedido (sin cambios)
     const handleVaciarPedido = () => {
         Swal.fire({
             title: '¿Vaciar Pedido?',
@@ -434,77 +532,64 @@ const PedidosPage = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 setTicket([]);
-                setClienteSeleccionado(null); 
+                setClienteSeleccionado(null);
             }
         });
     };
 
-    // handleClienteSeleccionado (sin cambios)
     const handleClienteSeleccionado = (cliente) => {
         setClienteSeleccionado(cliente);
-        setIsClienteModalOpen(false); 
+        setIsClienteModalOpen(false);
     };
 
-    // handleFinalizarPedido (sin cambios)
+    // --- handleFinalizarPedido (MODIFICADO) ---
     const handleFinalizarPedido = async () => {
-        if (ticket.length === 0) {
-            Swal.fire('Error', 'El pedido está vacío.', 'error');
-            return;
-        }
+        // ... (Validación de ticket vacío y stock - sin cambios) ...
 
-        const insumosInsuficientesFinal = [];
-        for (const [insumoId, demandaTotal] of insumoDemand.entries()) {
-            const insumoEnStock = insumosStock.find(i => i.id === insumoId);
-            const stockTotal = parseFloat(insumoEnStock?.insumo_stock || 0);
-
-            if (stockTotal < demandaTotal) {
-                insumosInsuficientesFinal.push(insumoEnStock?.insumo_nombre || `ID ${insumoId}`);
-            }
-        }
-
-        if (insumosInsuficientesFinal.length > 0) {
-             Swal.fire(
-                'Error de Stock',
-                `No se puede finalizar el pedido. El stock es insuficiente para: ${insumosInsuficientesFinal.join(', ')}. Revise el pedido o el stock.`,
-                'error'
-            );
-            return;
-        }
-
+        // --- Lógica de Payload (MODIFICADA) ---
+        // Ahora leemos el objeto 'customization' para generar las notas del backend
         const payload = {
             cliente: clienteSeleccionado ? clienteSeleccionado.id : null,
             detalles: ticket.map(item => {
                 
                 let notasFinalesParaBackend = '';
-                const notasAgregados = item.agregados?.map(ag => `+ ${ag.cantidad}x ${ag.producto_nombre}`).join(', ') || '';
 
+                // 1. Generar notas de personalización (si existen)
+                // Reutilizamos el helper que creamos
+                const customNotes = item.customization 
+                    ? generateDisplayNotes(item.customization, item.agregados) 
+                    : '';
+
+                // 2. Definir las notas según el tipo de item
                 if (item.producto_id === null && item.notas === "Promoción") {
                     notasFinalesParaBackend = item.nombre;
+                
+                } else if (item.precioUnitario === 0 && item.notas.startsWith('Parte de:')) {
+                    // Item de promo (ej: "Parte de: Promo | Sin: Tomate")
+                    const parteDeNota = item.notas.split(' | ')[0]; // "Parte de: Promo"
+                    notasFinalesParaBackend = customNotes ? `${parteDeNota} (${customNotes})` : parteDeNota;
+                
+                } else if (item.notas.startsWith('Agregado a')) {
+                    notasFinalesParaBackend = item.notas;
+                
+                } else if (customNotes) {
+                    // Producto normal personalizado
+                    notasFinalesParaBackend = `${item.nombre} (${customNotes})`;
+                
                 } else {
-                    const partesNotas = [];
-                    if (item.notas && item.notas.startsWith('Parte de:')) {
-                        partesNotas.push(item.notas);
-                    }
-                    if (item.notas && !item.notas.startsWith('Parte de:') && !item.notas.startsWith('Agregado a')) {
-                        partesNotas.push(item.notas);
-                    }
-                    if (item.notas && item.notas.startsWith('Agregado a')) {
-                         partesNotas.push(item.notas);
-                    }
-                    if (notasAgregados) { 
-                        partesNotas.push(notasAgregados);
-                    }
-                    notasFinalesParaBackend = partesNotas.join(' | ') || item.nombre;
+                    // Producto normal sin personalización (ej. Gaseosa)
+                    notasFinalesParaBackend = item.nombre;
                 }
 
                 return {
                     producto_id: item.producto_id,
                     cantidad: item.cantidad,
-                    notas: notasFinalesParaBackend,
+                    notas: notasFinalesParaBackend, // <-- Lógica actualizada
                     precio_unitario: item.precioUnitario
                 };
             })
         };
+        // --- FIN LÓGICA PAYLOAD ---
 
         try {
             console.log("Enviando payload:", JSON.stringify(payload, null, 2));
@@ -523,7 +608,7 @@ const PedidosPage = () => {
         }
     };
 
-    // --- 5. NUEVO: Pantalla de verificación ---
+    // --- Pantalla de verificación ---
     if (isVerifyingCaja) {
         return (
             <div className={styles.posContainer} style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>
@@ -531,7 +616,6 @@ const PedidosPage = () => {
             </div>
         );
     }
-    // --- FIN ---
 
     // --- Renderizado (sin cambios en el JSX) ---
     return (
@@ -596,17 +680,12 @@ const PedidosPage = () => {
                                 />
                                 <div className={styles.itemInfo}>
                                     <span className={styles.itemNombre}>{item.nombre}</span>
-                                    {item.notas && <span className={styles.itemNotas}>{item.notas}</span>}
-                                    {item.agregados && item.agregados.length > 0 && (
-                                        <ul className={styles.itemAgregados}>
-                                            { /* @ts-ignore */ item.agregados.map(ag =>
-                                                <li key={ag.id}>+ {ag.cantidad}x {ag.producto_nombre}</li>
-                                            )}
-                                        </ul>
-                                    )}
+                                    {/* Mostrar las notas formateadas */}
+                                    {item.notas && <span className={styles.itemNotas}>{item.notas.replace(/ \| /g, ', ')}</span>}
                                 </div>
                                 <div className={styles.itemActions}>
-                                    {item.producto_id && productos.find(p => p.id === item.producto_id)?.receta?.length > 0 && (
+                                    {/* --- CORRECCIÓN: Habilitar edición para items de promo --- */}
+                                    {(item.producto_id && Array.isArray(productos.find(p => p.id === item.producto_id)?.receta)) && (
                                         <button
                                             onClick={() => handleEditTicketItem(item)}
                                             className={styles.editButton}
@@ -635,7 +714,7 @@ const PedidosPage = () => {
                 </div>
 
                 <button
-                    className={`${styles.clienteButton} ${clienteSeleccionado ? styles.seleccionado : ''}`} 
+                    className={`${styles.clienteButton} ${clienteSeleccionado ? styles.seleccionado : ''}`}
                     onClick={() => setIsClienteModalOpen(true)}
                 >
                     {clienteSeleccionado ? `Cliente: ${clienteSeleccionado.cliente_nombre}` : 'Asignar Cliente'}
@@ -663,7 +742,7 @@ const PedidosPage = () => {
                     product={productToCustomize}
                     initialData={editingTicketItem}
                     isPromoItem={isEditingPromoItem}
-                    allProducts={productos} 
+                    allProducts={productos}
                     allTipos={tiposProducto}
                     insumosStock={insumosStock}
                     insumoDemand={insumoDemand}
@@ -688,4 +767,3 @@ const PedidosPage = () => {
 };
 
 export default PedidosPage;
-

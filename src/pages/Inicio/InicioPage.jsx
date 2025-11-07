@@ -124,9 +124,17 @@ const AdminDashboard = () => {
                 {insumosBajos.map(insumo => (
                     <li key={insumo.id} className={styles.lowStockItem}>
                         <span className={styles.itemName}>{insumo.insumo_nombre}</span>
-                        <span className={styles.itemStock}>
-                            <strong>{parseFloat(insumo.insumo_stock) || 0}</strong> / {parseFloat(insumo.insumo_stock_minimo) || 0} {insumo.insumo_unidad}
-                        </span>
+                        <div className={styles.itemStock}>
+                            <div className={styles.stockBajo}>
+                                Stock Actual:{parseFloat(insumo.insumo_stock) || 0}
+                            </div>
+                            <div>
+                                Stock Minimo:{parseFloat(insumo.insumo_stock_minimo) || 0}
+                            </div> 
+                            <div>
+                                Unidad:{insumo.insumo_unidad}
+                            </div>  
+                        </div>
                     </li>
                 ))}
             </ul>

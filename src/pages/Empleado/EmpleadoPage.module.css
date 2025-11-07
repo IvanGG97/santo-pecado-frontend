@@ -1,35 +1,174 @@
+/* --- Contenedor Principal (Renombrado de .comprasContainer) --- */
 .container {
     padding: 2rem;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    background-color: #f4f7fa;
+    min-height: 100vh;
 }
 
-.header {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.header h1 {
+.container h1 {
     font-size: 2rem;
     color: #333;
-}
-
-.initialView {
-    text-align: center;
-    padding: 3rem 1rem;
-}
-
-.initialView p {
-    font-size: 1.2rem;
-    color: #666;
     margin-bottom: 2rem;
 }
 
+/* --- Barra de Filtros (Copiado de ComprasPage) --- */
+.filtrosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    align-items: flex-end; /* Alinea botones y inputs */
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1; /* Ocupa espacio disponible */
+    min-width: 150px; /* Ancho mínimo */
+}
+
+.filtroGrupo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.filtroInput,
+.inputFecha,
+.filtroGrupo select {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    background-color: #fdfdfd;
+    box-sizing: border-box; 
+}
+
+.inputsFecha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.inputsFecha label {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* --- Estilos para botones de filtro (Copiado de ComprasPage) --- */
+.botonesFiltroEstado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.botonFiltro {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: #f8f9fa; /* Inactivo */
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.botonFiltro:hover:not(.activo) {
+    background-color: #e9ecef;
+}
+
+.botonFiltro.activo {
+    background-color: #A50000; /* Principal */
+    color: white;
+    border-color: #A50000;
+}
+
+.filtroAcciones {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto; 
+    flex-basis: 100%; 
+    justify-content: flex-end;
+    margin-top: 1rem; 
+}
+
+.botonLimpiar,
+.botonAplicar {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.botonLimpiar {
+    background-color: #6c757d;
+    color: white;
+}
+.botonLimpiar:hover {
+    background-color: #5a6268;
+}
+
+.botonAplicar {
+    background-color: #A50000;
+    color: white;
+}
+.botonAplicar:hover {
+    background-color: #8a0000;
+}
+
+/* --- Estilos de la Tabla (Copiado de ComprasPage) --- */
+.tableContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Ajustado para empleados */
+}
+
+.table th,
+.table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+    background-color: #fdfdfd;
+}
+
+/* --- Estilos para los botones de Acción de la tabla --- */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Botón de acción genérico (para mantener consistencia) */
 .actionButton {
-    padding: 0.8rem 2rem;
-    font-size: 1rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
     font-weight: bold;
     border: none;
     border-radius: 5px;
@@ -37,52 +176,23 @@
     transition: all 0.3s ease;
 }
 
-.initialView .actionButton {
-    background-color: #28a745; /* Verde como en tu maqueta */
-    color: white;
-}
-
-.initialView .actionButton:hover {
-    background-color: #218838;
-}
-
-/* Estilos de la tabla */
-.table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table th, .table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.actions .actionButton {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-}
-
 .editButton {
-    background-color: #007bff;
+    background-color: #007bff; /* Azul para editar */
     color: white;
 }
-
-.deleteButton {
-    background-color: #dc3545;
-    color: white;
+.editButton:hover {
+    background-color: #0056b3;
 }
 
-.error {
+/* --- Estados de Carga y Error --- */
+.loading,
+.errorText {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+.errorText {
     color: #dc3545;
 }
