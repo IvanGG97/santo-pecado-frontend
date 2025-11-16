@@ -10,7 +10,8 @@ const ROLES_FILTRO = [
     { value: 'todos', label: 'Todos' },
     { value: 'Admin', label: 'Admin' },
     { value: 'Encargado/Cajero', label: 'Encargado/Cajero' },
-    { value: 'Cocina', label: 'Cocina' }
+    { value: 'Cocina', label: 'Cocina' },
+    { value: 'Cliente', label: 'Cliente'}
     // Puedes añadir más roles aquí si es necesario
 ];
 
