@@ -1,383 +1,505 @@
-/* --- Contenedor Principal --- */
+/* ============================================
+   COMPRAS PAGE - Estilos Unificados
+   ============================================ */
+
 .comprasContainer {
-    padding: 2rem;
-    background-color: #f4f7fa;
+    width: 100%;
     min-height: 100vh;
+    /* Fondo transparente porque el MainLayout ya tiene el fondo base */
+    background-color: transparent;
+    padding: var(--spacing-lg);
+    padding-bottom: 80px; /* Espacio al final */
+    animation: fadeIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .comprasContainer h1 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 2rem;
+    font-size: var(--font-size-3xl);
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+    margin: 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-primary);
 }
 
-/* --- Barra de Filtros --- */
+/* ============================================
+   SECCIÓN DE FILTROS
+   ============================================ */
 .filtrosContainer {
+    background-color: var(--bg-dark-card);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
+    
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background-color: #fff;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    align-items: flex-end; /* Alinea botones y inputs */
+    gap: var(--spacing-lg);
+    align-items: flex-end;
 }
 
 .filtroGrupo {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    flex-grow: 1; /* Ocupa espacio disponible */
-    min-width: 150px; /* Ancho mínimo */
+    gap: var(--spacing-xs);
+    flex: 1 1 180px; /* Flexibles pero con un mínimo */
+    min-width: 160px;
 }
 
 .filtroGrupo label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #555;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.filtroInput,
-.inputFecha,
-.filtroGrupo select {
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.95rem;
-    background-color: #fdfdfd;
-    box-sizing: border-box; /* Asegura que el padding no desborde */
+/* Inputs Generales */
+.filtroInput {
+    width: 100%;
+    padding: var(--input-padding);
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-base);
+    height: var(--input-height);
+    box-sizing: border-box;
 }
 
-.inputsFecha {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.inputsFecha label {
-    font-size: 0.9rem;
-    color: #777;
-    margin: 0;
-    flex-shrink: 0; /* Evita que "Desde:" se rompa */
+.filtroInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
 }
 
-/* --- NUEVO: Estilos para botones de filtro (como en Ventas) --- */
+/* Botones de Filtro (Método de Pago) */
 .botonesFiltroEstado {
     display: flex;
+    gap: var(--spacing-xs);
     flex-wrap: wrap;
-    gap: 0.5rem;
 }
 
 .botonFiltro {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    background-color: #f8f9fa; /* Inactivo */
-    color: #555;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark-input);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
 }
 
-.botonFiltro:hover:not(.activo) {
-    background-color: #e9ecef;
+.botonFiltro:hover {
+    background-color: var(--bg-dark-hover);
+    color: var(--text-white);
 }
 
 .botonFiltro.activo {
-    background-color: #A50000; /* Principal */
-    color: white;
-    border-color: #A50000;
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(253, 0, 42, 0.3);
+    font-weight: var(--font-weight-semibold);
 }
-/* --- FIN DE NUEVOS ESTILOS --- */
 
+/* Inputs de Fecha (Corregido Wrap) */
+.inputsFecha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
 
+.inputsFecha label {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.inputFecha {
+    flex: 1 1 130px;
+    padding: 0 10px;
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    height: var(--input-height);
+    color-scheme: dark;
+    min-width: 130px;
+}
+
+/* Acciones de Filtro */
 .filtroAcciones {
     display: flex;
-    gap: 0.75rem;
-    margin-left: auto; /* Empuja a la derecha en PC */
-    flex-basis: 100%; /* Ocupa toda la línea en móvil */
+    gap: var(--spacing-md);
+    flex: 1 1 auto;
     justify-content: flex-end;
-    margin-top: 1rem; /* Espacio en móvil */
-}
-
-.botonLimpiar,
-.botonAplicar {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    padding-bottom: 2px;
+    min-width: 200px;
 }
 
 .botonLimpiar {
-    background-color: #6c757d;
-    color: white;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: var(--button-padding);
 }
+
 .botonLimpiar:hover {
-    background-color: #5a6268;
+    color: var(--text-white);
 }
 
 .botonAplicar {
-    background-color: #A50000;
-    color: white;
+    background-color: var(--color-info);
+    color: var(--text-white);
+    border: none;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-base);
 }
+
 .botonAplicar:hover {
-    background-color: #8a0000;
+    background-color: var(--color-info-hover);
+    box-shadow: var(--shadow-neon-accent);
 }
 
-
-/* --- Barra de Herramientas (para el botón) --- */
+/* ============================================
+   TOOLBAR (Botón Añadir)
+   ============================================ */
 .toolbar {
     display: flex;
     justify-content: flex-end;
-    /* Alinea el botón a la derecha */
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-sm); /* Espacio entre filtros y tabla */
 }
 
 .addButton {
-    background-color: #A50000;
-    /* Color rojo oscuro principal */
-    color: white;
+    background-color: var(--color-success);
+    color: var(--text-white);
     border: none;
-    padding: 0.7rem 1.5rem;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 0.95rem;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    font-size: var(--button-font-size);
 }
 
 .addButton:hover {
-    background-color: #c00;
-    /* Un rojo más brillante al pasar el mouse */
+    background-color: var(--color-success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
-/* --- Estilos de la Tabla (Similar a VentasPage) --- */
+/* ============================================
+   TABLA DE COMPRAS
+   ============================================ */
 .tableContainer {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: auto;
-    /* Permite scroll horizontal en pantallas pequeñas */
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-dark-card);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
-    /* Evita que la tabla se comprima demasiado */
-}
-
-.table th,
-.table td {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-    vertical-align: middle;
+    min-width: 900px; /* Ancho mínimo para evitar colapsos */
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
 }
 
 .table th {
-    background-color: #f8f9fa;
-    color: #6c757d;
-    font-size: 0.85rem;
+    background-color: var(--bg-dark-input);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-md);
+    text-align: left;
     text-transform: uppercase;
+    font-size: 0.75rem;
     letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    transition: background-color var(--transition-fast);
 }
 
 .table tbody tr:hover {
-    background-color: #fdfdfd;
+    background-color: var(--bg-dark-hover);
 }
 
+/* Acciones de Tabla */
 .actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .viewButton {
-    background-color: #6c757d;
-    color: white;
+    background-color: var(--color-info);
+    color: var(--text-white);
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: background-color 0.2s;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
 }
+
 .viewButton:hover {
-    background-color: #5a6268;
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
 }
 
-
-/* --- Estados de Carga y Error --- */
-.loading, /* Añadido para 'Cargando...' */
-.errorText {
-    text-align: center;
-    padding: 2rem;
-    font-size: 1.2rem;
-    color: #6c757d;
-}
-
-.errorText {
-    color: #dc3545;
-    /* Rojo para errores */
-}
-
-
-/* --- Estilos para Modal de Detalle (Genérico) --- */
+/* ============================================
+   MODAL DETALLE DE COMPRA
+   ============================================ */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1050;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(3px);
+    padding: var(--spacing-md);
 }
 
 .modalContent {
-    background-color: #ffffff;
-    color: #333;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 550px; /* Modal estándar */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    width: 100%;
+    max-width: 600px;
+    box-shadow: var(--shadow-modal);
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     position: relative;
+    overflow-y: auto;
 }
 
+/* Clase opcional para modal más ancho si se usa */
 .modalDetalleLg {
-    max-width: 900px; /* Modal más ancho para detalles */
+    max-width: 700px;
 }
 
 .closeButton {
     position: absolute;
-    top: 1rem;
-    right: 1.25rem;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    font-size: 2rem;
-    color: #aaa;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-2xl);
+    font-weight: bold;
     cursor: pointer;
     line-height: 1;
+    z-index: 10;
 }
+
 .closeButton:hover {
-    color: #333;
+    color: var(--text-white);
 }
 
 .modalContent h2 {
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #A50000;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    font-size: var(--font-size-xl);
+    border-bottom: 1px solid var(--border-color-dark);
+    padding-bottom: var(--spacing-md);
 }
 
+/* Secciones del Modal */
 .modalSection {
-    margin-bottom: 2rem;
-}
-.modalSection h4 {
-    font-size: 1.1rem;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px dashed var(--border-color-dark);
 }
 
-/* Grid de Info (copiado de Ventas) */
+.modalSection:last-of-type {
+    border-bottom: none;
+}
+
+.modalSection h4 {
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+}
+
+/* Grid de Info General */
 .gestionGridInfo {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 5px;
-}
-.gridItem, .gridItemFull {
-    font-size: 0.95rem;
-}
-.gridItemFull {
-    grid-column: 1 / -1; /* Ocupa todo el ancho */
-}
-.gestionGridInfo strong {
-    font-weight: 600;
-    color: #555;
-    margin-right: 0.5rem;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
 }
 
-/* Lista de Detalles (copiado de Ventas) */
-.detalleVentaList {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.gridItem, .gridItemFull {
+    background-color: var(--bg-dark-input);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
 }
+
+.gridItemFull { grid-column: 1 / -1; }
+
+.gestionGridInfo strong {
+    color: var(--text-tertiary);
+    margin-right: 5px;
+}
+
+/* Lista de Insumos (Ticket Style) */
+.detalleVentaList {
+    background-color: var(--bg-dark-input);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color-dark);
+}
+
 .detalleVentaItem {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-dark);
+    font-size: var(--font-size-sm);
 }
-.detalleVentaItem:last-child {
-    border-bottom: none;
-}
+
 .detalleQty {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #A50000;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-right: var(--spacing-sm);
+    min-width: 40px;
 }
+
 .itemInfo {
-    flex-grow: 1;
+    flex: 1;
 }
-.detalleNombre {
-    font-weight: 600;
-    color: #333;
-}
+
+.detalleNombre { color: var(--text-white); }
+
 .detallePrecio {
-    font-size: 0.95rem;
-    color: #555;
+    font-weight: 600;
+    color: var(--color-success);
+    margin-left: var(--spacing-md);
     white-space: nowrap;
 }
 
-/* Total (copiado de Ventas) */
 .detalleTotal {
     display: flex;
     justify-content: space-between;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #A50000;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 2px solid #eee;
+    padding: var(--spacing-md);
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+    border-radius: var(--radius-md);
+    font-weight: bold;
+    font-size: var(--font-size-lg);
 }
 
-/* Acciones (copiado de Ventas) */
+/* Acciones Modal */
 .modalActions {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
+    margin-top: auto;
 }
 
 .cancelButton {
-    padding: 0.7rem 1.5rem;
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+    padding: var(--button-padding);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.2s;
-    background-color: #6c757d;
-    color: white;
-}
-.cancelButton:hover {
-    background-color: #5a6268;
 }
 
+.cancelButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+/* Estados de Carga/Error */
+.errorText {
+    color: var(--color-error-light);
+    text-align: center;
+    padding: var(--spacing-lg);
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: var(--radius-md);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .filtrosContainer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filtroGrupo {
+        min-width: 100%;
+    }
+    
+    .inputsFecha {
+        flex-direction: column;
+    }
+    
+    .filtroAcciones {
+        justify-content: space-between;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .botonAplicar, .botonLimpiar {
+        flex: 1;
+        text-align: center;
+    }
+
+    .gestionGridInfo {
+        grid-template-columns: 1fr;
+    }
+    
+    .gridItem, .gridItemFull { grid-column: span 1; }
+}

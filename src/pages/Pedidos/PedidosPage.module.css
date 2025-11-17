@@ -1,385 +1,438 @@
+/* ============================================
+   PEDIDOS PAGE - Estilos Unificados (POS)
+   ============================================ */
+
 .posContainer {
     display: flex;
-    height: calc(100vh - 60px);
-    /* Altura total menos el Header */
-    background: #f4f7fa;
+    height: calc(100vh - var(--header-height) - 40px); /* Altura total menos header y márgenes */
+    gap: var(--spacing-lg);
+    overflow: hidden; /* Evita scroll en el contenedor principal */
 }
 
-/* Columna Izquierda: Catálogo */
+/* ============================================
+   COLUMNA IZQUIERDA: CATÁLOGO
+   ============================================ */
 .catalogoContainer {
-    flex: 2;
+    flex: 1;
     display: flex;
     flex-direction: column;
+    background-color: var(--bg-dark-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color-dark);
     overflow: hidden;
-    padding: 1rem;
+    box-shadow: var(--shadow-md);
 }
 
+/* Tabs Superiores (Productos / Promociones) */
 .navTabs {
     display: flex;
-    gap: 0.5rem;
-    flex-shrink: 0;
+    background-color: var(--bg-dark-input);
+    border-bottom: 1px solid var(--border-color-dark);
 }
 
 .navTabs button {
-    padding: 0.8rem 1.5rem;
+    flex: 1;
+    padding: var(--spacing-md);
+    background: none;
     border: none;
-    border-radius: 5px 5px 0 0;
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
     cursor: pointer;
-    background-color: #e9ecef;
-    color: #495057;
-    font-weight: 500;
-    font-size: 1rem;
+    transition: all var(--transition-fast);
+    border-bottom: 3px solid transparent;
+}
+
+.navTabs button:hover {
+    background-color: var(--bg-dark-hover);
+    color: var(--text-white);
 }
 
 .navTabs button.active {
-    background-color: #A50000;
-    color: white;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+    background-color: rgba(253, 0, 42, 0.05);
 }
 
+/* Filtros de Tipo de Producto */
 .tipoFiltro {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    flex-shrink: 0;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    overflow-x: auto; /* Scroll horizontal si hay muchos tipos */
+    background-color: var(--bg-dark-card);
+    border-bottom: 1px solid var(--border-color-dark);
+    /* Ocultar scrollbar visualmente pero mantener funcionalidad */
+    scrollbar-width: thin;
+}
+
+.tipoFiltro::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tipoFiltro::-webkit-scrollbar-thumb {
+    background-color: var(--color-neutral);
+    border-radius: var(--radius-pill);
 }
 
 .tipoFiltro button {
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    background: #f8f9fa;
+    white-space: nowrap;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark-input);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
     cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.tipoFiltro button:hover {
+    border-color: var(--color-primary);
+    color: var(--text-white);
 }
 
 .tipoFiltro button.active {
-    background: #fd002a;
-    color: white;
-    border-color: #fd002a;
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(253, 0, 42, 0.4);
+    font-weight: var(--font-weight-semibold);
 }
 
+/* Grid de Productos */
 .gridContainer {
-    flex-grow: 1;
-    /* Ocupa todo el espacio restante */
+    flex: 1;
     overflow-y: auto;
-    /* Añade scroll si los items no caben */
+    padding: var(--spacing-md);
     display: grid;
-    /* auto-fit expande las tarjetas para llenar el espacio */
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-    background: white;
-    margin-top: 1rem;
-    border-radius: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: var(--spacing-md);
+    align-content: start; /* Evita que se estiren si son pocos */
 }
 
+/* Tarjeta de Producto */
 .productCard {
-    border: 1px solid #eee;
-    border-radius: 8px;
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-dark);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all var(--transition-fast);
     display: flex;
     flex-direction: column;
-    height: 250px;
+    height: 200px;
 }
 
 .productCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.productCard:active {
+    transform: scale(0.98);
 }
 
 .productCard img {
     width: 100%;
-    height: 100px;
+    aspect-ratio: 4/3;
     object-fit: contain;
-    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark);
 }
 
 .cardBody {
-    padding: 0.75rem;
-    flex-grow: 1;
+    padding: var(--spacing-sm);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    flex-grow: 1;
+    text-align: center;
 }
 
 .cardTitle {
-    display: block;
-    font-weight: bold;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    font-size: 0.95rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+    /* Limitar a 2 líneas */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .cardPrice {
-    display: block;
-    color: #28a745;
-    font-weight: bold;
-    margin-top: 0.5rem;
+    color: var(--color-success);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
+    margin-top: auto;
 }
 
-/* Columna Derecha: Ticket */
+/* ============================================
+   COLUMNA DERECHA: TICKET
+   ============================================ */
 .ticketContainer {
-    flex: 1;
-    background-color: white;
-    border-left: 1px solid #ddd;
+    width: 380px; /* Ancho fijo para el ticket */
+    background-color: var(--bg-white); /* Ticket claro para contraste */
+    color: var(--text-primary); /* Texto oscuro en ticket */
+    border-radius: var(--radius-lg);
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color-light);
 }
 
 .ticketContainer h3 {
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    margin: 0;
+    padding: var(--spacing-md);
     text-align: center;
-    color: #A50000;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 1rem;
-    margin-top: 0;
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* Lista de Items del Ticket */
 .ticketItems {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
+    padding: var(--spacing-md);
+    background-color: #f9f9f9;
 }
 
 .ticketEmpty {
     text-align: center;
-    color: #888;
-    padding-top: 2rem;
+    color: var(--text-tertiary);
+    font-style: italic;
+    margin-top: var(--spacing-xl);
 }
 
+/* Item Individual del Ticket */
 .ticketItem {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* Centra todo verticalmente */
-    padding: 1rem 0.5rem;
-    border-bottom: 1px dashed #ccc;
+    align-items: flex-start;
+    background-color: #fff;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color-light);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: background-color var(--transition-fast);
 }
 
-/* Estilo para los sub-items de la promo (ej: Doble Cheddar, Fanta) */
+/* Sub-item de promoción (indentado) */
 .promoSubItem {
-    padding-left: 1.5rem;
-    /* Añade indentación */
-    background-color: #fdfdfd;
-}
-
-.promoSubItem .itemInfo .itemNotas {
-    color: #007bff;
-    /* Color diferente para la nota "Parte de..." */
+    margin-left: var(--spacing-lg);
+    background-color: #f4f4f4;
+    border-left: 3px solid var(--color-accent);
+    font-size: 0.9em;
 }
 
 .ticketItemImage {
     width: 40px;
     height: 40px;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     object-fit: cover;
-    margin-right: 10px;
-    flex-shrink: 0;
+    margin-right: var(--spacing-sm);
+    border: 1px solid var(--border-color-light);
 }
 
 .itemInfo {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-    margin-right: 1rem;
-    overflow: hidden;
+    min-width: 0; /* Permite truncar texto */
 }
 
 .itemNombre {
-    font-weight: bold;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
 }
 
 .itemNotas {
-    font-size: 0.85em;
-    color: #666;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
     font-style: italic;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    margin-top: 2px;
 }
 
-.itemAgregados {
-    font-size: 0.85em;
-    color: #28a745;
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 5px;
-}
-
-.itemAgregados li {
-    margin-bottom: 2px;
-}
-
+/* Acciones del Item (Stepper, Precio, Borrar) */
 .itemActions {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-shrink: 0;
-    /* Evita que los botones se compriman */
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-left: var(--spacing-sm);
 }
 
 .quantityStepper {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    background-color: #eee;
+    border-radius: var(--radius-pill);
+    padding: 2px;
 }
 
 .quantityStepper button {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    color: #333;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    border: none;
+    background-color: #fff;
+    color: var(--text-primary);
     font-weight: bold;
     cursor: pointer;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    line-height: 1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.quantityStepper button:hover {
+    background-color: var(--color-primary);
+    color: #fff;
 }
 
 .quantityStepper span {
-    font-weight: bold;
-    min-width: 20px;
+    min-width: 24px;
     text-align: center;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
 }
 
-/* Estilo para la cantidad fija de un sub-item de promo */
 .promoItemQuantity {
+    font-size: var(--font-size-sm);
     font-weight: bold;
-    min-width: 20px;
-    text-align: center;
-    padding: 0 4px;
-    font-size: 0.9em;
-    color: #555;
+    color: var(--color-primary);
 }
 
 .itemPrecio {
-    font-weight: bold;
-    font-size: 1rem;
-    min-width: 60px;
-    text-align: right;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
 }
 
 .removeButton {
-    width: 24px;
-    height: 24px;
+    background: none;
     border: none;
-    background-color: #dc3545;
-    color: white;
-    font-weight: bold;
+    color: var(--color-error);
+    font-size: 1.2rem;
     cursor: pointer;
-    border-radius: 50%;
-    font-size: 1rem;
-    line-height: 24px;
+    line-height: 1;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity var(--transition-fast);
+}
+
+.removeButton:hover {
+    opacity: 1;
 }
 
 .editButton {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #007bff;
-    background-color: #f0f6ff;
-    color: #007bff;
-    font-weight: bold;
+    background: none;
+    border: none;
+    color: var(--color-info);
+    font-size: 1rem;
     cursor: pointer;
-    border-radius: 50%;
-    font-size: 0.8rem;
-    line-height: 22px;
+    line-height: 1;
     padding: 0;
+    margin-bottom: 4px;
 }
 
+.editButton:hover {
+    color: var(--color-info-hover);
+}
+
+/* Sección de Total y Botones Finales */
 .ticketTotal {
     display: flex;
     justify-content: space-between;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
-    padding: 1rem 0.5rem;
-    border-top: 2px solid #333;
+    align-items: center;
+    padding: var(--spacing-md);
+    background-color: #fff;
+    border-top: 1px solid var(--border-color-light);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
 }
 
+/* Botones de Acción del Ticket */
+.clienteButton,
+.vaciarButton,
 .finalizarButton {
-    background-color: #A50000;
-    color: white;
+    width: 100%;
+    padding: var(--spacing-md);
     border: none;
-    padding: 1.5rem;
-    font-size: 1.2rem;
-    font-weight: bold;
     cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.2s;
-    margin-top: 0.5rem;
-}
-
-.finalizarButton:hover {
-    background-color: #c00;
-}
-
-.finalizarButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-.vaciarButton {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 1rem;
-}
-
-.vaciarButton:hover {
-    background-color: #5a6268;
-}
-
-.vaciarButton:disabled {
-    background-color: #ccc;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background-color var(--transition-base);
+    font-size: var(--font-size-sm);
 }
 
 .clienteButton {
-    background-color: #007bff;
-    /* Azul primario */
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    /* Similar a vaciar */
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 1rem;
-    /* Espaciado similar a vaciar */
-    transition: background-color 0.2s;
-    display: block;
-    /* Para que ocupe todo el ancho si quieres */
-    width: 100%;
-    box-sizing: border-box;
+    background-color: #e9ecef;
+    color: var(--text-secondary);
+    border-bottom: 1px solid #ddd;
 }
 
 .clienteButton:hover {
-    background-color: #0056b3;
-    /* Azul más oscuro al pasar el mouse */
+    background-color: #dee2e6;
 }
 
-/* Opcional: Estilo si un cliente está seleccionado */
 .clienteButton.seleccionado {
-    background-color: #17a2b8;
-    /* Un color diferente (ej. cian) */
+    background-color: var(--color-info-light);
+    color: var(--color-info);
+    border-color: var(--color-info);
 }
 
-.clienteButton.seleccionado:hover {
-    background-color: #138496;
+.vaciarButton {
+    background-color: #fff0f1;
+    color: var(--color-error);
+}
+
+.vaciarButton:hover {
+    background-color: #fde8ea;
+}
+
+.finalizarButton {
+    background-color: var(--color-success);
+    color: #fff;
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.finalizarButton:hover {
+    background-color: var(--color-success-hover);
+}
+
+.finalizarButton:disabled {
+    background-color: var(--color-neutral-light);
+    cursor: not-allowed;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .posContainer {
+        flex-direction: column;
+        height: auto; /* Permitir scroll natural en móvil */
+        overflow: visible;
+    }
+
+    .catalogoContainer {
+        height: 500px; /* Altura fija en móvil para scroll interno */
+    }
+
+    .ticketContainer {
+        width: 100%; /* Ticket ocupa todo el ancho abajo */
+        height: auto;
+        max-height: 500px;
+    }
 }

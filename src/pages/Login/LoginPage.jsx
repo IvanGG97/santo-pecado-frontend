@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import styles from './LoginPage.module.css'; 
 import { Eye, EyeOff } from 'lucide-react'; // 1. IMPORTAMOS LOS ICONOS
+import logo from '../../assets/images/logo.jpg';
 
 export default function LoginPage() {
     const { register, handleSubmit, formState: { errors, isValid } } = useForm({ mode: 'onChange' });
@@ -36,11 +37,11 @@ export default function LoginPage() {
     return (
         <div className={styles.container}>
             <div className={styles.containerImg}>
-                <img className={styles.img} src="https://i.imgur.com/w8KqDWP.jpeg" alt="santo pecado letras" />
+                <img className={styles.img} src={logo} alt="santo pecado letras" />
             </div>
             <h2 className={`${styles.title} ${styles.neonText}`}>INICIAR SESIÓN</h2>
 
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} className={styles.loginForm}>
                 <label className={styles.label}>Usuario</label>
                 <input
                     className={styles.input} type="text" placeholder="Tu nombre de usuario"

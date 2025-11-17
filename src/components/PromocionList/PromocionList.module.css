@@ -1,123 +1,260 @@
+/* ============================================
+   PROMOCION LIST - Estilos Unificados
+   ============================================ */
+
+/* Contenedor principal con animación */
+.container {
+    width: 100%;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TOOLBAR (Título y Botón Añadir) ===== */
 .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-primary);
+}
+
+.toolbar h3 {
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+    font-size: var(--font-size-2xl);
+    margin: 0;
+    font-weight: var(--font-weight-bold);
 }
 
 .addButton {
-    background-color: #28a745;
-    color: white;
-    padding: 0.75rem 1.5rem;
+    background-color: var(--color-success);
+    color: var(--text-white);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--button-font-size);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .addButton:hover {
-    background-color: #218838;
+    background-color: var(--color-success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
+/* ===== TABLA ===== */
 .table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-dark-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
 }
 
-.table th, .table td {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-    vertical-align: top;
+/* Cabecera */
+.table thead {
+    background-color: var(--bg-dark-input);
 }
 
 .table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
+    text-align: left;
+    padding: var(--spacing-md);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
 }
 
-/* Estilo para la imagen de la promoción en la tabla */
+/* Cuerpo */
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-dark-hover);
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== IMAGEN DE PROMOCIÓN ===== */
 .promoImage {
     width: 60px;
     height: 60px;
-    border-radius: 5px;
+    border-radius: var(--radius-md);
     object-fit: cover;
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark);
 }
 
+/* ===== LISTA DE PRODUCTOS INCLUIDOS ===== */
 .productList {
-    padding-left: 1rem;
+    list-style: none;
+    padding: 0;
     margin: 0;
-    list-style-type: disc;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
 }
 
 .productList li {
-    margin-bottom: 0.25rem;
+    margin-bottom: 2px;
 }
 
-.actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.editButton, .deleteButton {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.editButton {
-    background-color: #007bff;
-}
-
-.deleteButton {
-    background-color: #dc3545;
-}
-
-/* --- ESTILOS PARA DISPONIBILIDAD Y STOCK --- */
-
-.unavailableRow {
-    opacity: 0.6;
-    background-color: #fef2f2; /* Tono rojizo claro para destacar */
-}
-
-/* Para tachar el producto específico que no está disponible */
+/* Producto no disponible dentro de la promo (tachado) */
 .unavailableProduct {
     text-decoration: line-through;
-    color: #999;
+    color: var(--text-tertiary);
+    opacity: 0.7;
 }
 
-.outOfStockBadge {
-    background-color: #dc3545;
-    color: white;
-    padding: 0.3em 0.6em;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-}
-
-/* Insignias de estado general de la promoción */
+/* ===== BADGES DE ESTADO ===== */
 .statusBadge {
-    padding: 0.3em 0.6em;
-    border-radius: 4px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: white;
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
 }
 
 .statusAvailable {
-    background-color: #28a745; /* Verde */
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--color-success-light);
+    border: 1px solid var(--color-success);
 }
 
 .statusUnavailable {
-    background-color: #6c757d; /* Gris */
+    background-color: rgba(108, 117, 125, 0.2);
+    color: var(--text-tertiary);
+    border: 1px solid var(--color-neutral);
 }
 
-/* Mantenemos los botones siempre visibles y funcionales */
-.unavailableRow .actions {
-    opacity: 1;
+.outOfStockBadge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    background-color: rgba(220, 53, 69, 0.2);
+    color: var(--color-error-light);
+    border: 1px solid var(--color-error);
 }
 
+/* ===== FILA NO DISPONIBLE (GENERAL) ===== */
+.unavailableRow {
+    opacity: 0.6;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.unavailableRow:hover {
+    opacity: 0.8;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ACCIONES ===== */
+.actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.editButton,
+.deleteButton {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+}
+
+.editButton {
+    background-color: var(--color-info);
+    color: var(--text-white);
+}
+
+.editButton:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
+}
+
+.deleteButton {
+    background-color: var(--color-error);
+    color: var(--text-white);
+}
+
+.deleteButton:hover {
+    background-color: var(--color-error-hover);
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+
+/* ===== ESTADO DE CARGA ===== */
+p {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-style: italic;
+    font-size: var(--font-size-lg);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .addButton {
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* Ajuste para tablas en móvil */
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .table th, .table td {
+        padding: var(--spacing-sm);
+    }
+    
+    .actions {
+        flex-direction: column;
+        min-width: 100px;
+    }
+
+    .editButton, .deleteButton {
+        width: 100%;
+        text-align: center;
+    }
+}

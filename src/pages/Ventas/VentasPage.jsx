@@ -78,10 +78,10 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                             <p>No se encontraron detalles de pedido para esta venta.</p>
                         )}
                     </div>
-                       <div className={styles.detalleTotal}>
-                           <strong>Total:</strong>
-                           <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
-                       </div>
+                    <div className={styles.detalleTotal}>
+                        <strong>Total:</strong>
+                        <strong>${new Intl.NumberFormat('es-AR').format(venta.venta_total)}</strong>
+                    </div>
                 </div>
 
                 <div className={styles.modalSection}>
@@ -161,7 +161,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
 const VentasPage = () => {
     const [allVentas, setAllVentas] = useState([]);
     const [estadosVenta, setEstadosVenta] = useState([]);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
@@ -170,7 +170,7 @@ const VentasPage = () => {
     const navigate = useNavigate();
 
     // --- ESTADOS PARA LOS INPUTS DE FILTRO ---
-    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado'); 
+    const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado');
     const [inputEmpleadoSearch, setInputEmpleadoSearch] = useState('');
     const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
     // --- NUEVOS ESTADOS DE INPUT ---
@@ -218,7 +218,7 @@ const VentasPage = () => {
             try {
                 const res = await apiClient.get('/caja/estado/');
                 if (res.data && res.data.caja_estado === true) {
-                    setIsVerifyingCaja(false); 
+                    setIsVerifyingCaja(false);
                 } else {
                     Swal.fire({
                         title: 'Caja Cerrada',
@@ -229,7 +229,7 @@ const VentasPage = () => {
                         allowEscapeKey: false,
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            navigate('/cajas'); 
+                            navigate('/cajas');
                         }
                     });
                 }
@@ -243,7 +243,7 @@ const VentasPage = () => {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                 }).then(() => {
-                    navigate('/inicio'); 
+                    navigate('/inicio');
                 });
             }
         };
@@ -257,7 +257,7 @@ const VentasPage = () => {
         if (!isVerifyingCaja) {
             fetchVentasYEstados(true);
         }
-    }, [fetchVentasYEstados, isVerifyingCaja]); 
+    }, [fetchVentasYEstados, isVerifyingCaja]);
 
 
     // --- LÓGICA DE FILTRADO COMBINADO (MODIFICADA) ---
@@ -318,7 +318,7 @@ const VentasPage = () => {
 
             return true;
         });
-    }, [allVentas, activeFilters]); 
+    }, [allVentas, activeFilters]);
 
     // --- Handlers para filtros ---
     const handleDateChange = (e) => {
@@ -332,7 +332,7 @@ const VentasPage = () => {
     const handleEmpleadoSearchChange = (e) => {
         setInputEmpleadoSearch(e.target.value);
     };
-    
+
     // --- NUEVO: Handlers para inputs de ID ---
     const handleIdVentaChange = (e) => {
         setInputIdVenta(e.target.value);
@@ -340,7 +340,7 @@ const VentasPage = () => {
     const handleIdPedidoChange = (e) => {
         setInputIdPedido(e.target.value);
     };
-    
+
     // --- handleAplicarFiltros (MODIFICADO) ---
     const handleAplicarFiltros = () => {
         setActiveFilters({
@@ -394,12 +394,12 @@ const VentasPage = () => {
             </div>
         );
     }
-    
+
     // --- Renderizado Principal (MODIFICADO CON NUEVOS INPUTS) ---
     return (
         <div className={styles.ventasContainer}>
             <h1>Gestión de Ventas</h1>
-            
+
             <div className={styles.filtrosContainer}>
                 {/* Filtros de Estado */}
                 <div className={styles.filtroGrupo}>
@@ -442,7 +442,7 @@ const VentasPage = () => {
                         className={styles.filtroInput}
                     />
                 </div>
-                
+
                 {/* Filtro por Empleado */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="empleadoSearch">Empleado:</label>
@@ -450,7 +450,7 @@ const VentasPage = () => {
                         type="text"
                         id="empleadoSearch"
                         placeholder="Nombre o Apellido..."
-                        value={inputEmpleadoSearch} 
+                        value={inputEmpleadoSearch}
                         onChange={handleEmpleadoSearchChange}
                         className={styles.filtroInput}
                     />
@@ -458,27 +458,27 @@ const VentasPage = () => {
 
                 {/* Filtros de Fecha */}
                 <div className={styles.filtroGrupo}>
-                     <label>Fecha:</label>
-                     <div className={styles.inputsFecha}>
-                         <label htmlFor="desde">Desde:</label>
-                         <input
-                             type="date"
-                             id="desde"
-                             name="desde"
-                             value={inputDateRange.desde} 
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                         <label htmlFor="hasta">Hasta:</label>
-                         <input
-                             type="date"
-                             id="hasta"
-                             name="hasta"
-                             value={inputDateRange.hasta} 
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                     </div>
+                    <label>Fecha:</label>
+                    <div className={styles.inputsFecha}>
+                        <label htmlFor="desde">Desde:</label>
+                        <input
+                            type="date"
+                            id="desde"
+                            name="desde"
+                            value={inputDateRange.desde}
+                            onChange={handleDateChange}
+                            className={styles.inputFecha}
+                        />
+                        <label htmlFor="hasta">Hasta:</label>
+                        <input
+                            type="date"
+                            id="hasta"
+                            name="hasta"
+                            value={inputDateRange.hasta}
+                            onChange={handleDateChange}
+                            className={styles.inputFecha}
+                        />
+                    </div>
                 </div>
 
                 {/* Botones de Acción de Filtro */}
@@ -487,9 +487,9 @@ const VentasPage = () => {
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
-            
+
             {/* --- Resto del renderizado (Tabla, etc.) sin cambios --- */}
-            
+
             <div className={styles.tableContainer}>
                 {loading ? (
                     <p>Cargando ventas...</p>

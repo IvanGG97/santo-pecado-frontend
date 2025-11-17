@@ -29,7 +29,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         apiClient.get('/inventario/tipos-producto/')
             .then(res => setTiposProducto(res.data))
             .catch(err => console.error("Error al cargar tipos de producto", err));
-        
+
         // Cargar todos los insumos disponibles para la receta
         apiClient.get('/inventario/insumos/')
             .then(res => setAllInsumos(res.data))
@@ -53,7 +53,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
             if (product.receta) {
                 const initialReceta = {};
                 product.receta.forEach(item => {
-                    if(item.insumo) {
+                    if (item.insumo) {
                         initialReceta[item.insumo.id] = item.producto_insumo_cantidad;
                     }
                 });
@@ -64,6 +64,20 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        // --- VALIDACIÓN DE PRECIO EN TIEMPO REAL ---
+        if (name === "producto_precio") {
+            if (value === "") {
+                setFormData(prev => ({ ...prev, [name]: "" }));
+                return;
+            }
+            const numValue = parseFloat(value);
+            if (numValue > 10000000) { // Límite de 10 millones
+                return; // No actualiza el estado si se pasa
+            }
+        }
+        // --- FIN VALIDACIÓN ---
+
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
@@ -85,21 +99,19 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         if (fileInput) fileInput.value = '';
     };
 
-    // --- MANEJADORES DE RECETA CORREGIDOS ---
+    // --- MANEJADORES DE RECETA (Sin cambios) ---
     const handleInsumoSelect = (insumoId) => {
         setReceta(prev => {
             const newReceta = { ...prev };
-            // Corrección: Usamos hasOwnProperty para chequear la existencia de la clave
             if (newReceta.hasOwnProperty(insumoId)) {
-                delete newReceta[insumoId]; // Elimina el insumo de la receta
+                delete newReceta[insumoId];
             } else {
-                newReceta[insumoId] = 1; // Inicia en 1 por defecto
+                newReceta[insumoId] = 1;
             }
             return newReceta;
         });
     };
 
-    // Manejador para el input de texto (permite borrar el '0')
     const handleRecetaQuantityChange = (insumoId, cantidadStr) => {
         if (cantidadStr === '') {
             setReceta(prev => ({ ...prev, [insumoId]: '' }));
@@ -111,30 +123,36 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         }
     };
 
-    // Manejador para los botones '+' y '-'
     const handleRecetaQuantityStep = (insumoId, amount) => {
         setReceta(prev => {
             const currentQty = parseFloat(prev[insumoId]) || 0;
-            // Usamos el 'amount' para sumar o restar. 
-            // Para la unidad 'gramo' podríamos usar steps de 10 o 50
-            const step = (amount > 0 ? 1 : -1); 
+            const step = (amount > 0 ? 1 : -1);
             let newQty = currentQty + step;
             if (newQty < 0) newQty = 0;
-            
+
             return { ...prev, [insumoId]: newQty };
         });
     };
 
-    // --- handleSubmit (SIN CAMBIOS EN LA LÓGICA DE IMAGEN) ---
+    // --- handleSubmit (CON VALIDACIÓN) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // --- RECOMENDACIÓN DE VALIDACIÓN (NUEVO) ---
+        if (!e.target.checkValidity()) {
+            e.target.reportValidity();
+            Swal.fire('Datos Inválidos', 'Por favor, corrige los errores marcados en el formulario.', 'warning');
+            return; // Detiene el envío
+        }
+        // --- FIN RECOMENDACIÓN ---
+
         setLoading(true);
 
         let payload;
         let requestFn;
-        
+
         const recetaPayload = Object.keys(receta)
-            .filter(id => (parseFloat(receta[id]) || 0) > 0) // Filtra cantidades 0 o vacías
+            .filter(id => (parseFloat(receta[id]) || 0) > 0)
             .map(id => ({
                 insumo_id: parseInt(id),
                 cantidad: parseFloat(receta[id])
@@ -157,15 +175,20 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                 payload.producto_imagen = null;
                 payload.producto_imagen_url = null;
             } else if (isEditMode && previewImage) {
+                // Si la imagen de vista previa existe y no es un archivo nuevo, 
+                // no enviamos nada de imagen para que el backend mantenga la existente.
                 delete payload.producto_imagen;
-                delete payload.producto_imagen_url;
+                // Mantenemos la URL si es la que vino del producto
+                if (payload.producto_imagen_url === product.producto_imagen_url) {
+                    delete payload.producto_imagen_url;
+                }
             }
 
             requestFn = isEditMode
                 ? () => apiClient.patch(`/inventario/productos/${product.id}/`, payload)
                 : () => apiClient.post('/inventario/productos/', payload);
         }
-        
+
         try {
             await requestFn();
             Swal.fire('¡Éxito!', `El producto ha sido ${isEditMode ? 'actualizado' : 'creado'}.`, 'success');
@@ -179,7 +202,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         }
     };
 
-    const filteredInsumos = allInsumos.filter(i => 
+    const filteredInsumos = allInsumos.filter(i =>
         i.insumo_nombre.toLowerCase().includes(insumoSearch.toLowerCase())
     );
 
@@ -188,25 +211,61 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
             <div className={styles.modalContent}>
                 <button onClick={onClose} className={styles.closeButton}>&times;</button>
                 <h2>{isEditMode ? 'Editar' : 'Añadir'} Producto</h2>
-                <form onSubmit={handleSubmit} className={styles.form}>
-                    {/* ... (campos de Nombre, Descripción, Precio, Tipo) ... */}
+
+                <form onSubmit={handleSubmit} className={styles.form} noValidate>
+
                     <div className={styles.formGroup}>
                         <label>Nombre</label>
-                        <input name="producto_nombre" value={formData.producto_nombre} onChange={handleChange} className={styles.input} required />
+                        <input
+                            name="producto_nombre"
+                            value={formData.producto_nombre}
+                            onChange={handleChange}
+                            className={styles.input}
+                            required
+                            maxLength={100} // --- NUEVO (Goal 1) ---
+                        />
+                        {/* --- NUEVO: Contador de Caracteres (Goal 1) --- */}
+                        <small className={styles.charCounter}>
+                            {formData.producto_nombre.length} / 100
+                        </small>
                     </div>
-                     <div className={styles.formGroup}>
+
+                    <div className={styles.formGroup}>
                         <label>Descripción</label>
-                        <input name="producto_descripcion" value={formData.producto_descripcion} onChange={handleChange} className={styles.input} />
+                        {/* --- NUEVO: Cambiado a <textarea> (Goal 2) --- */}
+                        <textarea
+                            name="producto_descripcion"
+                            value={formData.producto_descripcion}
+                            onChange={handleChange}
+                            className={styles.input}
+                            maxLength={250} // Límite de 250
+                            rows={3} // Altura inicial
+                        />
+                        {/* --- NUEVO: Contador de Caracteres (Goal 2) --- */}
+                        <small className={styles.charCounter}>
+                            {formData.producto_descripcion.length} / 250
+                        </small>
                     </div>
+
                     <div className={styles.formGroup}>
                         <label>Precio</label>
-                        <input name="producto_precio" value={formData.producto_precio} onChange={handleChange} className={styles.input} type="number" step="0.01" min="0" required />
+                        <input
+                            name="producto_precio"
+                            value={formData.producto_precio}
+                            onChange={handleChange}
+                            className={styles.input}
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="10000000" // --- NUEVO (Goal 3) ---
+                            required
+                        />
                     </div>
                     <div className={styles.formGroup}>
                         <label>Tipo de Producto</label>
                         <select name="tipo_producto" value={formData.tipo_producto} onChange={handleChange} className={styles.input} required>
                             <option value="">-- Seleccionar --</option>
-                            {tiposProducto.map(tipo => ( <option key={tipo.id} value={tipo.id}>{tipo.tipo_producto_nombre}</option> ))}
+                            {tiposProducto.map(tipo => (<option key={tipo.id} value={tipo.id}>{tipo.tipo_producto_nombre}</option>))}
                         </select>
                     </div>
 
@@ -226,8 +285,8 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         <label>URL de Imagen (Alternativa)</label>
                         <input name="producto_imagen_url" value={formData.producto_imagen_url} onChange={handleChange} className={styles.input} type="text" placeholder="https://ejemplo.com/imagen.jpg" autoComplete="off" />
                     </div>
-                    
-                    {/* --- SECCIÓN DE RECETA (INSUMOS) ACTUALIZADA --- */}
+
+                    {/* --- SECCIÓN DE RECETA (INSUMOS) (sin cambios) --- */}
                     <div className={styles.formGroup}>
                         <label>Receta / Insumos</label>
                         <input
@@ -245,7 +304,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                                         checked={receta.hasOwnProperty(insumo.id)}
                                         onChange={() => handleInsumoSelect(insumo.id)}
                                     />
-                                    <img 
+                                    <img
                                         src={insumo.insumo_imagen || insumo.insumo_imagen_url || 'https://placehold.co/40x40/e1e1e1/777?text=N/A'}
                                         alt={insumo.insumo_nombre}
                                         className={styles.itemImage}
@@ -254,7 +313,6 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                                         <span>{insumo.insumo_nombre}</span>
                                         <span className={styles.itemUnit}>({insumo.insumo_unidad})</span>
                                     </label>
-                                    {/* --- STEPPER DE CANTIDAD AÑADIDO --- */}
                                     {receta.hasOwnProperty(insumo.id) && (
                                         <div className={styles.quantityStepper}>
                                             <button type="button" onClick={() => handleRecetaQuantityStep(insumo.id, -1)}>-</button>
@@ -275,7 +333,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         </div>
                     </div>
 
-                    {/* Switch de "Disponible" */}
+                    {/* Switch de "Disponible" (sin cambios) */}
                     <div className={`${styles.formGroup} ${styles.switchGroup}`}>
                         <label>Disponible</label>
                         <div>
@@ -283,7 +341,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                             <label htmlFor="disponible-switch" className={styles.switchLabel}></label>
                         </div>
                     </div>
-                    {/* Botones de acción */}
+                    {/* Botones de acción (sin cambios) */}
                     <div className={styles.buttons}>
                         <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
                         <button type="submit" disabled={loading} className={styles.saveButton}>{loading ? 'Guardando...' : 'Guardar'}</button>
@@ -295,4 +353,3 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
 };
 
 export default AddEditProductModal;
-

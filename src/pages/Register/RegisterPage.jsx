@@ -4,20 +4,30 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './RegisterPage.module.css';
 import Swal from 'sweetalert2';
+import logo from '../../assets/images/logo.jpg';
+import { Eye, EyeOff } from 'lucide-react'; // <-- 1. Importar iconos del "ojo"
 
 export default function RegisterPage() {
     const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({ mode: 'onChange' });
     const { registerUser, loading } = useAuth();
     const navigate = useNavigate();
     const [apiError, setApiError] = useState('');
-    
-    // 1. Estado para controlar la visibilidad de los requisitos de la contraseña
+
+    // --- ESTADOS PARA VALIDACIONES Y UI ---
+
+    // 2. Estados para visibilidad de contraseñas
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    // Observamos el valor del campo de la contraseña en tiempo real
+    // 3. Observamos campos para contadores y validación
     const password = watch("password", "");
+    const username = watch("username", "");
+    const firstName = watch("firstName", "");
+    const lastName = watch("lastName", "");
 
-    // 2. Objeto con la lógica para validar cada requisito de la contraseña
+    // 4. Lógica de requisitos de contraseña
     const passwordChecks = {
         hasSixChars: password.length >= 6,
         hasUpperCase: /[A-Z]/.test(password),
@@ -28,6 +38,7 @@ export default function RegisterPage() {
 
     const onSubmit = async (data) => {
         setApiError('');
+        // El 'data' ya está validado por react-hook-form
         const userData = {
             username: data.username,
             email: data.email,
@@ -57,74 +68,132 @@ export default function RegisterPage() {
     return (
         <div className={styles.container}>
             <div className={styles.containerImg}>
-                <img className={styles.img} src="https://i.imgur.com/w8KqDWP.jpeg" alt="santo pecado letras" />
+                <img className={styles.img} src={logo} alt="santo pecado letras" />
             </div>
             <h2 className={`${styles.title} ${styles.neonText}`}>REGÍSTRATE AHORA</h2>
-            
-            <form onSubmit={handleSubmit(onSubmit)}>
+
+            <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+
+                {/* --- USUARIO --- */}
                 <label className={styles.label}>Usuario</label>
-                <input className={styles.input} {...register("username", { required: "El usuario es obligatorio" })} />
+                <input
+                    className={styles.input}
+                    {...register("username", {
+                        required: "El usuario es obligatorio",
+                        maxLength: { value: 100, message: "El usuario no puede tener más de 100 caracteres" } // Goal 1
+                    })}
+                />
+                {/* Contador de caracteres */}
+                <small className={styles.charCounter}>{username.length} / 100</small>
                 {errors.username && <p className={styles.error}>{errors.username.message}</p>}
 
+                {/* --- NOMBRE --- */}
                 <label className={styles.label}>Nombre</label>
-                <input className={styles.input} {...register("firstName", { required: "El nombre es obligatorio" })} />
+                <input
+                    className={styles.input}
+                    {...register("firstName", {
+                        required: "El nombre es obligatorio",
+                        maxLength: { value: 100, message: "El nombre no puede tener más de 100 caracteres" } // Goal 2
+                    })}
+                />
+                <small className={styles.charCounter}>{firstName.length} / 100</small>
                 {errors.firstName && <p className={styles.error}>{errors.firstName.message}</p>}
-                
+
+                {/* --- APELLIDO --- */}
                 <label className={styles.label}>Apellido</label>
-                <input className={styles.input} {...register("lastName", { required: "El apellido es obligatorio" })} />
+                <input
+                    className={styles.input}
+                    {...register("lastName", {
+                        required: "El apellido es obligatorio",
+                        maxLength: { value: 100, message: "El apellido no puede tener más de 100 caracteres" } // Goal 3
+                    })}
+                />
+                <small className={styles.charCounter}>{lastName.length} / 100</small>
                 {errors.lastName && <p className={styles.error}>{errors.lastName.message}</p>}
 
+                {/* --- DNI --- */}
                 <label className={styles.label}>DNI</label>
-                <input 
+                <input
                     className={styles.input}
-                    type="text"
-                    placeholder="Documento Nacional de Identidad"
-                    {...register("dni")} 
+                    type="text" // Usamos text para poder validar el maxLength
+                    placeholder="Solo números, sin puntos"
+                    {...register("dni", {
+                        required: "El DNI es obligatorio",
+                        pattern: { // Mi validación: solo números
+                            value: /^[0-9]+$/,
+                            message: "El DNI solo debe contener números"
+                        },
+                        minLength: { value: 7, message: "El DNI debe tener al menos 7 dígitos" },
+                        maxLength: { value: 8, message: "El DNI no puede tener más de 8 dígitos" }, // Goal 6
+                        validate: { // Goal 6
+                            minNumber: v => parseInt(v, 10) > 5000000 || "El DNI debe ser un número válido"
+                        }
+                    })}
                 />
-                
+                {errors.dni && <p className={styles.error}>{errors.dni.message}</p>}
+
+                {/* --- TELÉFONO --- */}
                 <label className={styles.label}>Teléfono</label>
-                <input 
+                <input
                     className={styles.input}
                     type="tel"
-                    placeholder="Número de teléfono"
-                    {...register("telefono")} 
+                    placeholder="Ej: +54 9 387 1234567"
+                    {...register("telefono", {
+                        required: "El teléfono es obligatorio",
+                        maxLength: { value: 15, message: "El teléfono no puede tener más de 15 caracteres" }, // Goal 4
+                        pattern: { // Mi validación: números, +, y espacios
+                            value: /^[0-9+\s]+$/,
+                            message: "Número de teléfono no válido"
+                        }
+                    })}
                 />
+                {errors.telefono && <p className={styles.error}>{errors.telefono.message}</p>}
 
+                {/* --- CORREO --- */}
                 <label className={styles.label}>Correo</label>
                 <input
                     className={styles.input}
                     type="email"
-                    {...register("email", { 
+                    {...register("email", {
                         required: "El correo es obligatorio",
                         pattern: {
-                            value: /^\S+@\S+\.\S+$/,
-                            message: "Correo no válido"
+                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/, // Goal 5 (Regex robusta)
+                            message: "Correo no válido (ej: usuario@dominio.com)"
                         }
                     })}
+                    placeholder='Ej: usuario@dominio.com'
                 />
                 {errors.email && <p className={styles.error}>{errors.email.message}</p>}
 
+                {/* --- CONTRASEÑA --- */}
                 <label className={styles.label}>Contraseña</label>
-                <input
-                    className={styles.input}
-                    type="password"
-                    // 3. Actualizamos la validación y añadimos el evento onFocus
-                    {...register("password", { 
-                        required: "La contraseña es obligatoria",
-                        validate: {
-                            hasSixChars: v => v.length >= 6 || "Debe tener al menos 6 caracteres",
-                            hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener al menos una mayúscula",
-                            hasLowerCase: v => /[a-z]/.test(v) || "Debe contener al menos una minúscula",
-                            hasNumber: v => /\d/.test(v) || "Debe contener al menos un número",
-                            hasSpecialChar: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Debe contener al menos un caracter especial",
-                        }
-                    })}
-                    onFocus={() => setIsPasswordFocused(true)}
-                />
-                {/* Mostramos el primer error de validación que encuentre react-hook-form */}
+                {/* Goal 7: Contenedor del "ojo" */}
+                <div className={styles.passwordWrapper}>
+                    <input
+                        className={styles.input}
+                        type={showPassword ? "text" : "password"} // Tipo dinámico
+                        {...register("password", {
+                            required: "La contraseña es obligatoria",
+                            validate: {
+                                hasSixChars: v => v.length >= 6 || "Debe tener al menos 6 caracteres",
+                                hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener al menos una mayúscula",
+                                hasLowerCase: v => /[a-z]/.test(v) || "Debe contener al menos una minúscula",
+                                hasNumber: v => /\d/.test(v) || "Debe contener al menos un número",
+                                hasSpecialChar: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Debe contener al menos un caracter especial",
+                            }
+                        })}
+                        onFocus={() => setIsPasswordFocused(true)}
+                    />
+                    <button
+                        type="button"
+                        className={styles.passwordToggleIcon}
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
                 {errors.password && <p className={styles.error}>{errors.password.message}</p>}
 
-                {/* 4. Lista de requisitos que aparece al hacer focus */}
                 {isPasswordFocused && (
                     <div className={styles.passwordCriteria}>
                         <p className={passwordChecks.hasSixChars ? styles.valid : styles.invalid}>✓ Al menos 6 caracteres</p>
@@ -135,14 +204,26 @@ export default function RegisterPage() {
                     </div>
                 )}
 
+                {/* --- CONFIRMAR CONTRASEÑA --- */}
                 <label className={styles.label}>Confirmar Contraseña</label>
-                <input
-                    className={styles.input}
-                    type="password"
-                    {...register("confirmPassword", {
-                        validate: value => value === password || "Las contraseñas no coinciden"
-                    })}
-                />
+                {/* Goal 7: Contenedor del "ojo" */}
+                <div className={styles.passwordWrapper}>
+                    <input
+                        className={styles.input}
+                        type={showConfirmPassword ? "text" : "password"} // Tipo dinámico
+                        {...register("confirmPassword", {
+                            required: "Debes confirmar la contraseña",
+                            validate: value => value === password || "Las contraseñas no coinciden"
+                        })}
+                    />
+                    <button
+                        type="button"
+                        className={styles.passwordToggleIcon}
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
                 {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword.message}</p>}
 
                 {apiError && <p className={styles.error}>{apiError}</p>}
@@ -165,4 +246,3 @@ export default function RegisterPage() {
         </div>
     );
 }
-

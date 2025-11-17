@@ -1,125 +1,213 @@
+/* ============================================
+   INSUMO SEARCH MODAL - Estilos Unificados
+   ============================================ */
+
+/* ===== MODAL BASE ===== */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1001;
-    /* Ligeramente por encima del modal principal */
+    z-index: var(--z-modal-nested); /* Un nivel más alto por si se abre desde otro modal */
+    backdrop-filter: blur(2px);
 }
 
 .modalContent {
-    background-color: #1a1a1a;
-    color: #fff;
-    padding: 1.5rem 2rem;
-    border-radius: 8px;
-    border: 1px solid #fd002a;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
     width: 90%;
     max-width: 500px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    max-height: 70vh;
-    /* Más pequeño que el modal principal */
+    box-shadow: var(--shadow-modal);
+    animation: modalFadeIn 0.2s ease-out;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== BOTÓN CERRAR ===== */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    color: #aaa;
-    font-size: 2rem;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
+    transition: color var(--transition-base);
+    line-height: 1;
 }
 
 .closeButton:hover {
-    color: #fff;
+    color: var(--text-white);
 }
 
+/* ===== TÍTULO ===== */
 .modalContent h2 {
-    color: #fd002a;
-    text-shadow: 0 0 8px #fd002a;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-md);
     text-align: center;
-    flex-shrink: 0;
+    font-size: var(--font-size-xl);
 }
 
+/* ===== BARRA DE BÚSQUEDA ===== */
 .searchBar {
-    margin-bottom: 1.5rem;
-    flex-shrink: 0;
+    margin-bottom: var(--spacing-md);
 }
 
 .searchInput {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0000ff;
-    background-color: #323743;
-    color: #fff;
-    font-size: 1rem;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
     box-sizing: border-box;
+    transition: all var(--transition-base);
 }
 
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+.searchInput::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* ===== CONTENEDOR DE LA LISTA ===== */
 .insumoListContainer {
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
-    padding-right: 0.5rem;
-    margin-right: -0.5rem;
+    border: 1px solid var(--border-color-dark);
+    border-radius: var(--radius-md);
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: var(--spacing-xs);
+    min-height: 200px;
+    max-height: 400px;
 }
 
+/* ===== ITEM DE INSUMO ===== */
 .insumoItem {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid #333;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-fast);
+    border-bottom: 1px solid var(--border-color-dark);
+}
+
+.insumoItem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .insumoItem:hover {
-    background-color: #323743;
+    background-color: var(--bg-dark-hover);
+    border-color: transparent;
 }
 
+/* Imagen del item */
 .insumoImage {
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
+    width: 45px;
+    height: 45px;
+    border-radius: var(--radius-md);
     object-fit: cover;
-    margin-right: 1rem;
-    flex-shrink: 0;
+    margin-right: var(--spacing-md);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark);
 }
 
+/* Info del item */
 .insumoInfo {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .insumoNombre {
-    font-weight: 500;
-    font-size: 1.1rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
 }
 
 .insumoStock {
-    font-size: 0.85rem;
-    color: #aaa;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
 }
 
-.errorText,
-.noResults {
+/* ===== MENSAJES DE ESTADO ===== */
+.insumoListContainer p {
     text-align: center;
-    padding: 1rem;
-    color: #aaa;
+    padding: var(--spacing-lg);
+    color: var(--text-tertiary);
     font-style: italic;
+    margin: 0;
 }
 
 .errorText {
-    color: #f8d7da;
+    color: var(--color-error-light) !important;
+}
+
+.noResults {
+    color: var(--text-secondary);
+}
+
+/* ===== SCROLLBAR ===== */
+.insumoListContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.insumoListContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.insumoListContainer::-webkit-scrollbar-thumb {
+    background: var(--border-color-dark);
+    border-radius: var(--radius-md);
+}
+
+.insumoListContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+    .modalContent {
+        width: 95%;
+        padding: var(--spacing-md);
+        max-height: 95vh;
+    }
+    
+    .insumoListContainer {
+        max-height: 60vh;
+    }
 }

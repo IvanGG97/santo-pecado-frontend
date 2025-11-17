@@ -1,0 +1,252 @@
+/* ============================================
+   SANTO PECADO - DESIGN TOKENS
+   Sistema centralizado de variables CSS
+   ============================================ */
+
+:root {
+    /* ===== COLORES PRIMARIOS ===== */
+    --color-primary: #fd002a;
+    --color-primary-dark: #A50000;
+    --color-primary-darker: #8E0000;
+    --color-primary-light: #C00000;
+
+    /* ===== COLORES DE ACENTO ===== */
+    --color-accent: #FFC107;
+    --color-accent-glow: rgba(255, 193, 7, 0.5);
+
+    /* ===== COLORES FUNCIONALES ===== */
+    /* Éxito */
+    --color-success: #28a745;
+    --color-success-hover: #218838;
+    --color-success-light: #94d3a2;
+
+    /* Error/Peligro */
+    --color-error: #dc3545;
+    --color-error-hover: #c82333;
+    --color-error-light: #f8d7da;
+    --color-error-bg: #721c24;
+    --color-error-border: #f5c6cb;
+
+    /* Info/Editar */
+    --color-info: #007bff;
+    --color-info-hover: #0056b3;
+    --color-info-light: #e7f3ff;
+
+    /* Warning */
+    --color-warning: #ffc107;
+    --color-warning-hover: #e0a800;
+    --color-warning-light: #fff3cd;
+    --color-warning-text: #856404;
+
+    /* Secundario */
+    --color-secondary: #17a2b8;
+    --color-secondary-hover: #138496;
+
+    /* Neutral/Gris */
+    --color-neutral: #6c757d;
+    --color-neutral-hover: #5a6268;
+    --color-neutral-light: #94a3b8;
+
+    /* ===== FONDOS ===== */
+    /* Fondos oscuros (para modales) */
+    --bg-dark: #1a1a1a;
+    --bg-dark-input: #323743;
+    --bg-dark-card: #4a4a4a;
+    --bg-dark-hover: #2c2c2c;
+
+    /* Fondos claros (para páginas) */
+    --bg-light: #f4f7fa;
+    --bg-light-alt: #f8f9fa;
+    --bg-white: #ffffff;
+
+    /* Overlay */
+    --overlay-dark: rgba(0, 0, 0, 0.7);
+    --overlay-light: rgba(0, 0, 0, 0.6);
+
+    /* ===== BORDES ===== */
+    --border-color-dark: #444;
+    --border-color-light: #eee;
+    --border-color-input: #ccc;
+    --border-color-input-dark: #555;
+    --border-color-primary: var(--color-primary);
+
+    /* ===== TEXTO ===== */
+    --text-primary: #333;
+    --text-secondary: #6c757d;
+    --text-tertiary: #aaa;
+    --text-light: #888;
+    --text-white: #fff;
+    --text-on-dark: #ccc;
+
+    /* ===== TIPOGRAFÍA ===== */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
+    --font-size-3xl: 2rem;
+    /* 32px */
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* ===== ESPACIADO ===== */
+    --spacing-xs: 0.25rem;
+    /* 4px */
+    --spacing-sm: 0.5rem;
+    /* 8px */
+    --spacing-md: 1rem;
+    /* 16px */
+    --spacing-lg: 1.5rem;
+    /* 24px */
+    --spacing-xl: 2rem;
+    /* 32px */
+    --spacing-2xl: 2.5rem;
+    /* 40px */
+    --spacing-3xl: 3rem;
+    /* 48px */
+
+    /* ===== BORDER RADIUS ===== */
+    --radius-sm: 4px;
+    --radius-md: 5px;
+    --radius-lg: 8px;
+    --radius-full: 50%;
+    --radius-pill: 100px;
+
+    /* ===== SOMBRAS ===== */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 5px 15px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 10px 25px rgba(0, 0, 0, 0.3);
+    --shadow-modal: 0 5px 15px rgba(0, 0, 0, 0.5);
+
+    /* Sombras neón */
+    --shadow-neon-primary: 0 0 8px var(--color-primary);
+    --shadow-neon-accent: 0 0 15px var(--color-accent);
+
+    /* ===== TRANSICIONES ===== */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* ===== Z-INDEX ===== */
+    --z-dropdown: 100;
+    --z-sticky: 500;
+    --z-modal: 1000;
+    --z-modal-nested: 1050;
+    --z-tooltip: 1100;
+
+    /* ===== DIMENSIONES ESPECÍFICAS ===== */
+    --sidebar-width: 250px;
+    --header-height: 60px;
+
+    /* Inputs */
+    --input-height: 45px;
+    --input-padding: 0.75rem 1rem;
+    --input-font-size: var(--font-size-base);
+
+    /* Botones */
+    --button-padding: 0.7rem 1.5rem;
+    --button-font-size: 0.95rem;
+
+    /* Modales */
+    --modal-width-sm: 500px;
+    --modal-width-md: 700px;
+    --modal-width-lg: 900px;
+    --modal-max-height: 90vh;
+
+    /* Tablas */
+    --table-padding: 1rem;
+
+    /* ===== BREAKPOINTS (para referencia) ===== */
+    /* No se pueden usar directamente en CSS, pero documentamos */
+    /* --breakpoint-sm: 640px; */
+    /* --breakpoint-md: 768px; */
+    /* --breakpoint-lg: 1024px; */
+    /* --breakpoint-xl: 1280px; */
+}
+
+/* ============================================
+   ESTILOS GLOBALES BASE
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    color: var(--text-primary);
+    background-color: var(--bg-light);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   UTILIDADES DE TEXTO NEÓN
+   ============================================ */
+
+.text-neon-primary {
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+}
+
+.text-neon-accent {
+    color: var(--color-accent);
+    text-shadow: var(--shadow-neon-accent);
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADA (WEBKIT)
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark-input);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
+}
+
+/* ============================================
+   AUTOFILL FIX (para inputs oscuros)
+   ============================================ */
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--bg-dark-input) inset !important;
+    -webkit-text-fill-color: var(--text-white) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

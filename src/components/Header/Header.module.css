@@ -1,38 +1,75 @@
+/* ============================================
+   HEADER - Estilos Unificados
+   ============================================ */
+
 .header {
-    height: 60px;
-    background-color: #ffffff;
+    height: var(--header-height);
+    background-color: var(--bg-white);
     display: flex;
-    justify-content: flex-end; /* Alinea los items a la derecha */
     align-items: center;
-    padding: 0 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 100%;
-    z-index: 500; /* Se asegura que esté por encima del contenido */
+    justify-content: space-between;
+    padding: 0 var(--spacing-xl);
+    border-bottom: 1px solid var(--border-color-light);
+    box-shadow: var(--shadow-sm);
     flex-shrink: 0; /* Evita que el header se encoja */
+    z-index: var(--z-sticky);
 }
 
+/* Información del Usuario */
 .userInfo {
-    font-size: 1rem;
-    color: #333;
-    margin-right: 1.5rem;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .userInfo strong {
-    font-weight: 600;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
 }
 
+/* Botón Cerrar Sesión */
 .logoutButton {
-    background-color: #fd002a;
-    color: white;
-    border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 0.9rem;
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color-input);
+    padding: 6px 16px;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .logoutButton:hover {
-    background-color: #e00028;
+    background-color: var(--color-error-light);
+    color: var(--color-error);
+    border-color: var(--color-error);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+}
+
+.logoutButton:active {
+    transform: translateY(1px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 var(--spacing-md);
+        height: 50px; /* Un poco más compacto en móvil */
+    }
+
+    .userInfo {
+        font-size: var(--font-size-xs);
+    }
+    
+    .logoutButton {
+        padding: 4px 10px;
+        font-size: var(--font-size-xs);
+    }
 }

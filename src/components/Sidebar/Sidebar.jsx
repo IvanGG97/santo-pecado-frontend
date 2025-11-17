@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Sidebar.module.css';
-import logo from '../../assets/images/logo.jpg';
+import logo from '../../assets/images/letras-santo-pecado.jpg';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Sidebar = () => {

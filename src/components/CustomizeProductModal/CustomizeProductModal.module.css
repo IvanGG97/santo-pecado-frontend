@@ -1,193 +1,340 @@
+/* ============================================
+   CUSTOMIZE PRODUCT MODAL - Estilos Unificados
+   ============================================ */
+
+/* ===== MODAL BASE ===== */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(3px); /* Efecto blur opcional */
 }
 
 .modalContent {
-    background-color: #1a1a1a;
-    color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid #fd002a;
-    width: 90%;
-    max-width: 700px; /* Más ancho para las dos columnas */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    animation: fadeIn 0.3s ease-out;
-    max-height: 90vh;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    width: 95%;
+    max-width: var(--modal-width-lg); /* Usamos el ancho grande para las columnas */
+    box-shadow: var(--shadow-modal);
+    animation: modalFadeIn 0.3s ease-out;
+    max-height: var(--modal-max-height);
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
+/* ===== BOTÓN CERRAR ===== */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    color: #aaa;
-    font-size: 2rem;
-    font-weight: bold;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
+    transition: color var(--transition-base);
     line-height: 1;
+    z-index: 1;
 }
+
 .closeButton:hover {
-    color: #fff;
+    color: var(--text-white);
 }
 
+/* ===== TÍTULO ===== */
 .modalContent h2 {
-    color: #fd002a;
-    text-shadow: 0 0 8px #fd002a;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-xl);
     text-align: center;
+    flex-shrink: 0;
+    font-size: var(--font-size-2xl);
+    border-bottom: 1px solid var(--border-color-dark);
+    padding-bottom: var(--spacing-md);
 }
 
+/* ===== LAYOUT DE COLUMNAS ===== */
 .columns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    overflow-y: auto;
-    padding: 1rem;
-    /* Corrección para que el scroll no tape el contenido */
-    margin-right: -1rem;
-    padding-right: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-xl);
+    flex: 1;
+    overflow-y: auto; /* Scroll interno si es muy alto */
+    padding-right: var(--spacing-sm); /* Espacio para scrollbar */
+    margin-bottom: var(--spacing-lg);
 }
 
-/* Cuando solo hay una columna (editando promo), ocupa todo el ancho */
-.columns.singleColumn {
+/* Modificadores de columna (opcionales si usas grid auto-fit, pero buenos para forzar estructuras) */
+.singleColumn {
     grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 0 auto; /* Centrado */
+}
+
+.threeColumns {
+    /* Por defecto el grid auto-fit ya lo maneja, pero puedes forzar si quieres */
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Fix para scroll en flex items */
 }
 
 .column h3 {
-    border-bottom: 1px solid #fd002a;
-    padding-bottom: 0.5rem;
+    color: var(--color-accent);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-input-dark);
+    padding-bottom: var(--spacing-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
+/* Contenedor de lista con scroll propio si es necesario */
 .listContainer {
-    max-height: 50vh; /* Aumentamos la altura de la lista */
+    flex: 1;
     overflow-y: auto;
-    background: #323743;
-    border-radius: 8px;
-    padding: 1rem;
-    border: 1px solid #444;
+    padding-right: var(--spacing-xs);
+    max-height: 400px; /* Altura máxima por columna */
 }
 
-/* --- ESTILOS UNIFICADOS PARA LOS ITEMS DE LISTA --- */
+/* ===== ITEMS DE LISTA (CHECKBOXES) ===== */
 .checkItem {
     display: flex;
-    align-items: center;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-}
-.checkItem input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 1rem;
-    accent-color: #fd002a;
-    flex-shrink: 0; /* Evita que el checkbox se encoja */
-}
-.checkItem label { 
-    margin: 0;
-    cursor: pointer;
+    align-items: center; /* Alineación vertical centro */
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-dark-input);
+    transition: background-color var(--transition-fast);
+    border: 1px solid transparent;
 }
 
-/* Estilo para el label del agregado (nombre + precio) */
+.checkItem:hover {
+    background-color: var(--bg-dark-hover);
+    border-color: var(--border-color-dark);
+}
+
+/* Checkbox nativo + Label */
+.checkItem input[type="checkbox"] {
+    margin-right: var(--spacing-md);
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.checkItem label {
+    cursor: pointer;
+    flex-grow: 1;
+    font-size: var(--font-size-sm);
+    user-select: none;
+    display: flex;
+    justify-content: space-between; /* Separar nombre y precio */
+    align-items: center;
+}
+
+/* Label especial para items con precio (agregados) */
 .itemLabel {
     display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    margin: 0;
-    cursor: pointer;
-    overflow: hidden; /* Para manejar nombres largos */
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    justify-content: space-between;
+    width: 100%;
 }
-.itemPrice {
-    font-size: 0.85em;
-    color: #28a745; /* Verde para el precio */
-    font-weight: bold;
-}
-/* ---------------------------------------------------- */
 
-.noAgregados {
-    color: #888;
+.itemPrice {
+    color: var(--color-success);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-xs);
+    margin-left: var(--spacing-sm);
+}
+
+/* Mensaje "No hay items" */
+.noItems {
+    color: var(--text-tertiary);
     font-style: italic;
     text-align: center;
+    padding: var(--spacing-md);
+    font-size: var(--font-size-sm);
 }
 
+/* ===== STEPPER DE CANTIDAD (Para Agregados) ===== */
 .quantityStepper {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-left: auto; /* Empuja el stepper a la derecha */
+    gap: var(--spacing-xs);
+    margin-left: var(--spacing-sm);
+    background-color: var(--bg-dark-card);
+    padding: 2px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color-dark);
 }
+
 .quantityStepper button {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid #fd002a;
-    background-color: #323743;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    border: none;
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    padding-bottom: 2px;
+    padding-bottom: 2px; /* Ajuste visual vertical */
+    transition: background-color var(--transition-fast);
 }
+
+.quantityStepper button:hover {
+    background-color: var(--color-primary);
+}
+
 .quantityInput {
-    width: 50px;
-    padding: 5px;
+    width: 30px;
+    background: transparent;
+    border: none;
+    color: var(--text-white);
     text-align: center;
-    border: 1px solid #555;
-    background-color: #4a4a4a;
-    color: white;
-    border-radius: 5px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: 0;
     -moz-appearance: textfield;
 }
+
+.quantityInput:focus {
+    outline: none;
+}
+
 .quantityInput::-webkit-outer-spin-button,
 .quantityInput::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
+/* ===== SPINNER DE CARGA ===== */
+.spinner {
+    animation: spin 1s linear infinite;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
 .buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #333;
-}
-.cancelButton, .saveButton {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-}
-.cancelButton {
-    background-color: #6c757d;
-    color: white;
-}
-.saveButton {
-    background-color: #28a745;
-    color: white;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color-dark);
+    margin-top: auto; /* Empuja al fondo si hay espacio */
 }
 
+.cancelButton,
+.saveButton {
+    padding: var(--button-padding);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--button-font-size);
+}
+
+.cancelButton {
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+}
+
+.cancelButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+.saveButton {
+    background-color: var(--color-success);
+    color: var(--text-white);
+}
+
+.saveButton:hover {
+    background-color: var(--color-success-hover);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+.columns::-webkit-scrollbar,
+.listContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+.columns::-webkit-scrollbar-track,
+.listContainer::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-md);
+}
+
+.columns::-webkit-scrollbar-thumb,
+.listContainer::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+.columns::-webkit-scrollbar-thumb:hover,
+.listContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .modalContent {
+        width: 98%;
+        padding: var(--spacing-md);
+        max-height: 95vh;
+    }
+
+    .columns {
+        grid-template-columns: 1fr; /* En móvil, una columna debajo de otra */
+        gap: var(--spacing-lg);
+    }
+    
+    .listContainer {
+        max-height: 250px; /* Menos altura por lista en móvil */
+    }
+
+    .buttons {
+        flex-direction: column-reverse;
+    }
+
+    .cancelButton, .saveButton {
+        width: 100%;
+    }
+}

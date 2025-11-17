@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import apiClient from '../../services/api';
 import Swal from 'sweetalert2';
 import styles from './ResetPasswordPage.module.css';
+import logo from '../../assets/images/logo.jpg';
+import { Eye, EyeOff } from 'lucide-react'; // 1. Importar los iconos
 
 const ResetPasswordPage = () => {
     const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm({ mode: 'onChange' });
@@ -12,6 +14,10 @@ const ResetPasswordPage = () => {
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState('');
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+    // --- 2. Añadir estados para visibilidad ---
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Observamos el valor de la contraseña en tiempo real
     const password = watch("password", "");
@@ -50,31 +56,40 @@ const ResetPasswordPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.containerImg}>
-                <img className={styles.img} src="https://i.imgur.com/w8KqDWP.jpeg" alt="santo pecado letras" />
+                <img className={styles.img} src={logo} alt="santo pecado letras" />
             </div>
             <h2 className={`${styles.title} ${styles.neonText}`}>RESTABLECER CONTRASEÑA</h2>
             
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+                
+                {/* --- 3. CAMPO NUEVA CONTRASEÑA CON "OJO" --- */}
                 <label className={styles.label}>Nueva Contraseña</label>
-                <input
-                    className={styles.input}
-                    type="password"
-                    onFocus={() => setIsPasswordFocused(true)}
-                    {...register("password", { 
-                        required: "La contraseña es obligatoria",
-                        validate: {
-                            hasSixChars: v => v.length >= 6 || "Debe tener al menos 6 caracteres",
-                            hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener una mayúscula",
-                            hasLowerCase: v => /[a-z]/.test(v) || "Debe contener una minúscula",
-                            hasNumber: v => /\d/.test(v) || "Debe contener un número",
-                            hasSpecialChar: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Debe contener un caracter especial",
-                        }
-                    })}
-                />
-                {/* Muestra el primer error de validación que encuentra react-hook-form */}
+                <div className={styles.passwordWrapper}>
+                    <input
+                        className={styles.input}
+                        type={showPassword ? "text" : "password"} // Tipo dinámico
+                        onFocus={() => setIsPasswordFocused(true)}
+                        {...register("password", { 
+                            required: "La contraseña es obligatoria",
+                            validate: {
+                                hasSixChars: v => v.length >= 6 || "Debe tener al menos 6 caracteres",
+                                hasUpperCase: v => /[A-Z]/.test(v) || "Debe contener una mayúscula",
+                                hasLowerCase: v => /[a-z]/.test(v) || "Debe contener una minúscula",
+                                hasNumber: v => /\d/.test(v) || "Debe contener un número",
+                                hasSpecialChar: v => /[!@#$%^&*(),.?":{}|<>]/.test(v) || "Debe contener un caracter especial",
+                            }
+                        })}
+                    />
+                    <button 
+                        type="button" 
+                        className={styles.passwordToggleIcon} 
+                        onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
                 {errors.password && <p className={styles.error}>{errors.password.message}</p>}
 
-                {/* Lista de requisitos que aparece al hacer focus */}
                 {isPasswordFocused && (
                     <div className={styles.passwordCriteria}>
                         <p className={passwordChecks.hasSixChars ? styles.valid : styles.invalid}>✓ Al menos 6 caracteres</p>
@@ -85,14 +100,24 @@ const ResetPasswordPage = () => {
                     </div>
                 )}
                 
+                {/* --- 4. CAMPO CONFIRMAR CONTRASEÑA CON "OJO" --- */}
                 <label className={styles.label}>Confirmar Nueva Contraseña</label>
-                <input
-                    className={styles.input}
-                    type="password"
-                    {...register("confirmPassword", {
-                        validate: value => value === password || "Las contraseñas no coinciden"
-                    })}
-                />
+                <div className={styles.passwordWrapper}>
+                    <input
+                        className={styles.input}
+                        type={showConfirmPassword ? "text" : "password"} // Tipo dinámico
+                        {...register("confirmPassword", {
+                            validate: value => value === password || "Las contraseñas no coinciden"
+                        })}
+                    />
+                    <button 
+                        type="button" 
+                        className={styles.passwordToggleIcon} 
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                </div>
                 {errors.confirmPassword && <p className={styles.error}>{errors.confirmPassword.message}</p>}
 
                 {apiError && <p className={styles.error}>{apiError}</p>}
@@ -116,4 +141,3 @@ const ResetPasswordPage = () => {
 };
 
 export default ResetPasswordPage;
-

@@ -1,198 +1,263 @@
-/* --- Contenedor Principal (Renombrado de .comprasContainer) --- */
+/* ============================================
+   EMPLEADO PAGE - Estilos Unificados
+   ============================================ */
+
 .container {
-    padding: 2rem;
-    background-color: #f4f7fa;
+    width: 100%;
     min-height: 100vh;
+    background-color: transparent;
+    padding: var(--spacing-lg);
+    padding-bottom: 80px;
+    animation: fadeIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .container h1 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 2rem;
+    font-size: var(--font-size-3xl);
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+    margin: 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-primary);
 }
 
-/* --- Barra de Filtros (Copiado de ComprasPage) --- */
+/* ============================================
+   SECCIÓN DE FILTROS
+   ============================================ */
 .filtrosContainer {
+    background-color: var(--bg-dark-card);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
+    
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    background-color: #fff;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    align-items: flex-end; /* Alinea botones y inputs */
+    gap: var(--spacing-lg);
+    align-items: flex-end;
 }
 
 .filtroGrupo {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    flex-grow: 1; /* Ocupa espacio disponible */
-    min-width: 150px; /* Ancho mínimo */
+    gap: var(--spacing-xs);
+    flex: 1 1 180px;
+    min-width: 160px;
 }
 
 .filtroGrupo label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #555;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.filtroInput,
-.inputFecha,
-.filtroGrupo select {
-    padding: 0.6rem 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.95rem;
-    background-color: #fdfdfd;
-    box-sizing: border-box; 
+/* Inputs Generales */
+.filtroInput {
+    width: 100%;
+    padding: var(--input-padding);
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-base);
+    height: var(--input-height);
+    box-sizing: border-box;
 }
 
-.inputsFecha {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.inputsFecha label {
-    font-size: 0.9rem;
-    color: #777;
-    margin: 0;
-    flex-shrink: 0;
+.filtroInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
 }
 
-/* --- Estilos para botones de filtro (Copiado de ComprasPage) --- */
+/* Botones de Filtro de Rol */
 .botonesFiltroEstado {
     display: flex;
+    gap: var(--spacing-xs);
     flex-wrap: wrap;
-    gap: 0.5rem;
 }
 
 .botonFiltro {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    background-color: #f8f9fa; /* Inactivo */
-    color: #555;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark-input);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
 }
 
-.botonFiltro:hover:not(.activo) {
-    background-color: #e9ecef;
+.botonFiltro:hover {
+    background-color: var(--bg-dark-hover);
+    color: var(--text-white);
 }
 
 .botonFiltro.activo {
-    background-color: #A50000; /* Principal */
-    color: white;
-    border-color: #A50000;
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(253, 0, 42, 0.3);
+    font-weight: var(--font-weight-semibold);
 }
 
+/* Acciones de Filtro */
 .filtroAcciones {
     display: flex;
-    gap: 0.75rem;
-    margin-left: auto; 
-    flex-basis: 100%; 
+    gap: var(--spacing-md);
+    flex: 1 1 auto;
     justify-content: flex-end;
-    margin-top: 1rem; 
-}
-
-.botonLimpiar,
-.botonAplicar {
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    padding-bottom: 2px;
+    min-width: 200px;
 }
 
 .botonLimpiar {
-    background-color: #6c757d;
-    color: white;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: var(--button-padding);
 }
+
 .botonLimpiar:hover {
-    background-color: #5a6268;
+    color: var(--text-white);
 }
 
 .botonAplicar {
-    background-color: #A50000;
-    color: white;
-}
-.botonAplicar:hover {
-    background-color: #8a0000;
+    background-color: var(--color-info);
+    color: var(--text-white);
+    border: none;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-base);
 }
 
-/* --- Estilos de la Tabla (Copiado de ComprasPage) --- */
+.botonAplicar:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: var(--shadow-neon-accent);
+}
+
+/* ============================================
+   TABLA DE EMPLEADOS
+   ============================================ */
 .tableContainer {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: auto;
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-dark-card);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* Ajustado para empleados */
-}
-
-.table th,
-.table td {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-    vertical-align: middle;
+    min-width: 800px;
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
 }
 
 .table th {
-    background-color: #f8f9fa;
-    color: #6c757d;
-    font-size: 0.85rem;
+    background-color: var(--bg-dark-input);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-md);
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-dark-hover);
+}
+
+/* Acciones de Tabla */
+.actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.actionButton {
+    padding: 6px 12px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.table tbody tr:hover {
-    background-color: #fdfdfd;
-}
-
-/* --- Estilos para los botones de Acción de la tabla --- */
-.actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-/* Botón de acción genérico (para mantener consistencia) */
-.actionButton {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
 .editButton {
-    background-color: #007bff; /* Azul para editar */
-    color: white;
+    background-color: var(--color-info);
+    color: var(--text-white);
 }
+
 .editButton:hover {
-    background-color: #0056b3;
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
 }
 
-/* --- Estados de Carga y Error --- */
-.loading,
+/* Estados de Carga/Error */
 .errorText {
+    color: var(--color-error-light);
     text-align: center;
-    padding: 2rem;
-    font-size: 1.2rem;
-    color: #6c757d;
+    padding: var(--spacing-lg);
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: var(--radius-md);
 }
 
-.errorText {
-    color: #dc3545;
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .filtrosContainer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filtroGrupo {
+        min-width: 100%;
+    }
+
+    .filtroAcciones {
+        justify-content: space-between;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .botonAplicar, .botonLimpiar {
+        flex: 1;
+        text-align: center;
+    }
 }

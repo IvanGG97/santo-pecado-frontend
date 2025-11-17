@@ -1,116 +1,257 @@
+/* ============================================
+   PRODUCT LIST - Estilos Unificados
+   ============================================ */
+
+/* Contenedor principal con animación */
+.container {
+    width: 100%;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TOOLBAR ===== */
 .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    gap: 1rem; /* Añade espacio entre los elementos */
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-primary);
+    gap: var(--spacing-md);
+    flex-wrap: wrap; /* Para que se adapte en móviles */
 }
 
+/* Input de Búsqueda */
 .searchInput {
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 300px;
-    font-size: 1rem;
+    flex: 1;
+    min-width: 250px;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
+    transition: all var(--transition-base);
 }
 
-.addButton {
-    background-color: #28a745;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    white-space: nowrap; /* Evita que el texto se parta */
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
 }
 
-.addButton:hover {
-    background-color: #218838;
+.searchInput::placeholder {
+    color: var(--text-tertiary);
 }
 
-/* --- ESTILOS PARA EL NUEVO BOTÓN DE FILTRO --- */
+/* Botones del Toolbar */
 .toggleButton {
-    padding: 0.75rem 1.5rem;
-    border: 1px solid #007bff;
-    background-color: white;
-    color: #007bff;
-    border-radius: 5px;
-    font-weight: bold;
+    background-color: var(--color-secondary);
+    color: var(--text-white);
+    border: none;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--button-font-size);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-base);
     white-space: nowrap;
 }
 
 .toggleButton:hover {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--color-secondary-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
 }
-/* ------------------------------------------- */
 
+.addButton {
+    background-color: var(--color-success);
+    color: var(--text-white);
+    border: none;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--button-font-size);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+}
+
+.addButton:hover {
+    background-color: var(--color-success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* ===== TABLA ===== */
 .table {
     width: 100%;
-    border-collapse: collapse;
-    text-align: left;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-dark-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
 }
 
-.table th, .table td {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle; /* Centra verticalmente el contenido de las celdas */
+/* Cabecera */
+.table thead {
+    background-color: var(--bg-dark-input);
 }
 
 .table th {
-    background-color: #f8f9fa;
+    text-align: left;
+    padding: var(--spacing-md);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
 }
 
+/* Cuerpo */
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-dark-hover);
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+/* Resaltar el precio */
+.table td:nth-child(4) { /* Asumiendo que precio es la 4ta columna */
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-success-light);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== IMAGEN DEL PRODUCTO ===== */
 .productImage {
-    width: 60px;
-    height: 60px;
-    border-radius: 5px;
-    object-fit: contain;
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark);
 }
 
+/* ===== ESTADO NO DISPONIBLE ===== */
+/* Usamos opacity para "apagar" la fila visualmente */
+.unavailableRow {
+    opacity: 0.5;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.unavailableRow:hover {
+    opacity: 0.7; /* Un poco más visible al pasar el mouse */
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ACCIONES ===== */
 .actions {
     display: flex;
-    gap: 0.5rem;
-    align-items: center; /* Alinea los botones verticalmente */
+    gap: var(--spacing-sm);
+    flex-wrap: wrap; /* Si hay muchos botones, que bajen */
 }
 
 .actionButton {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background-color: #f8f9fa;
-    border-radius: 5px;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    
+    /* Estilo por defecto (Botón Ver Detalle) */
+    background-color: var(--color-neutral);
+    color: var(--text-white);
 }
 
+.actionButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+/* Botón Editar */
 .editButton {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
+    background-color: var(--color-info);
+    color: var(--text-white);
 }
 
+.editButton:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
+}
+
+/* Botón Borrar */
 .deleteButton {
-    background-color: #dc3545;
-    color: white;
-    border-color: #dc3545;
+    background-color: var(--color-error);
+    color: var(--text-white);
 }
 
-/* --- ESTILO PARA LA FILA DE PRODUCTO NO DISPONIBLE --- */
-.unavailableRow {
-    opacity: 0.5;
-    background-color: #f8f9fa;
+.deleteButton:hover {
+    background-color: var(--color-error-hover);
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
 }
 
-/* Evita que los botones se atenúen junto con la fila */
-.unavailableRow .actions {
-    opacity: 1;
+/* ===== ESTADO DE CARGA ===== */
+p {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-style: italic;
+    font-size: var(--font-size-lg);
 }
 
-.unavailableRow .actions button {
-    pointer-events: all; /* Asegura que los botones sigan siendo clickeables */
-}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
+    .searchInput,
+    .toggleButton,
+    .addButton {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Tabla responsive básica */
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .table th, .table td {
+        padding: var(--spacing-sm);
+    }
+    
+    .actions {
+        flex-direction: column;
+        min-width: 100px;
+    }
+
+    .actionButton {
+        width: 100%;
+        text-align: center;
+    }
+}

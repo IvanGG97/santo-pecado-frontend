@@ -1,338 +1,455 @@
-/* --- Estilos del Modal (Oscuro, similar a los otros) --- */
+/* ============================================
+   ADD COMPRA MODAL - Estilos Unificados
+   ============================================ */
+
+/* ===== MODAL BASE ===== */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: var(--z-modal);
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
 }
 
 .modalContent {
-    background-color: #1a1a1a;
-    color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid #fd002a;
-    width: 90%;
-    max-width: 900px; /* Más ancho para la tabla de detalles */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    max-height: 90vh;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    width: 100%;
+    max-width: 80%;
+    min-width: auto;
+    box-shadow: var(--shadow-modal);
+    max-height: 85vh;
     display: flex;
     flex-direction: column;
     position: relative;
+    animation: modalFadeIn 0.3s ease-out;
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== BOTÓN CERRAR ===== */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    color: #aaa;
-    font-size: 2rem;
-    font-weight: bold;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
     line-height: 1;
-}
-.closeButton:hover {
-    color: #fff;
+    transition: color var(--transition-base);
+    z-index: 10;
 }
 
+.closeButton:hover {
+    color: var(--text-white);
+}
+
+/* ===== TÍTULO ===== */
 .modalContent h2 {
-    color: #fd002a;
-    text-shadow: 0 0 8px #fd002a;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-xl);
     text-align: center;
     flex-shrink: 0;
+    font-size: var(--font-size-2xl);
 }
 
+/* ===== FORMULARIO ===== */
 .form {
     flex: 1;
     overflow-y: auto;
-    padding: 0 0.5rem;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+    max-width: none;
+    box-sizing: border-box;
 }
 
 /* Grid para Proveedor y Método de Pago */
 .formGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem 1.5rem;
-    margin-bottom: 2rem;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .formGroup {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .formGroup label {
-    margin-bottom: 0.5rem;
-    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    color: var(--text-on-dark);
 }
 
-/* --- NUEVO: Grupo de Input + Botón (para Proveedor) --- */
+/* ===== INPUT GROUP (Proveedor + Botón) ===== */
 .inputGroup {
     display: flex;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
     align-items: center;
+    width: 100%;
 }
-/* Display del proveedor seleccionado */
+
 .proveedorDisplay {
-    flex-grow: 1;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0000ff;
-    background-color: #323743;
-    color: #fff;
-    font-size: 1rem;
+    flex: 1;
+    min-width: 0;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
     box-sizing: border-box;
-    height: 45px; /* Misma altura que el input/select */
-    line-height: 1.5; /* Centrar verticalmente */
+    height: var(--input-height);
+    line-height: var(--line-height-normal);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.manageButton {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 0 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    flex-shrink: 0;
-    height: 45px; /* Misma altura */
-    font-size: 0.9rem;
-}
-.manageButton:hover {
-    background-color: #5a6268;
-}
-/* --- FIN NUEVO --- */
 
+.manageButton {
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0 var(--spacing-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+    flex-shrink: 0;
+    height: var(--input-height);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+}
+
+.manageButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+/* ===== INPUTS Y SELECTS ===== */
 .input,
 select {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0000ff;
-    background-color: #323743;
-    color: #fff;
-    font-size: 1rem;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
     box-sizing: border-box;
-    height: 45px; /* Altura fija */
+    height: var(--input-height);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
 }
 
 select option {
-    background-color: #323743;
-    color: #fff;
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
 }
 
-/* --- Estilos para la sección de Detalles (Insumos) --- */
+/* ===== SECCIÓN DE DETALLES (TABLA DE INSUMOS) ===== */
 .detallesContainer {
-    margin-top: 2rem;
-    border-top: 1px solid #444;
-    padding-top: 1.5rem;
+    margin-top: var(--spacing-xl);
+    border-top: 1px solid var(--border-color-dark);
+    padding-top: var(--spacing-lg);
+    width: 100%;
+    box-sizing: border-box;
 }
+
 .detallesContainer h4 {
     margin-top: 0;
-    margin-bottom: 1rem;
-    color: #eee;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-on-dark);
+    font-size: var(--font-size-lg);
 }
 
 /* Lista scrollable de detalles */
 .detallesList {
-    max-height: 250px;
+    max-height: 300px;
     overflow-y: auto;
-    padding: 0.5rem;
-    margin-bottom: 1rem;
-    background-color: rgba(0,0,0,0.1);
-    border-radius: 5px;
+    overflow-x: visible;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color-dark);
+    width: 100%;
+    box-sizing: border-box;
 }
+
 .noInsumos {
     text-align: center;
-    color: #888;
+    color: var(--text-light);
     font-style: italic;
-    padding: 1rem 0;
+    padding: var(--spacing-md) 0;
 }
 
 /* Fila de la tabla (header y body) */
-/* --- GRID ACTUALIZADO (6 columnas) --- */
 .detalleRow {
     display: grid;
-    /* Insumo | Cant | U. Compra | Precio | Subtotal | Quitar */
-    grid-template-columns: 2.5fr 1fr 1.2fr 1.5fr 1.5fr auto;
-    gap: 0.75rem;
+    grid-template-columns: 2.5fr 1fr 1.2fr 1.3fr 1.2fr 60px;
+    gap: var(--spacing-md);
     align-items: center;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #333;
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-dark);
+    width: 100%;
+    box-sizing: border-box;
 }
+
 .detalleRow:last-child {
     border-bottom: none;
     margin-bottom: 0;
 }
 
 .detallesHeader {
-    font-weight: bold;
-    color: #aaa;
-    border-bottom: 2px solid #555;
-    margin-bottom: 1rem;
-    font-size: 0.8rem; /* Más pequeño */
-    padding-right: 0.5rem; /* Alinea con la lista */
-    padding-left: 0.5rem;
-}
-.detallesHeader .detalleInput, 
-.detallesHeader .removeButton,
-.detallesHeader .subtotal,
-.detallesHeader .detalleSelect {
-    visibility: hidden;
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    border-bottom: 2px solid var(--color-primary);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: rgba(253, 0, 42, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 /* Inputs y Selects en la fila */
 .detalleSelect,
 .detalleInput {
     width: 100%;
-    padding: 8px 10px;
-    border-radius: 5px;
-    border: 1px solid #ff0000ff;
-    background-color: #323743;
-    color: #fff;
-    font-size: 0.95rem;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
     box-sizing: border-box;
-    height: 40px; /* Más bajos */
+    height: 38px;
+    transition: border-color var(--transition-fast);
+}
+
+.detalleSelect:focus,
+.detalleInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
 }
 
 /* Nombre del insumo (texto) */
 .detalleInsumoNombre {
-    font-size: 0.95rem;
-    padding: 8px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex; /* Para poner la unidad base abajo */
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs);
+    display: flex;
     flex-direction: column;
+    gap: 2px;
 }
+
 .detalleInsumoNombre small {
-    font-size: 0.8em;
-    color: #aaa;
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
     font-style: italic;
 }
-/* --- FIN NUEVO --- */
 
 .subtotal {
-    font-weight: bold;
+    font-weight: var(--font-weight-semibold);
     white-space: nowrap;
     text-align: right;
-    font-size: 0.95rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-success);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .removeButton {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--color-error);
+    color: var(--text-white);
     border: none;
-    border-radius: 50%;
+    border-radius: var(--radius-full);
     width: 30px;
     height: 30px;
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
     line-height: 1;
     padding: 0;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-base);
+    flex-shrink: 0;
 }
+
 .removeButton:hover {
-    background-color: #c82333;
+    background-color: var(--color-error-hover);
 }
 
 .addDetalleButton {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--color-info);
+    color: var(--text-white);
     border: none;
-    padding: 0.6rem 1rem;
-    border-radius: 5px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-weight: 500;
-    margin-top: 0.5rem; /* Más cerca de la lista */
-}
-.addDetalleButton:hover {
-    background-color: #0056b3;
+    font-weight: var(--font-weight-medium);
+    margin-top: var(--spacing-sm);
+    transition: background-color var(--transition-base);
 }
 
-/* --- Total y Botones Finales --- */
+.addDetalleButton:hover {
+    background-color: var(--color-info-hover);
+}
+
+/* ===== TOTAL Y BOTONES FINALES ===== */
 .totalContainer {
     text-align: right;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #444;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color-dark);
 }
+
 .totalContainer h3 {
-    color: #28a745;
-    font-size: 1.5rem;
+    color: var(--color-success);
+    font-size: var(--font-size-2xl);
+    margin: 0;
 }
 
 .errorText {
-    color: #f8d7da;
-    background-color: #721c24;
-    border: 1px solid #f5c6cb;
-    padding: 0.75rem 1rem;
-    border-radius: 5px;
+    color: var(--color-error-light);
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
     text-align: center;
-    margin-top: 1rem;
+    margin-top: var(--spacing-md);
 }
 
 .buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #333;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color-dark);
     flex-shrink: 0;
 }
 
 .cancelButton,
 .saveButton {
-    padding: 0.7rem 1.5rem;
+    padding: var(--button-padding);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-base);
+    font-size: var(--button-font-size);
 }
 
 .cancelButton {
-    background-color: #6c757d;
-    color: white;
+    background-color: var(--color-neutral);
+    color: var(--text-white);
 }
+
 .cancelButton:hover {
-    background-color: #5a6268;
+    background-color: var(--color-neutral-hover);
 }
 
 .saveButton {
-    background-color: #28a745;
-    color: white;
-}
-.saveButton:hover {
-    background-color: #218838;
-}
-.saveButton:disabled {
-    background-color: #94d3a2;
-    cursor: not-allowed;
+    background-color: var(--color-success);
+    color: var(--text-white);
 }
 
-/* Arreglo para Autocompletar en modo oscuro */
+.saveButton:hover {
+    background-color: var(--color-success-hover);
+}
+
+.saveButton:disabled {
+    background-color: var(--color-success-light);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===== AUTOFILL FIX ===== */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #323743 inset !important;
-    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0 30px var(--bg-dark-input) inset !important;
+    -webkit-text-fill-color: var(--text-white) !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+.detallesList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.detallesList::-webkit-scrollbar-track {
+    background: var(--bg-dark-input);
+    border-radius: var(--radius-md);
+}
+
+.detallesList::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+.detallesList::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
+}
+
+.form::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form::-webkit-scrollbar-track {
+    background: var(--bg-dark-input);
+    border-radius: var(--radius-md);
+}
+
+.form::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+.form::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
+import './styles/token.css'
 // Layout y Páginas
 import MainLayout from './components/MainLayout/MainLayout';
 import LoginPage from './pages/Login/LoginPage';

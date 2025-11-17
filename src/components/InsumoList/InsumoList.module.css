@@ -1,93 +1,221 @@
-/* Estilos muy similares a ProductList.module.css */
+/* ============================================
+   INSUMO LIST - Estilos Unificados
+   ============================================ */
+
+/* Contenedor principal con animación de entrada */
+.container {
+    width: 100%;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== TOOLBAR (Búsqueda y Botón Añadir) ===== */
 .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-primary);
+    gap: var(--spacing-md);
 }
 
+/* Input de Búsqueda */
 .searchInput {
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 300px;
-    font-size: 1rem;
+    flex: 1;
+    max-width: 400px;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
+    transition: all var(--transition-base);
 }
 
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+.searchInput::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Botón Añadir */
 .addButton {
-    background-color: #28a745;
-    color: white;
-    padding: 0.75rem 1.5rem;
+    background-color: var(--color-success);
+    color: var(--text-white);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--button-font-size);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap; /* Evita que el texto se rompa */
 }
 
 .addButton:hover {
-    background-color: #218838;
+    background-color: var(--color-success-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
+/* ===== TABLA ===== */
 .table {
     width: 100%;
-    border-collapse: collapse;
-    text-align: left;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-dark-card);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
 }
 
-.table th, .table td {
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle;
+/* Cabecera */
+.table thead {
+    background-color: var(--bg-dark-input);
 }
 
 .table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
+    text-align: left;
+    padding: var(--spacing-md);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
 }
 
+/* Cuerpo */
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-dark-hover);
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== IMAGEN DEL INSUMO ===== */
 .insumoImage {
-    width: 60px;
-    height: 60px;
-    border-radius: 5px;
-    object-fit: container;
+    width: 45px;
+    height: 45px;
+    border-radius: var(--radius-md);
+    object-fit: cover;
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark);
 }
 
+/* ===== FILA DE STOCK BAJO ===== */
+/* Usamos !important sutilmente o alta especificidad para sobreescribir el hover normal si es necesario */
+.lowStockRow {
+    background-color: rgba(220, 53, 69, 0.15) !important; /* Fondo rojizo transparente */
+}
+
+.lowStockRow:hover {
+    background-color: rgba(220, 53, 69, 0.25) !important; /* Más oscuro al pasar el mouse */
+}
+
+/* Opcional: Hacer el texto rojo también para alertar más */
+.lowStockRow td {
+    color: var(--color-error-light);
+}
+
+/* Restaurar color blanco para botones dentro de filas rojas si se pierden */
+.lowStockRow .actionButton {
+    color: var(--text-white); 
+}
+
+/* ===== ACCIONES ===== */
 .actions {
     display: flex;
-    gap: 0.5rem;
-    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .actionButton {
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: var(--spacing-xs) var(--spacing-md);
     border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
     cursor: pointer;
-    font-weight: 500;
-    color: white;
-    transition: opacity 0.2s;
-}
-
-.actionButton:hover {
-    opacity: 0.8;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
 }
 
 .editButton {
-    background-color: #007bff;
+    background-color: var(--color-info);
+    color: var(--text-white);
+}
+
+.editButton:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
 }
 
 .deleteButton {
-    background-color: #dc3545;
+    background-color: var(--color-error);
+    color: var(--text-white);
 }
 
-/* Estilo para filas con stock bajo */
-.lowStockRow {
-    background-color: #fff3cd; /* Amarillo pálido */
+.deleteButton:hover {
+    background-color: var(--color-error-hover);
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
 }
 
-.lowStockRow td {
-    color: #856404; /* Texto oscuro para contraste */
-    font-weight: 500; /* Un poco más de énfasis */
+/* ===== ESTADO DE CARGA ===== */
+p {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--spacing-xl);
+    font-style: italic;
+    font-size: var(--font-size-lg);
 }
 
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchInput {
+        max-width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .addButton {
+        width: 100%;
+    }
+
+    /* Ajuste para tablas en móvil (opcional: scroll horizontal) */
+    .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .table th, .table td {
+        padding: var(--spacing-sm);
+    }
+}

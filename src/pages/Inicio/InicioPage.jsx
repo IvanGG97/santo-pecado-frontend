@@ -1,14 +1,28 @@
-import React, { useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api';
 import styles from './InicioPage.module.css';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { AlertTriangle, BarChartHorizontalBig, Loader2, ServerOff } from 'lucide-react'; // Iconos
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+    PieChart, Pie, Cell
+} from 'recharts';
+import {
+    AlertTriangle, Loader2, ServerOff, PieChart as PieIcon,
+    CalendarDays, ShoppingBag, Bot, FileDown, X
+} from 'lucide-react';
 
-// --- Componente de Tarjeta (Sin cambios) ---
-const DashboardCard = ({ title, icon, children }) => (
-    <div className={styles.card}>
+// Importamos el servicio de IA y jsPDF
+import { generateDashboardReport } from '../../services/geminiService';
+import jsPDF from 'jspdf';
+import Swal from 'sweetalert2';
+
+// Colores para gráficos
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A50000', '#8884d8', '#FF6384', '#36A2EB'];
+
+// --- Componente Tarjeta ---
+const DashboardCard = ({ title, icon, children, className }) => (
+    <div className={`${styles.card} ${className || ''}`}>
         <div className={styles.cardHeader}>
             {icon}
             <h2 className={styles.cardTitle}>{title}</h2>
@@ -19,37 +33,68 @@ const DashboardCard = ({ title, icon, children }) => (
     </div>
 );
 
-// --- Componente del Dashboard de Admin (El contenido anterior) ---
+// --- MODAL REPORTE IA ---
+const ReporteIAModal = ({ isOpen, onClose, reportText, onDownload }) => {
+    if (!isOpen) return null;
+    return (
+        <div className={styles.modalBackdrop}>
+            <div className={styles.modalContent}>
+                <div className={styles.modalHeader}>
+                    <h3><Bot size={24} style={{ marginRight: '10px', color: '#A50000' }} />Reporte Estratégico IA</h3>
+                    <button onClick={onClose} className={styles.closeButton}><X size={24} /></button>
+                </div>
+                <div className={styles.reportBody}>
+                    <pre className={styles.reportText}>{reportText}</pre>
+                </div>
+                <div className={styles.modalActions}>
+                    <button onClick={onDownload} className={styles.downloadButton}>
+                        <FileDown size={18} style={{ marginRight: '8px' }} /> Descargar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Dashboard Admin ---
 const AdminDashboard = () => {
     const [insumosBajos, setInsumosBajos] = useState([]);
     const [allVentas, setAllVentas] = useState([]);
-    const [chartData, setChartData] = useState([]);
-    
+
+    // Estados para Gráficos
+    const [dataTortaPago, setDataTortaPago] = useState([]);
+    const [dataBarrasDias, setDataBarrasDias] = useState([]);
+    const [dataTortaProductos, setDataTortaProductos] = useState([]); // Nuevo Gráfico
+
+    // Estados para IA
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+    const [aiReport, setAiReport] = useState("");
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+    const today = new Date().toISOString().split('T')[0];
     const [fechas, setFechas] = useState({
-        desde: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0], 
-        hasta: new Date().toISOString().split('T')[0], 
+        desde: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+        hasta: today,
     });
 
     const [loadingInsumos, setLoadingInsumos] = useState(true);
     const [loadingVentas, setLoadingVentas] = useState(true);
 
+    // 1. Carga de Datos
     useEffect(() => {
         const fetchInsumos = async () => {
             setLoadingInsumos(true);
             try {
                 const response = await apiClient.get('/inventario/insumos/');
-                const insumos = response.data;
-                const bajos = insumos.filter(insumo => {
-                    const actual = parseFloat(insumo.insumo_stock); 
+                // Filtrar stock bajo
+                const bajos = response.data.filter(insumo => {
+                    const actual = parseFloat(insumo.insumo_stock);
                     const minimo = parseFloat(insumo.insumo_stock_minimo);
-                    if (!isNaN(actual) && !isNaN(minimo)) {
-                        return actual <= minimo;
-                    }
-                    return false; 
+                    return !isNaN(actual) && !isNaN(minimo) && actual <= minimo;
                 });
                 setInsumosBajos(bajos);
             } catch (error) {
-                console.error("Error cargando insumos:", error);
+                console.error("Error insumos:", error);
             } finally {
                 setLoadingInsumos(false);
             }
@@ -61,7 +106,7 @@ const AdminDashboard = () => {
                 const response = await apiClient.get('/venta/ventas/');
                 setAllVentas(response.data);
             } catch (error) {
-                console.error("Error cargando ventas:", error);
+                console.error("Error ventas:", error);
             } finally {
                 setLoadingVentas(false);
             }
@@ -71,41 +116,55 @@ const AdminDashboard = () => {
         fetchVentas();
     }, []);
 
-    const handleDateChange = (e) => {
-        const { name, value } = e.target;
-        setFechas(prev => ({ ...prev, [name]: value }));
-    };
-
+    // 2. Procesamiento de Datos (Gráficos)
     const handleGenerarGrafico = useCallback(() => {
         if (!fechas.desde || !fechas.hasta) return;
         const fechaDesde = new Date(fechas.desde + 'T00:00:00');
         const fechaHasta = new Date(fechas.hasta + 'T23:59:59');
 
         const ventasFiltradas = allVentas.filter(venta => {
-            if (venta.estado_venta?.estado_venta_nombre !== 'Pagado') return false;
             const fechaVenta = new Date(venta.venta_fecha_hora);
             return fechaVenta >= fechaDesde && fechaVenta <= fechaHasta;
         });
 
-        const productosVendidos = new Map();
-        for (const venta of ventasFiltradas) {
-            if (venta.pedido && venta.pedido.detalles) {
-                for (const detalle of venta.pedido.detalles) {
-                    if (detalle.producto_tipo && detalle.producto_tipo.toLowerCase() === 'agregados') {
-                        continue; 
-                    }
-                    const nombreProducto = detalle.producto_nombre || detalle.notas || 'Producto Desconocido';
-                    const cantidad = detalle.cantidad || 0; 
-                    const cantidadActual = productosVendidos.get(nombreProducto) || 0;
-                    productosVendidos.set(nombreProducto, cantidadActual + cantidad);
-                }
-            }
-        }
+        // -- A. Medios de Pago --
+        const mapMediosPago = {};
+        // -- B. Ingresos por Día --
+        const mapIngresosDia = {};
+        // -- C. Productos Vendidos (Top 10) --
+        const mapProductos = {};
 
-        const datosGrafico = Array.from(productosVendidos, ([name, total]) => ({ name, total }))
-            .sort((a, b) => b.total - a.total) 
-            .slice(0, 10); 
-        setChartData(datosGrafico);
+        ventasFiltradas.forEach(venta => {
+            const totalVenta = parseFloat(venta.venta_total) || 0;
+
+            // A. Medios de Pago
+            const medio = venta.venta_medio_pago || 'Otros';
+            mapMediosPago[medio] = (mapMediosPago[medio] || 0) + totalVenta;
+
+            // B. Ingresos por Día
+            const fechaStr = new Date(venta.venta_fecha_hora).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' });
+            mapIngresosDia[fechaStr] = (mapIngresosDia[fechaStr] || 0) + totalVenta;
+
+            // C. Productos (Iterar detalles)
+            if (venta.pedido && venta.pedido.detalles) {
+                venta.pedido.detalles.forEach(detalle => {
+                    const nombreProd = detalle.producto_nombre || detalle.notas || 'Producto';
+                    mapProductos[nombreProd] = (mapProductos[nombreProd] || 0) + (detalle.cantidad || 1);
+                });
+            }
+        });
+
+        // Setear Estados
+        setDataTortaPago(Object.keys(mapMediosPago).map(key => ({ name: key, value: mapMediosPago[key] })));
+
+        setDataBarrasDias(Object.keys(mapIngresosDia).map(key => ({ fecha: key, total: mapIngresosDia[key] }))
+            .sort((a, b) => b.total - a.total)
+            .slice(0, 7)); // Top 7 Días
+
+        setDataTortaProductos(Object.keys(mapProductos).map(key => ({ name: key, value: mapProductos[key] }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 10)); // Top 10 Productos
+
     }, [allVentas, fechas]);
 
     useEffect(() => {
@@ -114,172 +173,264 @@ const AdminDashboard = () => {
         }
     }, [loadingVentas, allVentas, handleGenerarGrafico]);
 
+
+    // 3. Lógica de IA y PDF
+    const handleGenerateRecommendation = async () => {
+        setIsGeneratingAI(true);
+        try {
+            const datosParaIA = {
+                ventasTotales: allVentas.length,
+                topProductos: dataTortaProductos.map(p => `${p.name} (${p.value}u)`),
+                topDias: dataBarrasDias.map(d => `${d.fecha}: $${d.total}`),
+                mediosPago: dataTortaPago.map(p => `${p.name}: $${p.value}`),
+                stockBajo: insumosBajos.map(i => `${i.insumo_nombre} (Stock: ${i.insumo_stock})`),
+            };
+
+            const report = await generateDashboardReport(datosParaIA);
+            setAiReport(report);
+            setIsReportModalOpen(true);
+
+        } catch (error) {
+            Swal.fire('Error IA', 'No se pudo generar el reporte. Verifica tu conexión o API Key.', 'error');
+        } finally {
+            setIsGeneratingAI(false);
+        }
+    };
+
+    // --- FUNCIÓN DE PDF CORREGIDA ---
+    const handleDownloadPDF = () => {
+        const doc = new jsPDF();
+
+        // --- 1. CONFIGURACIÓN ---
+        const margin = 15; // Margen (en mm)
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const usableWidth = pageWidth - (margin * 2);
+        let y = 0; // Posición Y inicial
+
+        // --- 2. TÍTULO Y FECHA ---
+        doc.setFontSize(18);
+        doc.setTextColor(165, 0, 0); // Rojo
+        doc.text("Informe Estratégico - Santo Pecado", margin, 20);
+        y = 30; // Mover Y hacia abajo
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generado el: ${new Date().toLocaleString()}`, margin, y);
+        y += 5; // Mover Y
+
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, pageWidth - margin, y); // Línea separadora
+        y += 10; // Espacio después de la línea
+
+        // --- 3. CONTENIDO (CON PAGINACIÓN) ---
+
+        // Usamos una fuente monoespaciada para que coincida con el <pre>
+        doc.setFont('courier', 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(0);
+
+        // Dividir el texto en líneas que quepan en el ancho
+        const splitText = doc.splitTextToSize(aiReport, usableWidth);
+
+        // Altura aproximada de cada línea (en mm)
+        const lineHeight = 6;
+
+        // Loop por cada línea
+        splitText.forEach(line => {
+            // Revisar si la línea entra en la página actual
+            if (y + lineHeight > pageHeight - margin) {
+                doc.addPage(); // Añadir página nueva
+                y = margin; // Resetear Y al margen superior
+            }
+
+            // Escribir la línea
+            doc.text(line, margin, y);
+
+            // Mover Y para la siguiente línea
+            y += lineHeight;
+        });
+
+        // --- 4. GUARDAR ---
+        doc.save(`Reporte_Estrategico_${today}.pdf`);
+    };
+    // --- FIN DE LA CORRECCIÓN ---
+
+
+    // --- Renders Auxiliares ---
     const renderStockBajo = () => {
         if (loadingInsumos) return <p>Cargando...</p>;
-        if (insumosBajos.length === 0) {
-            return <p className={styles.sinAlertas}>¡Todo bien! No hay insumos con stock crítico.</p>;
-        }
+        if (insumosBajos.length === 0) return <p className={styles.sinAlertas}>¡Stock saludable!</p>;
         return (
             <ul className={styles.lowStockList}>
                 {insumosBajos.map(insumo => (
                     <li key={insumo.id} className={styles.lowStockItem}>
                         <span className={styles.itemName}>{insumo.insumo_nombre}</span>
-                        <div className={styles.itemStock}>
-                            <div className={styles.stockBajo}>
-                                Stock Actual:{parseFloat(insumo.insumo_stock) || 0}
-                            </div>
-                            <div>
-                                Stock Minimo:{parseFloat(insumo.insumo_stock_minimo) || 0}
-                            </div> 
-                            <div>
-                                Unidad:{insumo.insumo_unidad}
-                            </div>  
-                        </div>
+                        <span className={styles.stockBajoValue}>{parseFloat(insumo.insumo_stock)} {insumo.insumo_unidad}</span>
                     </li>
                 ))}
             </ul>
         );
     };
 
-    const renderGraficoVentas = () => {
-        if (loadingVentas) return <p>Cargando datos de ventas...</p>;
-        if (chartData.length === 0) {
-            return <p className={styles.sinAlertas}>No se encontraron ventas para este rango de fechas.</p>;
-        }
-        return (
-            <div className={styles.chartContainer}>
-                <ResponsiveContainer width="100%" height={400}>
-                    <BarChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} layout="vertical" >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 12 }} interval={0} />
-                        <Tooltip formatter={(value) => [value, 'Unidades']} />
-                        <Legend />
-                        <Bar dataKey="total" name="Unidades Vendidas" fill="#A50000" />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-        );
+    const handleDateChange = (e) => {
+        setFechas({ ...fechas, [e.target.name]: e.target.value });
     };
 
     return (
         <div className={styles.dashboardContainer}>
-            <h1 className={styles.welcomeMessage}>Dashboard de Resumen</h1>
-            <div className={styles.dashboardGrid}>
-                <DashboardCard title="Productos Más Vendidos (Top 10)" icon={<BarChartHorizontalBig size={24} />}>
-                    <div className={styles.chartFilterBar}>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="desde">Desde:</label>
-                            <input type="date" id="desde" name="desde" value={fechas.desde} onChange={handleDateChange} className={styles.dateInput} />
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="hasta">Hasta:</label>
-                            <input type="date" id="hasta" name="hasta" value={fechas.hasta} onChange={handleDateChange} className={styles.dateInput} />
-                        </div>
-                        <button className={styles.generarButton} onClick={handleGenerarGrafico}>
-                            Generar Gráfico
-                        </button>
+            <div className={styles.headerRow}>
+                <h1 className={styles.welcomeMessage}>Dashboard de Resumen</h1>
+
+                <button
+                    className={styles.aiButton}
+                    onClick={handleGenerateRecommendation}
+                    disabled={isGeneratingAI}
+                >
+                    {isGeneratingAI ? (
+                        <><Loader2 className={styles.spin} size={20} /> Analizando...</>
+                    ) : (
+                        <><Bot size={20} /> Generar Recomendación con IA</>
+                    )}
+                </button>
+            </div>
+
+            {/* Filtros */}
+            <div className={styles.filterCard}>
+                <div className={styles.chartFilterBar}>
+                    <div className={styles.formGroup}>
+                        <label>Desde:</label>
+                        <input type="date" name="desde" value={fechas.desde} onChange={handleDateChange} className={styles.dateInput} />
                     </div>
-                    {renderGraficoVentas()}
+                    <div className={styles.formGroup}>
+                        <label>Hasta:</label>
+                        <input type="date" name="hasta" value={fechas.hasta} max={today} onChange={handleDateChange} className={styles.dateInput} />
+                    </div>
+                    <button className={styles.generarButton} onClick={handleGenerarGrafico}>Actualizar</button>
+                </div>
+            </div>
+
+            {/* GRID DE TARJETAS */}
+            <div className={styles.dashboardGrid}>
+
+                {/* 1. Torta Productos (Top 10) */}
+                <DashboardCard title="Top 10 Productos Más Vendidos" icon={<ShoppingBag size={24} />}>
+                    {dataTortaProductos.length === 0 ? <p className={styles.sinAlertas}>Sin datos.</p> : (
+                        <div className={styles.chartContainer}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={dataTortaProductos}
+                                        cx="50%" cy="50%"
+                                        outerRadius={80}
+                                        fill="#8884d8"
+                                        dataKey="value"
+                                        label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        {dataTortaProductos.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value, name) => [value, name]} />
+                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
                 </DashboardCard>
-                <DashboardCard title="Insumos con Stock Crítico" icon={<AlertTriangle size={24} />}>
+
+                {/* 2. Torta Ingresos */}
+                <DashboardCard title="Ingresos por Medio de Pago" icon={<PieIcon size={24} />}>
+                    {dataTortaPago.length === 0 ? <p className={styles.sinAlertas}>Sin datos.</p> : (
+                        <div className={styles.chartContainer}>
+                            <ResponsiveContainer>
+                                <PieChart>
+                                    <Pie
+                                        data={dataTortaPago}
+                                        cx="50%" cy="50%"
+                                        innerRadius={40}
+                                        outerRadius={80}
+                                        fill="#82ca9d"
+                                        dataKey="value"
+                                    >
+                                        {dataTortaPago.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip formatter={(value) => `$${new Intl.NumberFormat('es-AR').format(value)}`} />
+                                    <Legend layout="horizontal" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '10px' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </DashboardCard>
+
+                {/* 3. Barras Dias */}
+                <DashboardCard title="Días con Mayores Ingresos" icon={<CalendarDays size={24} />}>
+                    {dataBarrasDias.length === 0 ? <p className={styles.sinAlertas}>Sin datos.</p> : (
+                        <div className={styles.chartContainer}>
+                            <ResponsiveContainer>
+                                <BarChart data={dataBarrasDias} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="fecha" style={{ fontSize: '10px' }} />
+                                    <YAxis style={{ fontSize: '10px' }} />
+                                    <Tooltip formatter={(value) => [`$${new Intl.NumberFormat('es-AR').format(value)}`, 'Ventas']} />
+                                    <Bar dataKey="total" fill="#A50000" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    )}
+                </DashboardCard>
+
+                {/* 4. Stock */}
+                <DashboardCard title="Alertas de Stock" icon={<AlertTriangle size={24} />}>
                     {renderStockBajo()}
                 </DashboardCard>
+
             </div>
+
+            {/* MODAL DE REPORTE */}
+            <ReporteIAModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                reportText={aiReport}
+                onDownload={handleDownloadPDF}
+            />
         </div>
     );
 };
 
-// --- Componente de "Cuenta Pendiente" ---
-const CuentaPendiente = () => (
-    <div className={styles.dashboardContainer}>
-        <div className={styles.card} style={{ maxWidth: '600px', margin: '2rem auto' }}>
-            <div className={styles.cardHeader} style={{ backgroundColor: '#ffc107', color: '#333' }}>
-                <ServerOff size={24} />
-                <h2 className={styles.cardTitle}>Cuenta Pendiente de Rol</h2>
-            </div>
-            <div className={styles.cardContent}>
-                <p style={{ textAlign: 'center', fontSize: '1.1rem', lineHeight: '1.6' }}>
-                    Tu cuenta ha sido registrada y activada, pero aún no tiene un rol asignado.
-                    <br /><br />
-                    Por favor, contacta a un administrador para que te asigne los permisos correspondientes.
-                </p>
-            </div>
-        </div>
-    </div>
-);
-
-// --- Componente "Router" Principal ---
+// --- Componente Router (Sin cambios) ---
 const InicioPage = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!user) {
-            // Espera a que el contexto de Auth cargue el usuario
-            return;
-        }
-
-        const userRol = user.rol; // 'Admin', 'Cliente', 'Cocina', null, etc.
-        console.log("InicioPage: Rol de usuario es:", userRol);
-
-        if (userRol === 'Admin' || userRol === 'Encargado/Cajero') {
-            // Se queda en esta página y muestra el Dashboard
-            setIsLoading(false);
-        } 
+        if (!user) return;
+        const userRol = user.rol;
+        if (userRol === 'Admin' || userRol === 'Encargado/Cajero') setIsLoading(false);
         else if (userRol === 'Cliente') {
-            // Es cliente, comprobar si es su primer login
-            const bienvenidaVista = localStorage.getItem('bienvenidaVista');
-            if (!bienvenidaVista) {
-                // Nunca ha visto la bienvenida, redirigir
-                navigate('/bienvenido', { replace: true });
-            } else {
-                // Ya vio la bienvenida, redirigir a la carta
-                navigate('/carta', { replace: true });
-            }
+            navigate(localStorage.getItem('bienvenidaVista') ? '/carta' : '/bienvenido', { replace: true });
         }
-        else if (userRol === 'Cocina') {
-            // Es cocina, redirigir a su página
-            navigate('/cocina', { replace: true });
-        }
-        else {
-            // No tiene rol (es 'null' o 'undefined')
-            // Muestra la página de "Pendiente"
-            setIsLoading(false);
-        }
-
+        else if (userRol === 'Cocina') navigate('/cocina', { replace: true });
+        else setIsLoading(false);
     }, [user, navigate]);
 
-    // Renderizado final
-    if (isLoading) {
-        // Muestra un loader mientras se decide qué hacer
-        return (
-            <div className={styles.dashboardContainer} style={{ textAlign: 'center', paddingTop: '5rem' }}>
-                <Loader2 size={48} className={styles.spinner} />
-                <p>Cargando...</p>
-            </div>
-        );
-    }
-
-    // Si el rol es Admin o Encargado, muestra el dashboard
-    if (user && (user.rol === 'Admin' || user.rol === 'Encargado/Cajero')) {
-        return <AdminDashboard />;
-    }
-
-    // Si el rol es null o desconocido, muestra pendiente
-    if (user && !user.rol) {
-        return <CuentaPendiente />;
-    }
-
-    // Si es Cliente o Cocina, estará redirigiendo,
-    // pero mostramos un loader por si acaso.
-    return (
-        <div className={styles.dashboardContainer} style={{ textAlign: 'center', paddingTop: '5rem' }}>
-            <Loader2 size={48} className={styles.spinner} />
-            <p>Redirigiendo...</p>
-        </div>
-    );
+    if (isLoading) return <div className={styles.dashboardContainer}><Loader2 className={styles.spin} /></div>;
+    if (user && (user.rol === 'Admin' || user.rol === 'Encargado/Cajero')) return <AdminDashboard />;
+    if (user && !user.rol) return <CuentaPendiente />;
+    return null;
 };
+
+const CuentaPendiente = () => (
+    <div className={styles.dashboardContainer}>
+        <div className={styles.card} style={{ maxWidth: '600px', margin: '2rem auto', textAlign: 'center', padding: '2rem' }}>
+            <ServerOff size={48} style={{ margin: '0 auto', color: '#f0ad4e' }} />
+            <h2>Cuenta sin rol asignado</h2>
+            <p>Contacta al administrador.</p>
+        </div>
+    </div>
+);
 
 export default InicioPage;

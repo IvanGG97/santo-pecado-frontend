@@ -103,26 +103,20 @@ const CustomizeProductModal = ({
         }
 
         // --- LÓGICA DE EDICIÓN (REFACTORIZADA) ---
-        // ¡Se elimina toda la lógica de parseo de 'initialData.notas'!
-        // Ahora leemos el objeto 'customization' directamente.
         if (initialData && initialData.customization) {
-
-            // Si el objeto existe, lo usamos para sobreescribir el estado por defecto
             if (initialData.customization.base) {
                 setInsumosBase(initialData.customization.base);
             } else {
-                setInsumosBase(base); // Fallback al estado por defecto
+                setInsumosBase(base);
             }
 
             if (initialData.customization.aderezos) {
                 setAderezosState(initialData.customization.aderezos);
             } else {
-                setAderezosState(aderezos); // Fallback al estado por defecto
+                setAderezosState(aderezos);
             }
 
         } else {
-            // Si es un item nuevo (no hay initialData) o no tiene 'customization' (formato antiguo)
-            // Simplemente seteamos el estado por defecto.
             setInsumosBase(base);
             setAderezosState(aderezos);
         }
@@ -165,7 +159,6 @@ const CustomizeProductModal = ({
         const missingInsufficients = [];
         if (!insumosStock || !insumoDemand) return { available: true, missingInsufficients: [] };
 
-        // --- CORRECCIÓN: Comprobar si 'receta' es un array ---
         if (producto && Array.isArray(producto.receta) && producto.receta.length > 0) {
             for (const recetaItem of producto.receta) {
                 if (!recetaItem || !recetaItem.insumo) continue;
@@ -179,7 +172,6 @@ const CustomizeProductModal = ({
                 let demandaExcluida = 0;
                 if (initialData && (initialData.producto_id === producto.id || initialData.id === producto.id)) {
                     const productoEditado = allProducts.find(p => p.id === initialData.producto_id);
-                    // --- CORRECCIÓN: Comprobar si 'receta' es un array ---
                     const recetaItemEditado = Array.isArray(productoEditado?.receta) ? productoEditado.receta.find(r => r.insumo.id === insumoId) : null;
 
                     if (recetaItemEditado) {
@@ -194,7 +186,7 @@ const CustomizeProductModal = ({
                 }
             }
         }
-        return { available: missingInsufficients.length === 0, missingInsufficients: [] };
+        return { available: missingInsufficients.length === 0, missingInsufficients };
     }, [insumosStock, insumoDemand, initialData, allProducts]);
 
 
@@ -220,6 +212,7 @@ const CustomizeProductModal = ({
         });
     };
 
+    // ... (El resto de handlers de Agregado: handleAgregadoQuantityStep, Input, Blur... no necesitan cambios) ...
     const handleAgregadoQuantityStep = (agregadoId, amount) => {
         setAgregados(prev => {
             const currentAgregado = prev[agregadoId];
@@ -284,13 +277,9 @@ const CustomizeProductModal = ({
             return newAgregados;
         });
     };
-    // --- FIN LÓGICA AGREGADOS ---
 
-
-    // --- 3. handleSave (MODIFICADO para nuevo formato de notas) ---
+    // --- 3. handleSave (Sin cambios) ---
     const handleSave = () => {
-        
-        // --- Lógica de Agregados y Precio (sin cambios) ---
         let agregadosList = [];
         if (!isPromoItem) {
             agregadosList = Object.values(agregados)
@@ -298,30 +287,21 @@ const CustomizeProductModal = ({
                 .filter(ag => ag.cantidad > 0);
         }
 
-        let precioTotalCalculado = (product && product.producto_precio) ? parseFloat(product.producto_precio) : 0; 
+        let precioTotalCalculado = (product && product.producto_precio) ? parseFloat(product.producto_precio) : 0;
         if (!isPromoItem) {
             agregadosList.forEach(agregado => {
                 precioTotalCalculado += (parseFloat(agregado.producto_precio) * agregado.cantidad);
             });
         }
 
-        // --- CAMBIO ---
-        // Ya no generamos un string de 'notas' aquí.
-        // Enviamos los objetos de estado 'insumosBase' y 'aderezosState' directamente.
-        
         onSave({
-            product: product, 
-            agregados: agregadosList, 
+            product: product,
+            agregados: agregadosList,
             precioTotal: precioTotalCalculado,
-            
-            // --- NUEVO CAMPO ---
-            // Pasamos el estado de personalización como un objeto
             customization: {
                 base: insumosBase,
                 aderezos: aderezosState,
-                // Guardamos si es un 'target product' para que la página sepa
-                // si debe generar la sección "Aderezos" en las notas.
-                isTargetProduct: isTargetProduct 
+                isTargetProduct: isTargetProduct
             }
         });
     };
@@ -345,8 +325,18 @@ const CustomizeProductModal = ({
                 <button onClick={onClose} className={styles.closeButton}>&times;</button>
                 <h2>Personalizar: {product.producto_nombre || 'Producto'}</h2>
 
-                {/* --- 4. JSX MODIFICADO --- */}
-                <div className={`${styles.columns} ${isPromoItem ? styles.singleColumn : ''} ${isTargetProduct ? styles.threeColumns : ''}`}>
+                {/* --- 4. JSX (CON AMBAS CORRECCIONES) --- */}
+
+                {/* * CORRECCIÓN VISUAL:
+                  * La lógica de clases aquí estaba conflictiva.
+                  * Si es un producto con aderezos (isTargetProduct) queremos el layout de 3 columnas (aunque la 3ra se oculte en promos).
+                  * Si NO tiene aderezos (ej. Gaseosa) y es promo, usamos 'singleColumn'.
+                  * Si NO tiene aderezos y NO es promo, usamos 'twoColumns' (asumiendo que existe en tu CSS).
+                */}
+                <div className={`${styles.columns} ${isTargetProduct
+                        ? styles.threeColumns
+                        : (isPromoItem ? styles.singleColumn : styles.twoColumns)
+                    }`}>
 
                     {/* Columna 1: Quitar Insumos Base */}
                     <div className={styles.column}>
@@ -372,7 +362,7 @@ const CustomizeProductModal = ({
                         </div>
                     </div>
 
-                    {/* --- NUEVA COLUMNA: Aderezos --- */}
+                    {/* Columna 2: Aderezos */}
                     {isTargetProduct && (
                         <div className={styles.column}>
                             <h3>Aderezos</h3>
@@ -385,7 +375,7 @@ const CustomizeProductModal = ({
                                                 id={`aderezo-${aderezo.id}`}
                                                 checked={aderezo.checked}
                                                 onChange={() => handleAderezoToggle(aderezo.id)}
-                                                disabled={isPromoItem}
+                                            // --- CORRECCIÓN FUNCIONAL: Se eliminó 'disabled={isPromoItem}' ---
                                             />
                                             <label htmlFor={`aderezo-${aderezo.id}`}>{aderezo.insumo_nombre}</label>
                                         </div>
@@ -397,7 +387,7 @@ const CustomizeProductModal = ({
                         </div>
                     )}
 
-                    {/* Columna 3: Añadir Agregados (Solo si NO es promo) */}
+                    {/* Columna 3: Añadir Agregados (Oculto si es promo) */}
                     {!isPromoItem && (
                         <div className={styles.column}>
                             <h3>Añadir Agregados</h3>
@@ -439,7 +429,7 @@ const CustomizeProductModal = ({
                         </div>
                     )}
                 </div>
-                {/* --- FIN JSX MODIFICADO --- */}
+                {/* --- FIN JSX --- */}
 
                 <div className={styles.buttons}>
                     <button onClick={onClose} className={styles.cancelButton}>Cancelar</button>

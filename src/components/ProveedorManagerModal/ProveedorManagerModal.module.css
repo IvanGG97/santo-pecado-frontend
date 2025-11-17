@@ -1,334 +1,429 @@
-/* Estilos generales del modal (backdrop, content, closeButton, etc.) */
+/* ============================================
+   PROVEEDOR MANAGER MODAL - Estilos Unificados
+   ============================================ */
+
+/* ===== MODAL BASE ===== */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1050;
-    padding: 1rem;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(3px);
 }
 
 .modalContent {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    width: 100%;
-    max-width: 700px; /* Un poco más ancho para la lista */
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    width: 95%;
+    max-width: 700px; /* Un poco más ancho para la gestión */
+    box-shadow: var(--shadow-modal);
+    animation: modalFadeIn 0.3s ease-out;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     position: relative;
-    /* Quitamos overflow-y: auto aquí para permitir scroll en contenedores internos */
 }
 
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== BOTÓN CERRAR ===== */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #aaa;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
+    transition: color var(--transition-base);
     line-height: 1;
+    z-index: 10;
 }
+
 .closeButton:hover {
-    color: #333;
+    color: var(--text-white);
 }
 
+/* ===== TÍTULO ===== */
 .modalContent h2 {
-    text-align: center;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: #333;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    font-size: var(--font-size-xl);
+    border-bottom: 1px solid var(--border-color-dark);
+    padding-bottom: var(--spacing-md);
 }
 
-/* Contenedor de cada vista (para padding y posible scroll interno) */
+/* ===== CONTENEDOR DE VISTAS ===== */
 .viewContainer {
     display: flex;
     flex-direction: column;
-    /* Permitir scroll si el contenido de la vista excede */
-    overflow-y: auto;
-    /* Restringir altura para que el scroll funcione dentro del modal */
-    /* Ajusta este valor según necesites, considerando altura de título/botones */
-    max-height: calc(90vh - 150px); /* Ejemplo: 90vh menos altura aprox título y márgenes */
-    padding: 0 0.5rem; /* Padding lateral ligero */
+    gap: var(--spacing-md);
+    flex: 1;
+    overflow: hidden; /* Para que el scroll sea interno */
 }
 
-/* Botón para cambiar entre vistas */
+/* Botón superior para cambiar vista */
 .switchViewButton {
     background: none;
-    border: 1px solid #007bff;
-    color: #007bff;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border: none;
+    color: var(--color-info);
+    text-decoration: underline;
     cursor: pointer;
-    margin-bottom: 1rem;
-    align-self: flex-start; /* Alinea a la izquierda */
-    font-size: 0.9em;
+    align-self: flex-end;
+    font-size: var(--font-size-sm);
+    padding: 0;
+    margin-bottom: var(--spacing-sm);
 }
+
 .switchViewButton:hover {
-    background-color: #e7f3ff;
+    color: var(--color-info-hover);
 }
 
-
-/* --- Estilos Vista 'search' (Búsqueda Rápida) --- */
+/* ===== VISTA 1: BÚSQUEDA (Search Section) ===== */
 .searchSection {
-    margin-bottom: 1rem;
+    position: relative;
+    width: 100%;
 }
 
 .searchInput {
     width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
     box-sizing: border-box;
+    transition: all var(--transition-base);
 }
 
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+}
+
+/* Lista de Sugerencias (Dropdown) */
 .suggestionsList {
     list-style: none;
+    margin: var(--spacing-xs) 0 0 0;
     padding: 0;
-    margin: 0.5rem 0 0 0;
-    max-height: 180px; /* Aumentar altura sugerencias */
+    background-color: var(--bg-dark-card);
+    border: 1px solid var(--border-color-dark);
+    border-radius: var(--radius-md);
+    max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    position: absolute;
+    width: 100%;
+    z-index: var(--z-dropdown);
+    box-shadow: var(--shadow-lg);
 }
 
 .suggestionsList li {
-    padding: 0.7rem 1rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
     cursor: pointer;
-    border-bottom: 1px solid #eee;
-    background-color: #fff;
-    transition: background-color 0.2s;
+    transition: background-color var(--transition-fast);
+    display: flex;
+    flex-direction: column;
 }
+
 .suggestionsList li:last-child {
     border-bottom: none;
 }
+
 .suggestionsList li:hover {
-    background-color: #f0f8ff; /* Azul claro suave */
-}
-.suggestionsList li small {
-    color: #6c757d;
-    display: block;
-    font-size: 0.85em;
-    margin-top: 2px;
+    background-color: var(--bg-dark-hover);
 }
 
+.suggestionsList li strong {
+    color: var(--text-white);
+}
+
+.suggestionsList li small {
+    color: var(--text-tertiary);
+}
+
+/* Separador "O" */
 .divider {
     text-align: center;
-    margin: 1.5rem 0;
-    color: #aaa;
-    font-weight: bold;
+    color: var(--text-tertiary);
+    margin: var(--spacing-lg) 0;
+    font-style: italic;
     position: relative;
 }
+
 .divider::before,
 .divider::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
-    width: 40%;
+    width: 45%;
     height: 1px;
-    background-color: #ddd;
+    background-color: var(--border-color-dark);
 }
+
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
+/* Botón grande para crear */
 .createButtonInline {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 0.7rem 1.2rem;
-    border-radius: 5px;
+    background-color: var(--bg-dark-input);
+    border: 2px dashed var(--color-neutral);
+    color: var(--text-secondary);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
     cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: bold;
-    transition: background-color 0.2s;
-    align-self: center; /* Centrar el botón */
-}
-.createButtonInline:hover {
-    background-color: #218838;
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-base);
+    width: 100%;
+    text-align: center;
 }
 
-/* --- Estilos Vista 'manage' (Gestionar Clientes) --- */
+.createButtonInline:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: rgba(253, 0, 42, 0.05);
+}
+
+/* ===== VISTA 2: GESTIÓN (Manage Toolbar & List) ===== */
 .manageToolbar {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    align-items: center;
-}
-.manageToolbar .searchInput {
-    flex-grow: 1; /* El input ocupa el espacio restante */
-}
-.addButton {
-    background-color: #17a2b8; /* Cyan */
-    color: white;
-    border: none;
-    padding: 0.8rem 1rem; /* Mismo padding que searchInput */
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: bold;
-    white-space: nowrap; /* Evita que el texto se parta */
-}
-.addButton:hover {
-    background-color: #138496;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
+.addButton {
+    background-color: var(--color-success);
+    color: var(--text-white);
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 0 var(--spacing-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--transition-base);
+}
+
+.addButton:hover {
+    background-color: var(--color-success-hover);
+}
+
+/* Contenedor de la lista de gestión */
 .clientListContainer {
-    max-height: 400px; /* Altura máxima para la lista completa */
+    flex: 1;
     overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid var(--border-color-dark);
+    border-radius: var(--radius-md);
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: var(--spacing-xs);
+    max-height: 400px;
 }
 
 .clientListItem {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.8rem 1rem;
-    border-bottom: 1px solid #eee;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--bg-dark-input);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
 }
-.clientListItem:last-child {
-    border-bottom: none;
+
+.clientListItem:hover {
+    border-color: var(--color-primary);
+    background-color: var(--bg-dark-card);
 }
 
 .clientInfo {
-    flex-grow: 1;
-    cursor: pointer; /* Indicar que se puede seleccionar */
-    margin-right: 1rem; /* Espacio antes de los botones */
-}
-.clientInfo strong {
-    display: block;
-}
-.clientInfo small {
-    color: #6c757d;
-    font-size: 0.9em;
-}
-.clientInfo:hover strong {
-    color: #0056b3; /* Resaltar al pasar el mouse */
-}
-
-
-.clientActions button {
-    background: none;
-    border: 1px solid;
-    padding: 0.3rem 0.6rem;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 0.85em;
-    margin-left: 0.5rem; /* Espacio entre botones si hubiera más */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
+
+.clientInfo strong {
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+}
+
+.clientInfo small {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-xs);
+    margin-top: 2px;
+}
+
 .editButton {
-    border-color: #ffc107; /* Amarillo */
-    color: #ffc107;
+    background-color: var(--color-info);
+    color: var(--text-white);
+    border: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    margin-left: var(--spacing-md);
 }
+
 .editButton:hover {
-    background-color: #fff8e1;
-}
-/* Estilos para botón delete (deshabilitado) si lo necesitas
-.deleteButton {
-    border-color: #dc3545; // Rojo
-    color: #dc3545;
-}
-.deleteButton:hover {
-    background-color: #fbe_e;
-}
-.deleteButton:disabled {
-    border-color: #ccc;
-    color: #ccc;
-    cursor: not-allowed;
-} */
-.noResultsText {
-    text-align: center;
-    color: #888;
-    padding: 1rem;
+    background-color: var(--color-info-hover);
 }
 
-
-/* --- Estilos Vistas 'create' y 'edit' (Formulario) --- */
+/* ===== VISTA 3: FORMULARIO (Form) ===== */
 .clientForm {
-    width: 100%;
-    margin-top: 1rem;
-    padding: 1.5rem; /* Más padding */
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    width: 100% !important;      /* ← AGREGADO */
+    max-width: none !important;   /* ← AGREGADO */
 }
+
 .clientForm h3 {
-    margin-top: 0;
+    color: var(--color-accent);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
     text-align: center;
-    color: #555;
-    margin-bottom: 1.5rem;
 }
 
 .formGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem; /* Más espacio antes de botones */
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
 }
 
+/* Los inputs dentro del form usan la clase .inputField del JSX */
 .inputField {
     width: 100%;
-    padding: 0.7rem 0.9rem; /* Un poco más de padding */
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 1rem; /* Tamaño de fuente estándar */
+    padding: var(--input-padding);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color-input-dark);
+    background-color: var(--bg-dark-input);
+    color: var(--text-white);
+    font-size: var(--input-font-size);
     box-sizing: border-box;
 }
 
-.formActions {
-    display: flex;
-    justify-content: flex-end; /* Alinea botones a la derecha */
-    gap: 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
+.inputField:focus {
+    outline: none;
+    border-color: var(--color-accent);
 }
 
-.cancelButton, .saveButton {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 0.95rem;
+/* Mensajes de estado */
+.loadingText {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-style: italic;
+    margin-top: var(--spacing-sm);
 }
-.cancelButton {
-    background-color: #6c757d; /* Gris */
-    color: white;
+
+.errorText {
+    color: var(--color-error-light);
+    text-align: center;
+    background-color: var(--color-error-bg);
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    margin-top: var(--spacing-sm);
+    font-size: var(--font-size-sm);
 }
-.cancelButton:hover {
-    background-color: #5a6268;
+
+.noResultsText {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--spacing-lg);
 }
+
+/* Botones del formulario */
+.formActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    margin-top: auto;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color-dark);
+}
+
+.cancelButton,
 .saveButton {
-    background-color: #28a745; /* Verde */
-    color: white;
+    padding: var(--button-padding);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background-color var(--transition-base);
 }
+
+.cancelButton {
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+}
+
+.cancelButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+.saveButton {
+    background-color: var(--color-success);
+    color: var(--text-white);
+}
+
 .saveButton:hover {
-    background-color: #218838;
+    background-color: var(--color-success-hover);
 }
-.saveButton:disabled, .cancelButton:disabled {
-    background-color: #ccc;
+
+.saveButton:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
 }
 
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .modalContent {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        padding: var(--spacing-md);
+    }
 
-/* Textos de estado/error (reutilizados) */
-.loadingText, .errorText {
-    text-align: center;
-    margin-top: 0.5rem;
-    font-size: 0.9em;
+    .formGrid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .manageToolbar {
+        flex-direction: column;
+    }
+
+    .addButton {
+        width: 100%;
+        padding: var(--spacing-sm);
+    }
+
+    .formActions {
+        flex-direction: column-reverse;
+    }
+    
+    .cancelButton, .saveButton {
+        width: 100%;
+    }
 }
-.loadingText { color: #6c757d; }
-.errorText { color: #dc3545; font-weight: bold; }
-

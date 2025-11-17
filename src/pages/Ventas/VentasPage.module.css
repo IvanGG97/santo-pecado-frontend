@@ -1,688 +1,564 @@
-/* --- Contenedor Principal --- */
+/* ============================================
+   VENTAS PAGE - Estilos Unificados y Corregidos
+   ============================================ */
+
 .ventasContainer {
-    padding: 2rem;
-    background-color: #f4f7fa;
-    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+    animation: fadeIn 0.3s ease-out;
+    background-color: transparent; 
+    gap: var(--spacing-lg);
+    /* Aseguramos que no genere scroll horizontal en la página principal */
+    max-width: 100vw; 
+    box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .ventasContainer h1 {
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 2rem;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+    font-size: var(--font-size-3xl);
+    margin: 0;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-primary);
 }
 
-/* --- Estilos de la Tabla --- */
+/* ============================================
+   SECCIÓN DE FILTROS
+   ============================================ */
+.filtrosContainer {
+    background-color: var(--bg-dark-card);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
+    
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos bajen si no caben */
+    gap: var(--spacing-lg);
+    align-items: flex-end;
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    /* Flex-grow 1, Flex-shrink 1, Base 200px */
+    flex: 1 1 200px; 
+    min-width: 150px; /* Reducimos un poco el mínimo para pantallas pequeñas */
+}
+
+.filtroGrupo label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Inputs Generales */
+.filtroInput {
+    width: 100%;
+    padding: var(--input-padding);
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-base);
+    height: var(--input-height);
+    box-sizing: border-box;
+}
+
+.filtroInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.1);
+}
+
+/* --- CORRECCIÓN FILTRO FECHAS --- */
+.inputsFecha {
+    display: flex;
+    flex-wrap: wrap; /* CRUCIAL: Permite que los inputs bajen si no hay espacio */
+    align-items: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.inputsFecha label {
+    margin: 0;
+    white-space: nowrap; /* Evita que la etiqueta "Desde" se rompa */
+}
+
+.inputFecha {
+    flex: 1 1 130px; /* Crecen si pueden, pero mínimo 130px de ancho */
+    padding: 0 10px;
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    height: var(--input-height);
+    color-scheme: dark;
+    min-width: 130px; /* Asegura que no se aplaste demasiado el calendario */
+}
+
+/* Botones de Filtro de Estado */
+.botonesFiltroEstado {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.botonFiltro {
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-color-dark);
+    background-color: var(--bg-dark-input);
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.botonFiltro:hover {
+    background-color: var(--bg-dark-hover);
+    color: var(--text-white);
+}
+
+.botonFiltro.activo {
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(253, 0, 42, 0.3);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Acciones de Filtro */
+.filtroAcciones {
+    display: flex;
+    gap: var(--spacing-md);
+    flex: 1 1 auto; /* Se adapta al espacio disponible */
+    justify-content: flex-end;
+    padding-bottom: 2px;
+    min-width: 200px; /* Asegura que los botones tengan su espacio */
+}
+
+.botonLimpiar {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    padding: var(--button-padding);
+}
+
+.botonLimpiar:hover {
+    color: var(--text-white);
+}
+
+.botonAplicar {
+    background-color: var(--color-info);
+    color: var(--text-white);
+    border: none;
+    padding: var(--button-padding);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-base);
+}
+
+.botonAplicar:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: var(--shadow-neon-accent);
+}
+
+/* ============================================
+   TABLA (Estilo Lista)
+   ============================================ */
 .tableContainer {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    overflow: auto;
+    width: 100%;
+    overflow-x: auto; /* Scroll horizontal contenido */
+    border-radius: var(--radius-lg);
+    background-color: var(--bg-dark-card);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color-dark);
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
-}
-
-.table th,
-.table td {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    border-bottom: 1px solid #e9ecef;
-    vertical-align: middle;
+    min-width: 1000px; /* Fuerza ancho mínimo para evitar que se rompan las columnas */
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
 }
 
 .table th {
-    background-color: #f8f9fa;
-    color: #6c757d;
-    font-size: 0.85rem;
+    background-color: var(--bg-dark-input);
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-md);
+    text-align: left;
     text-transform: uppercase;
+    font-size: 0.75rem;
     letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color-dark);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tbody tr {
+    transition: background-color var(--transition-fast);
 }
 
 .table tbody tr:hover {
-    background-color: #fdfdfd;
-}
-
-.readOnlyRow {
-    background-color: #f8f9fa;
-    color: #6c757d;
+    background-color: var(--bg-dark-hover);
 }
 
 .readOnlyRow td {
-    color: #6c757d;
+    color: var(--text-secondary);
+    font-style: italic;
 }
 
-/* --- Insignias de Estado (Etiquetas) --- */
+/* Badges de Estado */
 .estadoBadge {
-    padding: 0.25rem 0.6rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: var(--font-weight-bold);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     display: inline-block;
+    min-width: 90px; /* Un poco más ancho para "NO PAGADO" */
+    text-align: center;
 }
 
 .pagado {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
 }
 
 .cancelado {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: rgba(220, 53, 69, 0.2);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
 }
 
-.pendiente {
-    /* Para 'No Pagado' */
-    background-color: #fff3cd;
-    color: #856404;
+.pendiente, .default {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: var(--color-warning);
+    border: 1px solid var(--color-warning);
 }
 
-.default {
-    background-color: #e2e3e5;
-    color: #383d41;
-}
-
-/* --- Botones de Acciones en Tabla --- */
+/* Acciones de Tabla */
 .actions {
     text-align: right;
     white-space: nowrap;
 }
 
 .manageButton {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--color-info);
+    color: var(--text-white);
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-    font-size: 0.9rem;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .manageButton:hover {
-    background-color: #0056b3;
+    background-color: var(--color-info-hover);
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
 }
 
 .viewOnlyButton {
-    background-color: #6c757d;
+    background-color: var(--color-neutral);
 }
 
 .viewOnlyButton:hover {
-    background-color: #5a6268;
+    background-color: var(--color-neutral-hover);
 }
 
-/* --- Estilos del Modal (ManageVentaModal) --- */
+/* ============================================
+   MODAL DE GESTIÓN (Estilo Unificado)
+   ============================================ */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1050;
-    padding: 1rem;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(3px);
+    padding: var(--spacing-md);
 }
 
 .modalContent {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
     width: 100%;
-    max-width: 700px;
+    max-width: 650px;
+    box-shadow: var(--shadow-modal);
     max-height: 90vh;
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow-y: auto;
+    overflow-y: auto; /* Scroll vertical del modal */
 }
 
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    font-size: 1.8rem;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-2xl);
     font-weight: bold;
-    color: #aaa;
     cursor: pointer;
+    line-height: 1;
+    z-index: 10;
 }
 
 .closeButton:hover {
-    color: #333;
+    color: var(--text-white);
 }
 
 .modalContent h2 {
-    text-align: center;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
     margin-top: 0;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    font-size: var(--font-size-xl);
+    border-bottom: 1px solid var(--border-color-dark);
+    padding-bottom: var(--spacing-md);
 }
 
+/* Secciones del Modal */
 .modalSection {
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px dashed var(--border-color-dark);
 }
 
 .modalSection:last-of-type {
     border-bottom: none;
-    margin-bottom: 0;
 }
 
 .modalSection h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    color: #A50000;
+    color: var(--color-accent);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
 }
 
-/* Lista de Detalles de Pedido */
+/* Lista de detalles (Ticket) */
 .detalleVentaList {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    max-height: 200px;
+    background-color: var(--bg-dark-input);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    max-height: 250px;
     overflow-y: auto;
-    padding-right: 0.5rem;
+    border: 1px solid var(--border-color-dark);
 }
 
 .detalleVentaItem {
     display: flex;
+    justify-content: space-between;
     align-items: flex-start;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #f4f4f4;
-}
-
-.detalleVentaItem:last-child {
-    border-bottom: none;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-dark);
+    font-size: var(--font-size-sm);
 }
 
 .detalleQty {
     font-weight: bold;
-    color: #A50000;
-    margin-right: 0.75rem;
-    font-size: 1.1rem;
-    min-width: 30px;
+    color: var(--color-primary);
+    margin-right: var(--spacing-sm);
 }
 
 .itemInfo {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
 }
 
-.detalleNombre {
-    font-weight: 500;
-    color: #333;
-}
-
-.notas {
-    font-size: 0.85em;
-    color: #666;
-    font-style: italic;
-    padding-left: 0.5rem;
-}
-
-.detallePrecio {
-    font-weight: 500;
-    color: #555;
-    margin-left: 1rem;
-    white-space: nowrap;
-}
+.detalleNombre { color: var(--text-white); }
+.notas { color: var(--text-tertiary); font-style: italic; font-size: var(--font-size-xs); }
+.detallePrecio { font-weight: 600; color: var(--color-success); margin-left: var(--spacing-md); }
 
 .detalleTotal {
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
+    padding: var(--spacing-md);
+    background-color: rgba(40, 167, 69, 0.1);
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+    border-radius: var(--radius-md);
     font-weight: bold;
-    color: #333;
-    padding-top: 0.75rem;
-    margin-top: 0.5rem;
-    border-top: 2px solid #eee;
+    font-size: var(--font-size-lg);
 }
 
-/* --- NUEVO: Grid de Info y Controles (Separados) --- */
+/* Grid de Info en Modal */
 .gestionGridInfo {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem 1.5rem;
-    /* Menos gap vertical */
-    margin-bottom: 1.5rem;
-    /* Espacio antes de los controles */
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-lg);
 }
 
-.gestionGridInfo div {
-    font-size: 0.95rem;
-}
+.gridItemFull { grid-column: 1 / -1; }
+.gestionGridInfo strong { color: var(--text-tertiary); margin-right: 5px; }
 
-.gestionGridInfo div strong {
-    color: #555;
-}
-
-.gridItemFull {
-    grid-column: 1 / -1;
-    /* Ocupa todo el ancho */
-}
-
-/* Grid para los controles (Labels y Radios) */
+/* Controles */
 .gestionGridControls {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 1rem 1.5rem;
-    align-items: flex-start;
-
+    gap: var(--spacing-md);
+    align-items: start;
 }
 
 .gridLabel {
-    font-weight: 500;
     text-align: right;
-    color: #555;
-    padding-top: 0;
-    /* Alinear con el primer radio */
+    font-weight: 600;
+    padding-top: 6px;
+    color: var(--text-white);
 }
 
-/* --- NUEVO: Estilos para Botones Radio --- */
 .radioGroup {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--spacing-sm);
 }
 
 .radioButton {
-    background-color: #f0f0f0;
-    border: 2px solid #ddd;
-    color: #555;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
 }
 
 .radioButton:hover {
-    background-color: #e0e0e0;
-    border-color: #ccc;
+    border-color: var(--color-primary);
+    color: var(--text-white);
 }
 
 .radioButton.radioSelected {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-    font-weight: bold;
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border-color: var(--color-primary);
 }
 
-/* --- FIN Estilos Radio --- */
-
-
-/* Dropdown (por si acaso lo necesitas en el futuro) */
-.dropdown {
-    width: 100%;
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    background-color: #fff;
-}
-
-.dropdown:disabled {
-    background-color: #e9ecef;
-}
-
-/* Acciones del Modal */
+/* Botones del Modal */
 .modalActions {
-    border-top: 1px solid #eee;
-    padding-top: 1.5rem;
-    margin-top: 1rem;
     display: flex;
     justify-content: flex-end;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.readOnlyText {
-    color: #dc3545;
-    /* Rojo */
-    font-style: italic;
-    margin-right: auto;
-    /* Empuja a la izquierda */
-    font-size: 0.9em;
-}
-
-.cancelButton,
-.saveButton {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    gap: var(--spacing-md);
+    margin-top: auto;
 }
 
 .cancelButton {
-    background-color: #6c757d;
-    color: white;
-}
-
-.cancelButton:hover {
-    background-color: #5a6268;
+    background-color: var(--color-neutral);
+    color: var(--text-white);
+    padding: var(--button-padding);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
 }
 
 .saveButton {
-    background-color: #28a745;
-    color: white;
-}
-
-.saveButton:hover {
-    background-color: #218838;
-}
-
-.saveButton:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-
-/* Fallbacks */
-.loading,
-.errorText {
-    text-align: center;
-    padding: 2rem;
-    font-size: 1.2rem;
-    color: #6c757d;
-}
-
-.errorText {
-    color: #dc3545;
-}
-
-/* --- ESTILOS PARA LA BARRA DE FILTROS --- */
-.filtrosContainer {
-    display: flex;
-    flex-wrap: wrap;
-    /* Permite que los filtros pasen abajo en pantallas chicas */
-    gap: 1.5rem 2rem;
-    /* Espacio entre grupos de filtros */
-    background-color: #ffffff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.filtroGrupo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    /* Espacio entre label y control */
-}
-
-.filtroGrupo label {
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
-}
-
-/* Botones de Filtro de Estado */
-.botonesFiltroEstado {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.botonFiltro {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    color: #555;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.botonFiltro:hover {
-    background-color: #e0e0e0;
-}
-
-.botonFiltro.activo {
-    background-color: #A50000;
-    /* Color primario (rojo oscuro) */
-    color: white;
-    border-color: #A50000;
-}
-
-/* Input de Búsqueda de Empleado */
-.filtroInput {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    min-width: 200px;
-}
-
-/* Inputs de Fecha */
-.inputsFecha {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.inputsFecha label {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.inputFecha {
-    padding: 0.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.95rem;
-}
-
-/* --- ESTILOS ACTUALIZADOS PARA EL MODAL (Layout Grid) --- */
-/* Grid de Info (Datos fijos) */
-.gestionGridInfo {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem 1.5rem;
-    margin-bottom: 1.5rem;
-    font-size: 0.95rem;
-}
-
-.gestionGridInfo div {
-    grid-column: span 1;
-}
-
-.gestionGridInfo div strong {
-    color: #555;
-}
-
-.gridItemFull {
-    grid-column: 1 / -1;
-    /* Ocupa todo el ancho */
-}
-
-.gridItem {
-    grid-column: span 1;
-}
-
-
-/* Grid de Controles (Labels + Radios) */
-.gestionGridControls {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    /* Label angosto, control ancho */
-    gap: 1rem 1.5rem;
-    align-items: flex-start;
-}
-
-.gridLabel {
-    font-weight: 500;
-    text-align: right;
-    color: #555;
-    padding-top: 0;
-}
-
-/* Grupo de Botones Radio */
-.radioGroup {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.radioButton {
-    background-color: #f0f0f0;
-    border: 2px solid #ddd;
-    color: #555;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.radioButton:hover {
-    background-color: #e0e0e0;
-    border-color: #ccc;
-}
-
-.radioButton.radioSelected {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-    font-weight: bold;
-}
-
-/* --- ESTILOS PARA LA BARRA DE FILTROS --- */
-.filtrosContainer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 2rem;
-    /* Espacio entre grupos de filtros */
-    background-color: #ffffff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    align-items: flex-end;
-    /* Alinea los items (incluyendo botones) abajo */
-}
-
-.filtroGrupo {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    /* Espacio entre label y control */
-}
-
-.filtroGrupo label {
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
-}
-
-/* Botones de Filtro de Estado */
-.botonesFiltroEstado {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.botonFiltro {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    color: #555;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.botonFiltro:hover {
-    background-color: #e0e0e0;
-}
-
-.botonFiltro.activo {
-    background-color: #A50000;
-    /* Color primario (rojo oscuro) */
-    color: white;
-    border-color: #A50000;
-}
-
-/* Input de Búsqueda de Empleado */
-.filtroInput {
-    padding: 0.6rem 0.8rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.95rem;
-    min-width: 200px;
-    /* Ancho mínimo */
-}
-
-/* Inputs de Fecha */
-.inputsFecha {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.inputsFecha label {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.inputFecha {
-    padding: 0.5rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 0.95rem;
-}
-
-/* --- NUEVO: Contenedor para los botones Aplicar/Limpiar --- */
-.filtroAcciones {
-    display: flex;
-    gap: 0.5rem;
-    margin-left: auto;
-    /* Empuja los botones a la derecha */
-}
-
-.botonAplicar,
-.botonLimpiar {
-    padding: 0.6rem 1.2rem;
+    background-color: var(--color-success);
+    color: var(--text-white);
+    padding: var(--button-padding);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background-color 0.2s;
-    font-size: 0.9rem;
+    font-weight: bold;
 }
 
-.botonAplicar {
-    background-color: #007bff;
-    /* Azul (como 'Gestionar Venta') */
-    color: white;
+.readOnlyText {
+    color: var(--text-tertiary);
+    font-style: italic;
+    margin-right: auto;
+    font-size: var(--font-size-xs);
 }
 
-.botonAplicar:hover {
-    background-color: #0056b3;
-}
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .filtrosContainer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filtroGrupo {
+        min-width: 100%;
+    }
+    
+    /* En móvil forzamos que fecha se ponga en columna */
+    .inputsFecha {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .inputFecha {
+        width: 100%;
+    }
+    
+    .filtroAcciones {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: var(--spacing-md);
+    }
+    
+    .botonAplicar, .botonLimpiar {
+        flex: 1;
+        text-align: center;
+    }
 
-.botonLimpiar {
-    background-color: #6c757d;
-    /* Gris (como 'Ver Detalles') */
-    color: white;
-}
+    .modalContent {
+        padding: var(--spacing-md);
+        width: 95%;
+    }
 
-.botonLimpiar:hover {
-    background-color: #5a6268;
+    .gestionGridInfo, .gestionGridControls {
+        grid-template-columns: 1fr;
+    }
+    
+    .gridLabel { text-align: left; margin-bottom: 4px; }
 }

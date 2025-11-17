@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import styles from './RequestPasswordResetPage.module.css';
 import Swal from 'sweetalert2';
 import apiClient from '../../services/api'; // Lo activamos para usarlo
+import logo from '../../assets/images/logo.jpg';
+
 
 const RequestPasswordResetPage = () => {
     const [email, setEmail] = useState('');
@@ -38,7 +40,7 @@ const RequestPasswordResetPage = () => {
     return (
         <div className={styles.container}>
             <div className={styles.containerImg}>
-                <img className={styles.img} src="https://i.imgur.com/w8KqDWP.jpeg" alt="santo pecado letras" />
+                <img className={styles.img} src={logo} alt="santo pecado letras" />
             </div>
             <h2 className={`${styles.title} ${styles.neonText}`}>RECUPERAR CONTRASEÑA</h2>
             <p className={styles.instructions}>

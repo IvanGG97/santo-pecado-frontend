@@ -1,26 +1,60 @@
-/* src/components/MainLayout/MainLayout.module.css */
+/* ============================================
+   MAIN LAYOUT - Estructura Global
+   ============================================ */
 
+/* Contenedor principal: Ocupa toda la pantalla y organiza Sidebar vs Resto */
 .layout {
     display: flex;
-    background-color: #f4f7fa;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-light); /* Fondo general de la app */
+    overflow: hidden; /* Evita scroll en el body, lo manejamos internamente */
 }
 
-/* Este es el contenedor principal que agrupa el Header y el contenido.
-  Ocupa todo el espacio a la derecha del Sidebar.
-*/
+/* Wrapper principal (Header + Contenido) */
 .mainWrapper {
     display: flex;
-    flex-direction: column; /* Apila los hijos (Header y content) verticalmente */
-    width: calc(100% - 250px); /* Ancho total menos el sidebar */
-    margin-left: 250px;      /* Deja espacio para el sidebar fijo */
-    height: 100vh;           /* Ocupa toda la altura de la pantalla */
+    flex-direction: column;
+    flex: 1; /* Ocupa todo el espacio restante después del Sidebar */
+    position: relative;
+    overflow: hidden;
+    transition: margin-left var(--transition-base); /* Por si luego animas el sidebar */
 }
 
-/*
-  Esta es el área donde se renderizan tus páginas (Inicio, Empleados, etc.)
-*/
+/* Área de contenido donde se renderizan las páginas (Outlet) */
 .content {
-    padding: 2rem;
-    flex-grow: 1; /* ¡Esta es la línea clave! Hace que el contenido ocupe todo el espacio vertical sobrante */
-    overflow-y: auto; /* Si el contenido es muy largo, solo esta área tendrá scroll, no toda la página */
+    flex: 1; /* Ocupa el espacio restante debajo del Header */
+    overflow-y: auto; /* El scroll ocurre SOLO aquí */
+    padding: var(--spacing-lg);
+    position: relative;
+    
+    /* Scrollbar personalizada para el contenido */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neutral) var(--bg-light);
+}
+
+/* Ajuste de scrollbar para Webkit (Chrome/Safari) */
+.content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+    background: var(--bg-light);
+}
+
+.content::-webkit-scrollbar-thumb {
+    background-color: var(--color-neutral-light);
+    border-radius: var(--radius-pill);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column; /* En móvil, todo en columna si el sidebar no es 'drawer' */
+    }
+
+    .content {
+        padding: var(--spacing-md); /* Menos padding en móvil */
+        padding-bottom: 80px; /* Espacio extra abajo por si hay elementos flotantes */
+    }
 }

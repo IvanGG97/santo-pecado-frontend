@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import apiClient from '../../services/api';
 // Asumiendo que usa los estilos de SelectClienteModal como dijimos
-import styles from '../SelectClienteModal/SelectClienteModal.module.css';
+import styles from './ProveedorManagerModal.module.css';
 
 // Hook de Debounce
 const useDebounce = (value, delay) => {

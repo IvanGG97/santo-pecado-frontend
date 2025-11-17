@@ -1,238 +1,306 @@
-/* Estilos base del modal (fondo, centrado) */
+/* ============================================
+   PRODUCT DETAIL MODAL - Estilos Unificados
+   ============================================ */
+
+/* ===== MODAL BASE ===== */
 .modalBackdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: var(--overlay-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: var(--z-modal);
+    backdrop-filter: blur(3px);
 }
 
 .modalContent {
-    background-color: #1a1a1a;
-    color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid #fd002a;
-    width: 90%;
-    max-width: 800px; /* Más ancho para mostrar más info */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    animation: fadeIn 0.3s ease-out;
-    max-height: 90vh;
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-primary);
+    width: 95%;
+    max-width: var(--modal-width-lg); /* Ancho grande para mostrar info cómodamente */
+    box-shadow: var(--shadow-modal);
+    animation: modalFadeIn 0.3s ease-out;
+    max-height: var(--modal-max-height);
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== BOTÓN CERRAR ===== */
 .closeButton {
     position: absolute;
-    top: 10px;
-    right: 35px;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
     background: none;
     border: none;
-    color: #aaa;
-    font-size: 2rem;
-    font-weight: bold;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color var(--transition-base);
     line-height: 1;
+    z-index: 10;
 }
 
 .closeButton:hover {
-    color: #fff;
+    color: var(--text-white);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-/* --- NUEVO LAYOUT DE 2 COLUMNAS --- */
+/* ===== GRID DE CONTENIDO ===== */
 .contentGrid {
     display: grid;
-    /* Cambiamos la proporción a 1/3 - 2/3 (aprox 35%/65%) */
-    grid-template-columns: 1fr 2fr; 
-    gap: 2.5rem;
-    overflow-y: auto;
-    padding: 1rem;
-    /* Ajuste para navegadores webkit */
-    padding-right: 1rem;
-    margin-right: -1rem;
-    padding-left: 1rem;
-    margin-left: -1rem;
+    grid-template-columns: 1fr 1.5fr; /* Izquierda 40%, Derecha 60% aprox */
+    gap: var(--spacing-xl);
+    flex: 1;
+    overflow-y: auto; /* Scroll interno si el contenido es largo */
+    padding-right: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
 }
 
+/* --- COLUMNA IZQUIERDA (INFO) --- */
 .leftColumn {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    min-width: 0; /* Corrección para flexbox */
+    align-items: center; /* Centrar imagen */
+    border-right: 1px solid var(--border-color-dark);
+    padding-right: var(--spacing-lg);
 }
 
 .productName {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #fd002a;
-    text-shadow: 0 0 8px #fd002a;
-    margin: 0;
+    color: var(--color-primary);
+    text-shadow: var(--shadow-neon-primary);
+    font-size: var(--font-size-2xl);
     text-align: center;
+    margin-bottom: var(--spacing-md);
 }
 
 .productImage {
     width: 100%;
-    height: auto;
-    max-height: 300px;
-    border-radius: 8px;
-    border: 2px solid #fd002a;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--color-primary);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: var(--spacing-md);
+    background-color: var(--bg-dark-input);
 }
 
 .productDescription {
-    font-size: 1rem;
-    color: #ccc;
-    line-height: 1.5;
-    margin: 0.5rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
     text-align: center;
-    word-wrap: break-word; /* Para descripciones largas */
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
 }
 
-/* --- TARJETAS DE INFO MÁS PEQUEÑAS --- */
+/* Items de Información Clave */
 .infoItem {
-    background-color: #323743;
-    border-radius: 8px;
-    padding: 0.75rem; /* Padding reducido */
-    border: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid var(--border-color-dark);
+}
+
+.infoItem:last-child {
+    border-bottom: none;
 }
 
 .infoLabel {
-    display: block;
-    font-size: 0.8em;
-    color: #aaa;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
+    color: var(--text-tertiary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
 }
 
 .infoValue {
-    font-size: 1rem; /* Tamaño de fuente reducido */
-    font-weight: 500;
-    word-wrap: break-word;
+    color: var(--text-white);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    text-align: right;
 }
 
+/* Badge de Estado */
 .statusBadge {
-    padding: 0.3em 0.6em;
-    border-radius: 4px;
-    font-size: 0.9em;
-    font-weight: bold;
-    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
 }
-.statusAvailable { background-color: #28a745; }
-.statusUnavailable { background-color: #dc3545; }
+
+.statusAvailable {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.statusUnavailable {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
 
 /* --- COLUMNA DERECHA (RECETA) --- */
 .rightColumn {
     display: flex;
     flex-direction: column;
-    min-height: 0; 
-    max-height: 70vh;
 }
 
 .sectionTitle {
-    color: #fd002a;
-    border-bottom: 1px solid #444;
-    padding-bottom: 0.5rem;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    text-align: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
+    color: var(--color-accent);
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color-input-dark);
+    padding-bottom: var(--spacing-sm);
 }
 
 .recetaContainer {
-    background-color: #323743;
-    border-radius: 8px;
-    padding: 1rem;
-    overflow-y: auto;
-    flex-grow: 1; /* Ocupa el espacio disponible */
-    border: 1px solid #444;
+    flex: 1;
 }
 
-.noReceta {
-    color: #888;
-    text-align: center;
-    font-style: italic;
-    padding-top: 2rem;
-}
-
-/* --- ESTILOS PARA LAS MINI-CARDS DE RECETA --- */
+/* Grid de Tarjetas de Insumos */
 .recetaCardGrid {
     display: grid;
-    /* Mantenemos el minmax para que se ajusten automáticamente */
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--spacing-md);
 }
 
 .recetaCard {
-    background-color: #4a4a4a;
-    border-radius: 8px;
-    padding: 0.75rem; /* Padding reducido */
-    text-align: center;
-    border: 1px solid #555;
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-dark);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
     display: flex;
     flex-direction: column;
     align-items: center;
-    word-wrap: break-word;
+    text-align: center;
+    transition: transform var(--transition-fast);
+}
+
+.recetaCard:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-sm);
 }
 
 .recetaCardImage {
-    width: 50px; /* Tamaño de imagen reducido */
-    height: 50px; /* Tamaño de imagen reducido */
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
     object-fit: cover;
-    border-radius: 50%;
-    margin-bottom: 0.5rem;
-    border: 2px solid #fd002a;
+    margin-bottom: var(--spacing-xs);
+    border: 1px solid var(--border-color-dark);
 }
 
 .recetaCardName {
-    display: block;
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: #fff;
-    margin-bottom: 0.25rem;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-white);
+    margin-bottom: 2px;
+    line-height: 1.2;
 }
 
 .recetaCardQuantity {
-    display: block;
-    font-size: 0.8rem;
-    color: #ccc;
-    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    color: var(--color-secondary);
+    font-weight: var(--font-weight-bold);
 }
-/* ------------------------------------------- */
 
+.noReceta {
+    color: var(--text-tertiary);
+    font-style: italic;
+    text-align: center;
+    padding: var(--spacing-xl);
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-lg);
+}
+
+/* ===== BOTONES ===== */
 .buttons {
     display: flex;
     justify-content: flex-end;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #333;
-    flex-shrink: 0;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color-dark);
 }
 
 .cancelButton {
-    padding: 0.7rem 1.5rem;
+    padding: var(--button-padding);
     border: none;
-    border-radius: 5px;
-    font-weight: bold;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
-    background-color: #6c757d;
-    color: white;
-    transition: background-color 0.2s;
-}
-.cancelButton:hover {
-    background-color: #5a6268;
+    transition: all var(--transition-base);
+    font-size: var(--button-font-size);
+    background-color: var(--color-neutral);
+    color: var(--text-white);
 }
 
+.cancelButton:hover {
+    background-color: var(--color-neutral-hover);
+}
+
+/* ===== SCROLLBAR PERSONALIZADA ===== */
+.contentGrid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.contentGrid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: var(--radius-md);
+}
+
+.contentGrid::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+.contentGrid::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .contentGrid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .leftColumn {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid var(--border-color-dark);
+        padding-bottom: var(--spacing-lg);
+    }
+
+    .recetaCardGrid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+
+    .buttons {
+        justify-content: center;
+    }
+
+    .cancelButton {
+        width: 100%;
+    }
+}

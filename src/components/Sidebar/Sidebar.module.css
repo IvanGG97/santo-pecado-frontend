@@ -1,28 +1,45 @@
+/* ============================================
+   SIDEBAR - Navegación Principal
+   ============================================ */
+
 .sidebar {
-    width: 250px;
-    background-color: #A50000; /* Un rojo oscuro, ajústalo al tuyo */
-    color: white;
-    height: 100vh;
+    width: var(--sidebar-width);
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    height: 100vh; /* Altura completa del viewport */
     display: flex;
     flex-direction: column;
-    padding: 1rem 0;
-    position: fixed;
-    top: 0;
-    left: 0;
+    border-right: 1px solid var(--border-color-primary);
+    box-shadow: var(--shadow-lg);
+    flex-shrink: 0; /* Evita que se colapse */
+    z-index: var(--z-sticky); /* Por encima del contenido si fuera necesario */
+    transition: width var(--transition-base);
 }
 
+/* ===== LOGO ===== */
 .logoContainer {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 0 1rem;
+    height: var(--header-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--spacing-md);
+    border-bottom: 1px solid var(--border-color-dark);
+    background-color: rgba(0, 0, 0, 0.2); /* Fondo ligeramente más oscuro para el header del sidebar */
 }
 
 .logo {
-    width: 100px; /* Ajusta el tamaño */
-    height: 100px;
-    border-radius: 50%;
-    border: 3px solid #FFC107; /* Borde de neón simulado */
-    box-shadow: 0 0 15px #FFC107;
+    max-height: 40px;
+    width: auto;
+    object-fit: contain;
+    /* Opcional: Si el logo es oscuro y necesitas invertirlo o darle brillo */
+    /* filter: brightness(1.2); */
+}
+
+/* ===== NAVEGACIÓN ===== */
+.nav {
+    flex: 1;
+    overflow-y: auto; /* Scroll si hay muchos items */
+    padding: var(--spacing-md) 0;
 }
 
 .nav ul {
@@ -31,22 +48,118 @@
     margin: 0;
 }
 
+.nav li {
+    margin-bottom: 2px; /* Espacio mínimo entre items */
+}
+
+/* Enlaces del menú */
 .nav a {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    color: white;
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--text-tertiary);
     text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-base);
+    border-left: 4px solid transparent; /* Línea indicadora invisible por defecto */
 }
 
+.nav a span {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md); /* Espacio entre icono y texto */
+    font-size: var(--font-size-base);
+}
+
+/* Estado Hover */
 .nav a:hover {
-    background-color: #8E0000;
+    background-color: var(--bg-dark-hover);
+    color: var(--text-white);
 }
 
-.nav a.active {
-    background-color: #C00000; /* Un rojo más brillante para el item activo */
-    border-right: 4px solid #FFC107;
+/* Estado Activo (Página actual) */
+.active {
+    background-color: rgba(253, 0, 42, 0.1); /* Fondo sutil con el color primario */
+    color: var(--color-primary) !important;
+    border-left-color: var(--color-primary) !important;
+    font-weight: var(--font-weight-semibold) !important;
+}
+
+/* Efecto de brillo en el icono activo (opcional, si usas iconos SVG reales esto ayuda) */
+.active span {
+    /* text-shadow: 0 0 8px rgba(253, 0, 42, 0.4); */
+}
+
+/* ===== SCROLLBAR PERSONALIZADA (Sidebar oscuro) ===== */
+.nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+.nav::-webkit-scrollbar-thumb {
+    background: var(--color-neutral);
+    border-radius: var(--radius-md);
+}
+
+.nav::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-hover);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    /* En móvil el sidebar suele ocultarse o convertirse en un drawer */
+    /* Para este layout simple, asumimos que se oculta o cambia de estilo */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        overflow-x: auto; /* Scroll horizontal en móvil */
+        border-right: none;
+        border-bottom: 1px solid var(--border-color-dark);
+        padding: 0;
+    }
+
+    .logoContainer {
+        display: none; /* Ocultar logo en sidebar móvil para ahorrar espacio */
+    }
+
+    .nav {
+        display: flex;
+        padding: 0;
+        overflow-y: hidden;
+    }
+
+    .nav ul {
+        display: flex;
+        width: 100%;
+    }
+
+    .nav li {
+        flex: 0 0 auto; /* No encoger items */
+        margin-bottom: 0;
+    }
+
+    .nav a {
+        flex-direction: column;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-xs);
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+    }
+
+    .nav a span {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.75rem; /* Texto más pequeño */
+    }
+
+    .active {
+        border-left-color: transparent !important;
+        border-bottom-color: var(--color-primary) !important;
+        background-color: transparent;
+    }
 }

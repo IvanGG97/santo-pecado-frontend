@@ -156,9 +156,6 @@ const PedidosPage = () => {
             if (notasConAderezos) notasPartes.push(`Aderezos: ${notasConAderezos}`);
         }
 
-        // Nota: La lógica de agregados se maneja por separado en el ticket
-        // (aparecen como items nuevos), así que no la añadimos aquí.
-
         return notasPartes.join(' | ');
     };
 
@@ -172,11 +169,9 @@ const PedidosPage = () => {
         }
 
         for (const ticketItem of ticket) {
-            // Encontrar la info completa del producto en el ticket
             const productInfo = productos.find(p => p.id === ticketItem.producto_id);
-
-            // Si es un producto (no promo) y tiene receta
-            if (productInfo && Array.isArray(productInfo.receta)) { // <-- Check de Array
+            
+            if (productInfo && Array.isArray(productInfo.receta)) {
                 for (const recetaItem of productInfo.receta) {
                     if (!recetaItem || !recetaItem.insumo) continue;
                     const insumoId = recetaItem.insumo.id;
@@ -184,7 +179,6 @@ const PedidosPage = () => {
 
                     const demandaActual = demandMap.get(insumoId) || 0;
 
-                    // Sumar la cantidad requerida por la cantidad de items en el ticket
                     demandMap.set(insumoId, demandaActual + (cantidadRequerida * ticketItem.cantidad));
                 }
             }
@@ -197,7 +191,6 @@ const PedidosPage = () => {
     const checkStock = (producto, cantidadAChequear) => {
         const missingInsufficients = [];
 
-        // Comprobar si 'receta' es un array
         if (producto && Array.isArray(producto.receta) && producto.receta.length > 0) {
             for (const recetaItem of producto.receta) {
                 if (!recetaItem || !recetaItem.insumo) continue;
@@ -212,7 +205,6 @@ const PedidosPage = () => {
                 let demandaExcluida = 0;
                 if (editingTicketItem && (editingTicketItem.producto_id === producto.id || editingTicketItem.id === producto.id)) {
                     const productoEditado = productos.find(p => p.id === editingTicketItem.producto_id);
-                    // Comprobar si 'receta' es un array
                     const recetaItemEditado = Array.isArray(productoEditado?.receta) ? productoEditado.receta.find(r => r.insumo.id === insumoId) : null;
 
                     if (recetaItemEditado) {
@@ -237,8 +229,6 @@ const PedidosPage = () => {
 
 
     // --- Lógica del Pedido ---
-
-    // --- NUEVO: Función helper para crear items del ticket ---
     const createTicketItem = (item, cantidad, precio, notas, agregados = [], imagen = null, groupId = null, uniqueSubItemIdPart = null, customization = null) => {
         const finalId = uniqueSubItemIdPart 
             ? `${groupId}-${uniqueSubItemIdPart}`
@@ -250,17 +240,14 @@ const PedidosPage = () => {
             nombre: item.producto_nombre,
             cantidad: Number(cantidad),
             precioUnitario: Number(precio),
-            notas: notas, // String de display (ej: "Sin: Tomate", "Parte de: Promo")
+            notas: notas,
             agregados: agregados, 
             imagen: imagen,
             groupId: groupId,
-            // --- NUEVO CAMPO ---
-            // Objeto con el estado de la personalización para la EDICIÓN
             customization: customization 
         };
     };
 
-    // addToTicket ahora solo añade un item (para 'Agregados' simples y productos sin custom)
     const addToTicket = (item, cantidad, precio, notas, agregados = [], imagen = null, groupId = null, uniqueSubItemIdPart = null) => {
         const newItem = createTicketItem(item, cantidad, precio, notas, agregados, imagen, groupId, uniqueSubItemIdPart);
         setTicket(prevTicket => [...prevTicket, newItem]);
@@ -284,7 +271,6 @@ const PedidosPage = () => {
             return;
         }
 
-        // Comprobar si 'receta' es un array
         if (Array.isArray(product.receta) && product.receta.length > 0) {
             setProductToCustomize(product);
             setEditingTicketItem(null);
@@ -352,7 +338,6 @@ const PedidosPage = () => {
     const handleEditTicketItem = (ticketItem) => {
         const originalProduct = productos.find(p => p.id === ticketItem.producto_id);
 
-        // Comprobar si 'receta' es un array
         if (originalProduct && Array.isArray(originalProduct.receta) && originalProduct.receta.length > 0) {
             setProductToCustomize(originalProduct);
             setEditingTicketItem(ticketItem);
@@ -363,27 +348,20 @@ const PedidosPage = () => {
         }
     };
 
-    // --- handleSaveCustomization (CORRECCIÓN DEFINITIVA) ---
-    // Esta función ahora agrupa todas las actualizaciones en un solo setTicket
+    // --- handleSaveCustomization (CON CORRECCIÓN PARA PROMOS) ---
     const handleSaveCustomization = (customizedItem) => {
         // customizedItem = { product, agregados: [...], precioTotal, customization: { base, aderezos, isTargetProduct } }
         
-        // --- CAMBIO ---
-        // Generamos el string de notas aquí, en la página,
-        // leyendo el objeto 'customization' que nos envió el modal.
         const displayNotes = generateDisplayNotes(customizedItem.customization, customizedItem.agregados);
-
         const newTicketItems = [];
 
         if (editingTicketItem) {
             // --- Lógica de Edición ---
             
-            let notasCombinadas = displayNotes; // Usamos las nuevas notas generadas
+            let notasCombinadas = displayNotes;
 
-            // Si es un item de promo, le volvemos a añadir el "Parte de:"
             if (editingTicketItem.notas && editingTicketItem.notas.startsWith('Parte de:')) {
                 const notaPersonalizada = displayNotes ? ` | ${displayNotes}` : '';
-                // Extraemos el "Parte de: XXX" original
                 const parteDeNota = editingTicketItem.notas.split(' | ')[0]; 
                 notasCombinadas = `${parteDeNota}${notaPersonalizada}`;
             }
@@ -392,17 +370,18 @@ const PedidosPage = () => {
                 customizedItem.product,
                 editingTicketItem.cantidad,
                 editingTicketItem.precioUnitario === 0 ? 0 : parseFloat(customizedItem.product.producto_precio),
-                notasCombinadas, // El nuevo string de notas
+                notasCombinadas,
                 customizedItem.agregados, 
                 customizedItem.product.producto_imagen || customizedItem.product.producto_imagen_url,
                 editingTicketItem.groupId,
-                null, // uniqueSubItemIdPart (no aplica aquí)
-                customizedItem.customization // <-- GUARDAMOS EL OBJETO
+                null,
+                customizedItem.customization
             );
-            updatedMainItem.id = editingTicketItem.id; // Mantenemos el ID original
+            updatedMainItem.id = editingTicketItem.id;
             newTicketItems.push(updatedMainItem);
 
-            // Re-crear los items "Agregado a..." (Lógica sin cambios)
+            // Re-crear los items "Agregado a..." (Solo para items normales)
+            // (El modal previene que isPromoItem=true añada agregados)
             customizedItem.agregados.forEach(agregado => {
                 newTicketItems.push(
                     createTicketItem( 
@@ -414,20 +393,48 @@ const PedidosPage = () => {
                         agregado.producto_imagen || agregado.producto_imagen_url, 
                         editingTicketItem.groupId,
                         null,
-                        null // Los agregados no tienen personalización
+                        null
                     )
                 );
             });
             
+            // --- AQUI ESTÁ LA CORRECCIÓN ---
             setTicket(prevTicket => {
-                const ticketSinGrupoEditado = prevTicket.filter(
-                    item => item.groupId !== editingTicketItem.groupId
-                );
-                return [...ticketSinGrupoEditado, ...newTicketItems];
+                
+                // Usamos el estado 'isEditingPromoItem' que se seteó al abrir el modal
+                if (isEditingPromoItem) {
+                    // --- LÓGICA PARA ITEMS DE PROMO ---
+                    // Estamos editando un sub-item (ej. Doble Cheddar)
+                    // NO borramos el grupo. Solo reemplazamos el item.
+                    
+                    // 1. Filtramos el item específico que se editó
+                    const ticketSinItemEditado = prevTicket.filter(
+                        item => item.id !== editingTicketItem.id
+                    );
+                    
+                    // 2. Añadimos el item actualizado
+                    // newTicketItems SÓLO tiene el item actualizado (Doble Cheddar)
+                    // ya que el modal no permite añadir agregados a items de promo.
+                    return [...ticketSinItemEditado, ...newTicketItems];
+
+                } else {
+                    // --- LÓGICA PARA ITEMS NORMALES (CON AGREGADOS) ---
+                    // Estamos editando un item normal.
+                    // SÍ borramos el grupo (item + agregados) y lo reemplazamos.
+                    
+                    // 1. Filtramos TODOS los items del grupo
+                    const ticketSinGrupoEditado = prevTicket.filter(
+                        item => item.groupId !== editingTicketItem.groupId
+                    );
+                    
+                    // 2. Devolvemos la lista filtrada + los nuevos items (item + agregados)
+                    return [...ticketSinGrupoEditado, ...newTicketItems];
+                }
             });
+            // --- FIN DE LA CORRECCIÓN ---
 
         } else {
-            // --- Lógica de Creación ---
+            // --- Lógica de Creación (Sin cambios) ---
             const newGroupId = `${customizedItem.product.id}-${Date.now()}`;
             
             newTicketItems.push(
@@ -435,12 +442,12 @@ const PedidosPage = () => {
                     customizedItem.product, 
                     1, 
                     customizedItem.product.producto_precio, 
-                    displayNotes, // El nuevo string de notas
+                    displayNotes,
                     customizedItem.agregados,
                     customizedItem.product.producto_imagen || customizedItem.product.producto_imagen_url, 
                     newGroupId,
                     null,
-                    customizedItem.customization // <-- GUARDAMOS EL OBJETO
+                    customizedItem.customization
                 )
             );
             
@@ -455,7 +462,7 @@ const PedidosPage = () => {
                         agregado.producto_imagen || agregado.producto_imagen_url, 
                         newGroupId,
                         null,
-                        null // Los agregados no tienen personalización
+                        null
                     )
                 );
             });
@@ -463,20 +470,19 @@ const PedidosPage = () => {
             setTicket(prevTicket => [...prevTicket, ...newTicketItems]);
         }
         
-        // Cerrar modal (sin cambios)
+        // Cerrar modal
         setIsModalOpen(false);
         setProductToCustomize(null);
         setEditingTicketItem(null);
         setIsEditingPromoItem(false);
     };
-    // --- FIN DE LA CORRECCIÓN ---
+    // --- FIN DE LA FUNCIÓN ---
 
 
     const handleUpdateTicketQuantity = (itemId, amount) => {
         const itemToUpdate = ticket.find(item => item.id === itemId);
         if (!itemToUpdate) return;
 
-        // --- CORRECCIÓN: No permitir modificar cantidad de sub-items de promo ---
         if (itemToUpdate.groupId && itemToUpdate.precioUnitario === 0) {
             Swal.fire('Atención', 'La cantidad de los items de promoción no se puede modificar.', 'info');
             return;
@@ -510,15 +516,11 @@ const PedidosPage = () => {
         );
     };
 
-    // --- handleRemoveFromTicket (CORREGIDO) ---
     const handleRemoveFromTicket = (itemToRemove) => {
         setTicket(prevTicket => {
-            // Si el item tiene un groupId (es promo, item de promo, o agregado)
             if (itemToRemove.groupId) {
-                // Borra todo el grupo (item principal + sub-items)
                 return prevTicket.filter(item => item.groupId !== itemToRemove.groupId);
             }
-            // Si es un item normal sin grupo (ej. Gaseosa)
             return prevTicket.filter(item => item.id !== itemToRemove.id);
         });
     };
@@ -542,54 +544,61 @@ const PedidosPage = () => {
         setIsClienteModalOpen(false);
     };
 
-    // --- handleFinalizarPedido (MODIFICADO) ---
     const handleFinalizarPedido = async () => {
-        // ... (Validación de ticket vacío y stock - sin cambios) ...
+        // Validación final de stock (copiada de tu código, asumo que está ok)
+        const insumosInsuficientesFinal = [];
+        for (const [insumoId, demandaTotal] of insumoDemand.entries()) {
+            const insumoEnStock = insumosStock.find(i => i.id === insumoId);
+            const stockTotal = parseFloat(insumoEnStock?.insumo_stock || 0);
 
-        // --- Lógica de Payload (MODIFICADA) ---
-        // Ahora leemos el objeto 'customization' para generar las notas del backend
+            if (stockTotal < demandaTotal) {
+                insumosInsuficientesFinal.push(insumoEnStock?.insumo_nombre || `ID ${insumoId}`);
+            }
+        }
+        if (insumosInsuficientesFinal.length > 0) {
+            Swal.fire(
+                'Error de Stock',
+                `No se puede finalizar el pedido. El stock es insuficiente para: ${insumosInsuficientesFinal.join(', ')}. Revise el pedido o el stock.`,
+                'error'
+            );
+            return;
+        }
+        // Fin validación stock
+
         const payload = {
             cliente: clienteSeleccionado ? clienteSeleccionado.id : null,
             detalles: ticket.map(item => {
                 
                 let notasFinalesParaBackend = '';
-
-                // 1. Generar notas de personalización (si existen)
-                // Reutilizamos el helper que creamos
                 const customNotes = item.customization 
                     ? generateDisplayNotes(item.customization, item.agregados) 
                     : '';
 
-                // 2. Definir las notas según el tipo de item
                 if (item.producto_id === null && item.notas === "Promoción") {
                     notasFinalesParaBackend = item.nombre;
                 
                 } else if (item.precioUnitario === 0 && item.notas.startsWith('Parte de:')) {
-                    // Item de promo (ej: "Parte de: Promo | Sin: Tomate")
-                    const parteDeNota = item.notas.split(' | ')[0]; // "Parte de: Promo"
+                    const parteDeNota = item.notas.split(' | ')[0];
                     notasFinalesParaBackend = customNotes ? `${parteDeNota} (${customNotes})` : parteDeNota;
                 
                 } else if (item.notas.startsWith('Agregado a')) {
                     notasFinalesParaBackend = item.notas;
                 
                 } else if (customNotes) {
-                    // Producto normal personalizado
                     notasFinalesParaBackend = `${item.nombre} (${customNotes})`;
                 
                 } else {
-                    // Producto normal sin personalización (ej. Gaseosa)
                     notasFinalesParaBackend = item.nombre;
                 }
 
                 return {
                     producto_id: item.producto_id,
                     cantidad: item.cantidad,
-                    notas: notasFinalesParaBackend, // <-- Lógica actualizada
+                    notas: notasFinalesParaBackend,
                     precio_unitario: item.precioUnitario
                 };
             })
         };
-        // --- FIN LÓGICA PAYLOAD ---
 
         try {
             console.log("Enviando payload:", JSON.stringify(payload, null, 2));
@@ -608,7 +617,6 @@ const PedidosPage = () => {
         }
     };
 
-    // --- Pantalla de verificación ---
     if (isVerifyingCaja) {
         return (
             <div className={styles.posContainer} style={{ padding: '2rem', textAlign: 'center', fontSize: '1.2rem' }}>
@@ -617,7 +625,6 @@ const PedidosPage = () => {
         );
     }
 
-    // --- Renderizado (sin cambios en el JSX) ---
     return (
         <div className={styles.posContainer}>
             {/* Columna Izquierda: Catálogo */}
@@ -680,11 +687,9 @@ const PedidosPage = () => {
                                 />
                                 <div className={styles.itemInfo}>
                                     <span className={styles.itemNombre}>{item.nombre}</span>
-                                    {/* Mostrar las notas formateadas */}
                                     {item.notas && <span className={styles.itemNotas}>{item.notas.replace(/ \| /g, ', ')}</span>}
                                 </div>
                                 <div className={styles.itemActions}>
-                                    {/* --- CORRECCIÓN: Habilitar edición para items de promo --- */}
                                     {(item.producto_id && Array.isArray(productos.find(p => p.id === item.producto_id)?.receta)) && (
                                         <button
                                             onClick={() => handleEditTicketItem(item)}

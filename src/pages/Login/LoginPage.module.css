@@ -1,144 +1,222 @@
-/* He copiado y adaptado tus estilos de Register para mantener la consistencia */
+/* ============================================
+   LOGIN PAGE - Estilos Unificados
+   ============================================ */
+
+/* Contenedor Principal (Pantalla completa) */
 .container {
-    max-width: 400px;
-    margin: 40px auto;
-    background-color: #000000;
-    padding: 30px 25px;
-    border-radius: 8px;
-    border: 1px solid #fd002a;
-    color: #fff;
-    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-dark); /* Fondo oscuro para resaltar neón */
+    padding: var(--spacing-lg);
+    animation: fadeIn 0.5s ease-out;
 }
 
-.title {
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    text-align: center;
-    color: #fff;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.neonText {
-    color: #fd002a;
-    text-shadow: 0 0 8px #fd002a;
+/* Logo / Imagen */
+.containerImg {
+    margin-bottom: var(--spacing-xl);
+    width: 150px; /* Tamaño controlado del logo */
+    height: 150px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    border: 4px solid var(--color-primary);
+    box-shadow: var(--shadow-neon-primary);
+    background-color: #000;
 }
 
 .img {
-    width: 250px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.containerImg {
-    display: flex;
+/* Título con efecto Neón */
+.title {
+    font-size: var(--font-size-2xl);
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xl);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 800;
+}
+
+.neonText {
+    text-shadow: var(--shadow-neon-primary);
+}
+
+/* Formulario */
+.loginForm {
     width: 100%;
-    justify-content: center;
-    margin-bottom: 1rem;
+    max-width: 400px;
+    background-color: var(--bg-dark-card);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color-dark);
+    box-shadow: var(--shadow-lg);
 }
 
 .label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-    margin-top: 15px;
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-white);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin-top: var(--spacing-md);
 }
 
+.label:first-of-type {
+    margin-top: 0;
+}
+
+/* Inputs */
 .input {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0000ff;
-    background-color: #323743;
-    color: #fff;
-    font-size: 16px;
+    padding: var(--input-padding);
+    background-color: var(--bg-dark-input);
+    border: 1px solid var(--border-color-input-dark);
+    border-radius: var(--radius-md);
+    color: var(--text-white);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-base);
     box-sizing: border-box;
 }
 
-/* --- ESTILOS AÑADIDOS PARA EL ENLACE --- */
-.forgotPassword {
-    text-align: right;
-    margin-top: 10px;
+.input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(253, 0, 42, 0.2);
 }
 
-.button {
-    margin-top: 30px;
-    width: 50%;
-    background-color: #fd002a;
-    color: #fff;
-    font-weight: bold;
-    font-size: 16px;
-    padding: 15px 0;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    transition: background-color 0.3s ease;
-}
-
-.button:hover:not(:disabled) {
-    background-color: #e00028;
-}
-
-.buttonDisabled {
-    background-color: #ff6b8b;
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.error {
-    color: #ff4d4d;
-    margin-top: 10px;
-    text-align: center;
-    font-size: 0.9em;
-}
-
-.switchText {
-    margin-top: 20px;
-    text-align: center;
-    color: #fd002a;
-    font-weight: 500;
-}
-
-.linkButton {
-    background: none;
-    border: none;
-    color: #fd002a;
-    text-decoration: underline;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9em; /* Ajustamos el tamaño para que se vea bien */
-    padding: 0;
-}
-
+/* Wrapper para Input de Contraseña + Icono */
 .passwordWrapper {
     position: relative;
-    width: 100%;
-}
-
-/* Ajusta el padding del input para que el texto no se oculte 
-detrás del icono. Asumiendo que el icono tiene ~40px de espacio.
-*/
-.passwordWrapper .input {
-    /* Asumiendo que .input ya tiene padding, le añadimos espacio a la derecha */
-    padding-right: 40px; 
-}
-
-/* Botón del icono (ojo) */
-.passwordToggleIcon {
-    position: absolute;
-    top: 50%;
-    right: 10px; /* 10px desde la derecha */
-    transform: translateY(-50%); /* Centrado vertical perfecto */
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #888; /* Color gris para el icono */
-    padding: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
+}
+
+.passwordWrapper .input {
+    padding-right: 45px; /* Espacio para el icono */
+}
+
+.passwordToggleIcon {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    transition: color var(--transition-base);
 }
 
 .passwordToggleIcon:hover {
-    color: #fbfbfb; /* Color más oscuro al pasar el mouse */
+    color: var(--text-white);
+}
+
+/* Errores */
+.error {
+    color: var(--color-error);
+    font-size: var(--font-size-xs);
+    margin-top: 4px;
+    min-height: 1.2em; /* Reserva espacio para evitar saltos */
+}
+
+/* Links (Olvidé contraseña / Registro) */
+.forgotPassword {
+    text-align: right;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.linkButton {
+    color: var(--text-tertiary);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-base);
+}
+
+.linkButton:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* Botón Principal */
+.button {
+    width: 100%;
+    padding: var(--button-padding);
+    background-color: var(--color-primary);
+    color: var(--text-white);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: var(--spacing-sm);
+    box-shadow: var(--shadow-neon-primary);
+}
+
+.button:hover {
+    background-color: var(--color-primary-light);
+    transform: translateY(-2px);
+}
+
+.button:active {
+    transform: translateY(0);
+}
+
+.buttonDisabled {
+    background-color: var(--color-neutral);
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+/* Texto inferior (Switch) */
+.switchText {
+    margin-top: var(--spacing-xl);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.switchText .linkButton {
+    font-weight: bold;
+    color: var(--text-white);
+    margin-left: 5px;
+}
+
+.switchText .linkButton:hover {
+    color: var(--color-primary);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    .form {
+        padding: var(--spacing-lg);
+        background-color: rgba(30, 30, 30, 0.95); /* Un poco más transparente en móvil */
+    }
+
+    .containerImg {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .title {
+        font-size: var(--font-size-xl);
+    }
 }
