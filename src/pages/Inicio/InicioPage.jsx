@@ -282,7 +282,7 @@ const AdminDashboard = () => {
             <div className={styles.headerRow}>
                 <h1 className={styles.welcomeMessage}>Dashboard de Resumen</h1>
 
-                <button
+                {/* <button
                     className={styles.aiButton}
                     onClick={handleGenerateRecommendation}
                     disabled={isGeneratingAI}
@@ -292,7 +292,7 @@ const AdminDashboard = () => {
                     ) : (
                         <><Bot size={20} /> Generar Recomendación con IA</>
                     )}
-                </button>
+                </button> */}
             </div>
 
             {/* Filtros */}
