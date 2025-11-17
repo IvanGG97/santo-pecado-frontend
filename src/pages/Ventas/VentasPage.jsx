@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'; // 1. IMPORTAR useRef
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api';
 import styles from './VentasPage.module.css';
@@ -21,11 +21,14 @@ const MEDIOS_DE_PAGO = [
     { value: 'transferencia', label: 'Transferencia' },
 ];
 
-// --- Componente Modal (Sin cambios) ---
+// --- Componente Modal (MODIFICADO) ---
 const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
     const [editableEstadoId, setEditableEstadoId] = useState(venta.estado_venta?.id || '');
     const [editableMedioPago, setEditableMedioPago] = useState(venta.venta_medio_pago || 'efectivo');
     const [isLoading, setIsLoading] = useState(false);
+
+    // --- 2. CREAR REFERENCIA AL CONTENIDO DEL MODAL ---
+    const modalContentRef = useRef(null);
 
     const isReadOnly =
         venta.estado_venta?.estado_venta_nombre === ESTADO_FINAL_PAGADO ||
@@ -50,10 +53,130 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
         }
     };
 
+    // --- 3. FUNCIÓN PARA IMPRIMIR ---
+    const handlePrint = () => {
+        const printContent = modalContentRef.current.innerHTML;
+        
+        // Crear un iframe temporal para no afectar la página actual
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'absolute';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+        
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        // Escribimos el HTML del modal y algunos estilos básicos para la impresión
+        doc.write(`
+            <html>
+                <head>
+                    <title>Comprobante Venta #${venta.id}</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            color: #000;
+                        }
+                        h2 { 
+                            color: #000; 
+                            border-bottom: 2px solid #000; 
+                            padding-bottom: 5px; 
+                        }
+                        h4 { 
+                            border-bottom: 1px solid #ccc; 
+                            padding-bottom: 3px; 
+                            margin-top: 20px;
+                        }
+                        
+                        /* Estilos para simular el grid de info */
+                        .gestionGridInfo { 
+                            display: grid; 
+                            grid-template-columns: 1fr 1fr; 
+                            gap: 5px; 
+                            margin-bottom: 10px; 
+                            font-size: 0.9em;
+                        }
+                        .gridItemFull { 
+                            grid-column: 1 / -1; 
+                        }
+                        
+                        /* Estilos para la lista de detalles */
+                        .detalleVentaList { 
+                            margin-top: 10px; 
+                        }
+                        .detalleVentaItem { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            border-bottom: 1px dashed #ccc; 
+                            padding: 8px 0; 
+                            font-size: 0.9em;
+                        }
+                        .detalleQty { 
+                            font-weight: bold; 
+                            margin-right: 10px; 
+                        }
+                        .itemInfo { 
+                            flex-grow: 1; 
+                        }
+                        .detalleNombre { 
+                            font-weight: bold; 
+                        }
+                        .notas { 
+                            font-style: italic; 
+                            color: #555; 
+                            font-size: 0.9em; 
+                            display: block;
+                        }
+                        .detallePrecio { 
+                            font-weight: bold; 
+                            white-space: nowrap;
+                        }
+                        .detalleTotal { 
+                            text-align: right; 
+                            font-size: 1.3em; 
+                            font-weight: bold; 
+                            margin-top: 15px; 
+                        }
+                        
+                        /* Ocultar botones en la impresión */
+                        .no-print { 
+                            display: none !important; 
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        doc.close();
+
+        // Ocultar los botones dentro del iframe antes de imprimir
+        // Usamos la clase de CSS module como un string selector
+        const modalActions = doc.querySelector(`.${styles.modalActions}`);
+        if (modalActions) {
+            modalActions.classList.add('no-print');
+        }
+        const closeButton = doc.querySelector(`.${styles.closeButton}`);
+        if (closeButton) {
+            closeButton.classList.add('no-print');
+        }
+
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        
+        // Limpiar
+        document.body.removeChild(iframe);
+    };
+
+
     return (
         <div className={styles.modalBackdrop}>
-            <div className={styles.modalContent}>
-                <button onClick={onClose} className={styles.closeButton}>&times;</button>
+            {/* --- 4. ASIGNAR LA REFERENCIA AL DIV QUE QUEREMOS IMPRIMIR --- */}
+            <div className={styles.modalContent} ref={modalContentRef}>
+                {/* 5. AÑADIR CLASE 'no-print' AL BOTÓN DE CERRAR */}
+                <button onClick={onClose} className={`${styles.closeButton} no-print`}>&times;</button>
                 <h2>Detalle de Venta #{venta.id}</h2>
 
                 <div className={styles.modalSection}>
@@ -95,7 +218,8 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                         <div className={styles.gridItemFull}><strong>Fecha:</strong> {new Date(venta.venta_fecha_hora).toLocaleString()}</div>
                     </div>
 
-                    <div className={styles.gestionGridControls}>
+                    {/* Controles de Gestión (Se ocultan al imprimir) */}
+                    <div className={`${styles.gestionGridControls} no-print`}>
                         {isReadOnly ? (
                             <>
                                 <div className={styles.gridLabel}><strong>Estado:</strong></div>
@@ -138,7 +262,20 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                     </div>
                 </div>
 
-                <div className={styles.modalActions}>
+                {/* --- 6. MODIFICAR LA SECCIÓN DE ACCIONES --- */}
+                <div className={`${styles.modalActions} no-print`}>
+                    
+                    {/* Botón de Imprimir (Alineado a la izquierda) */}
+                    <button 
+                        type="button"
+                        onClick={handlePrint}
+                        className={styles.cancelButton} // Reusamos el estilo del botón "cancelar"
+                        style={{ marginRight: 'auto' }} // Esto lo empuja a la izquierda
+                    >
+                        Imprimir Comprobante
+                    </button>
+                    
+                    {/* Botones originales (Alineados a la derecha) */}
                     <button onClick={onClose} className={styles.cancelButton}>Cerrar</button>
                     {!isReadOnly && (
                         <button
@@ -157,7 +294,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
 };
 
 
-// --- Componente Principal VentasPage ---
+// --- Componente Principal VentasPage (Sin cambios) ---
 const VentasPage = () => {
     const [allVentas, setAllVentas] = useState([]);
     const [estadosVenta, setEstadosVenta] = useState([]);
@@ -169,27 +306,23 @@ const VentasPage = () => {
     const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
     const navigate = useNavigate();
 
-    // --- ESTADOS PARA LOS INPUTS DE FILTRO ---
     const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado');
     const [inputEmpleadoSearch, setInputEmpleadoSearch] = useState('');
     const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
-    // --- NUEVOS ESTADOS DE INPUT ---
     const [inputIdVenta, setInputIdVenta] = useState('');
     const [inputIdPedido, setInputIdPedido] = useState('');
 
-    // --- ESTADO PARA LOS FILTROS APLICADOS (MODIFICADO) ---
     const [activeFilters, setActiveFilters] = useState({
         status: 'No Pagado',
         empleado: '',
         desde: '',
         hasta: '',
-        idVenta: '', // <-- NUEVO
-        idPedido: '' // <-- NUEVO
+        idVenta: '',
+        idPedido: ''
     });
 
     const STATUS_FILTERS = useMemo(() => ['No Pagado', 'Pagado', 'Cancelado', 'Todos'], []);
 
-    // Función de carga (sin cambios)
     const fetchVentasYEstados = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) setLoading(true);
         try {
@@ -212,7 +345,6 @@ const VentasPage = () => {
     }, []);
 
 
-    // useEffect para verificar la caja (sin cambios)
     useEffect(() => {
         const checkCajaStatus = async () => {
             try {
@@ -252,7 +384,6 @@ const VentasPage = () => {
     }, [navigate]);
 
 
-    // Carga inicial (depende de la verificación) (sin cambios)
     useEffect(() => {
         if (!isVerifyingCaja) {
             fetchVentasYEstados(true);
@@ -260,67 +391,53 @@ const VentasPage = () => {
     }, [fetchVentasYEstados, isVerifyingCaja]);
 
 
-    // --- LÓGICA DE FILTRADO COMBINADO (MODIFICADA) ---
     const filteredVentas = useMemo(() => {
         const termEmpleado = activeFilters.empleado.toLowerCase().trim();
-        // --- NUEVO: Obtener términos de ID ---
         const termIdVenta = activeFilters.idVenta.trim();
         const termIdPedido = activeFilters.idPedido.trim();
 
         return allVentas.filter(venta => {
-            // 1. Filtro por Estado
             if (activeFilters.status !== 'Todos' && venta.estado_venta?.estado_venta_nombre !== activeFilters.status) {
                 return false;
             }
-            // 2. Filtro por Empleado
             if (termEmpleado) {
                 const nombreCompleto = `${venta.empleado?.first_name || ''} ${venta.empleado?.last_name || ''}`.toLowerCase().trim();
                 if (!nombreCompleto.includes(termEmpleado)) {
                     return false;
                 }
             }
-            // 3. Filtro por Fecha "Desde"
             if (activeFilters.desde) {
                 try {
-                    const fechaDesde = new Date(activeFilters.desde + 'T00:00:00'); // Asegurar inicio del día
+                    const fechaDesde = new Date(activeFilters.desde + 'T00:00:00');
                     const fechaVenta = new Date(venta.venta_fecha_hora);
                     if (fechaVenta < fechaDesde) {
                         return false;
                     }
                 } catch (e) { console.warn("Fecha 'desde' inválida:", activeFilters.desde); }
             }
-            // 4. Filtro por Fecha "Hasta"
             if (activeFilters.hasta) {
                 try {
-                    const fechaHasta = new Date(activeFilters.hasta + 'T23:59:59'); // Asegurar fin del día
+                    const fechaHasta = new Date(activeFilters.hasta + 'T23:59:59');
                     const fechaVenta = new Date(venta.venta_fecha_hora);
                     if (fechaVenta > fechaHasta) {
                         return false;
                     }
                 } catch (e) { console.warn("Fecha 'hasta' inválida:", activeFilters.hasta); }
             }
-
-            // --- NUEVO: 5. Filtro por ID Venta ---
             if (termIdVenta) {
-                // Comparamos como string para que '12' coincida con '123'
                 if (!String(venta.id).startsWith(termIdVenta)) {
                     return false;
                 }
             }
-
-            // --- NUEVO: 6. Filtro por ID Pedido ---
             if (termIdPedido) {
-                // Usamos optional chaining (?.), convertimos a string
                 if (!String(venta.pedido?.id || '').startsWith(termIdPedido)) {
                     return false;
                 }
             }
-
             return true;
         });
     }, [allVentas, activeFilters]);
 
-    // --- Handlers para filtros ---
     const handleDateChange = (e) => {
         const { name, value } = e.target;
         setInputDateRange(prevRange => ({
@@ -332,8 +449,7 @@ const VentasPage = () => {
     const handleEmpleadoSearchChange = (e) => {
         setInputEmpleadoSearch(e.target.value);
     };
-
-    // --- NUEVO: Handlers para inputs de ID ---
+    
     const handleIdVentaChange = (e) => {
         setInputIdVenta(e.target.value);
     };
@@ -341,38 +457,33 @@ const VentasPage = () => {
         setInputIdPedido(e.target.value);
     };
 
-    // --- handleAplicarFiltros (MODIFICADO) ---
     const handleAplicarFiltros = () => {
         setActiveFilters({
             status: inputStatusFilter,
             empleado: inputEmpleadoSearch,
             desde: inputDateRange.desde,
             hasta: inputDateRange.hasta,
-            idVenta: inputIdVenta,   // <-- NUEVO
-            idPedido: inputIdPedido  // <-- NUEVO
+            idVenta: inputIdVenta,
+            idPedido: inputIdPedido
         });
     };
 
-    // --- handleLimpiarFiltros (MODIFICADO) ---
     const handleLimpiarFiltros = () => {
-        // Resetear inputs
         setInputStatusFilter('No Pagado');
         setInputEmpleadoSearch('');
         setInputDateRange({ desde: '', hasta: '' });
-        setInputIdVenta('');   // <-- NUEVO
-        setInputIdPedido('');  // <-- NUEVO
-        // Resetear filtros activos
+        setInputIdVenta('');
+        setInputIdPedido('');
         setActiveFilters({
             status: 'No Pagado',
             empleado: '',
             desde: '',
             hasta: '',
-            idVenta: '',   // <-- NUEVO
-            idPedido: '' // <-- NUEVO
+            idVenta: '',
+            idPedido: ''
         });
     };
 
-    // --- Handlers del Modal (sin cambios) ---
     const handleManageClick = (venta) => {
         setSelectedVenta(venta);
         setIsModalOpen(true);
@@ -386,7 +497,6 @@ const VentasPage = () => {
         fetchVentasYEstados(false);
     };
 
-    // --- Renderizado de Verificación (sin cambios) ---
     if (isVerifyingCaja) {
         return (
             <div className={styles.ventasContainer} style={{ padding: '2rem', textAlign: 'center' }}>
@@ -395,7 +505,6 @@ const VentasPage = () => {
         );
     }
 
-    // --- Renderizado Principal (MODIFICADO CON NUEVOS INPUTS) ---
     return (
         <div className={styles.ventasContainer}>
             <h1>Gestión de Ventas</h1>
@@ -417,11 +526,11 @@ const VentasPage = () => {
                     </div>
                 </div>
 
-                {/* --- NUEVO: Filtro por ID Venta --- */}
+                {/* Filtro por ID Venta */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="idVentaSearch">ID Venta:</label>
                     <input
-                        type="number" // 'number' para mostrar teclado numérico en móviles
+                        type="number"
                         id="idVentaSearch"
                         placeholder="Buscar por ID Venta..."
                         value={inputIdVenta}
@@ -430,7 +539,7 @@ const VentasPage = () => {
                     />
                 </div>
 
-                {/* --- NUEVO: Filtro por ID Pedido --- */}
+                {/* Filtro por ID Pedido */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="idPedidoSearch">ID Pedido:</label>
                     <input
@@ -487,8 +596,6 @@ const VentasPage = () => {
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
-
-            {/* --- Resto del renderizado (Tabla, etc.) sin cambios --- */}
 
             <div className={styles.tableContainer}>
                 {loading ? (
