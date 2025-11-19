@@ -47,7 +47,7 @@ const RequestPasswordResetPage = () => {
                 Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
             </p>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className={styles.requestForm}>
                 <label className={styles.label}>Correo Electrónico</label>
                 <input
                     className={styles.input}

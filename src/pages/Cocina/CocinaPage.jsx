@@ -4,6 +4,9 @@ import apiClient from '../../services/api';
 // Asegúrate que este archivo CSS exista en la misma carpeta (src/pages/Cocina/)
 import styles from './CocinaPage.module.css';
 
+
+
+const today = new Date().toISOString().split('T')[0];
 // --- Componente Simple de Mensajes ---
 const MessageBox = ({ message, type, onClose }) => {
     if (!message) return null;
@@ -435,6 +438,7 @@ const CocinaPage = () => {
                             value={inputDateRange.hasta} // Controlado por INPUT state
                             onChange={handleDateChange}
                             className={styles.inputFecha}
+                            max={today} 
                         />
                     </div>
                 </div>

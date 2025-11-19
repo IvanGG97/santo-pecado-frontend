@@ -15,7 +15,6 @@ const IconoEgreso = () => (
     </svg>
 );
 
-// --- Función de formato movida fuera para ser reutilizable ---
 const formatCurrency = (value) => new Intl.NumberFormat('es-AR').format(value || 0);
 
 // --- Formulario para ABRIR Caja (Sin cambios) ---
@@ -102,8 +101,7 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
     );
 };
 
-// --- Modal para INGRESOS/EGRESOS (Sin cambios) ---
-// (Este modal ahora es llamado por CajaDetalleModal)
+// --- Modal para INGRESOS/EGRESOS (CORREGIDO) ---
 const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     const [monto, setMonto] = useState('');
     const [descripcion, setDescripcion] = useState('');
@@ -113,6 +111,18 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     const endpoint = tipo === 'ingreso' ? '/movimiento_caja/ingresos/' : '/movimiento_caja/egresos/';
     const title = tipo === 'ingreso' ? 'Registrar Ingreso Manual' : 'Registrar Egreso Manual';
 
+    // Validación en tiempo real para monto positivo
+    const handleMontoChange = (e) => {
+        const val = e.target.value;
+        if (val === '') {
+            setMonto('');
+            return;
+        }
+        if (parseFloat(val) >= 0) {
+            setMonto(val);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -120,7 +130,7 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
 
         const montoNum = parseFloat(monto);
         if (isNaN(montoNum) || montoNum <= 0) {
-            setError("El monto debe ser un número positivo.");
+            setError("El monto debe ser un número positivo mayor a 0.");
             setIsLoading(false);
             return;
         }
@@ -152,12 +162,16 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                <div className={styles.closeButtonContainer}>
-                    <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
+                {/* --- CORRECCIÓN BOTÓN CERRAR --- */}
+                <div className={styles.closeButtonModalContainer}>
+                    <button onClick={onClose} className={styles.closeButtonModal} disabled={isLoading}>&times;</button>
                 </div>
+                {/* ------------------------------- */}
+
                 <h2>{title}</h2>
                 <form onSubmit={handleSubmit} className={styles.formSimple}>
                     {error && <p className={styles.errorText}>{error}</p>}
+
                     <div className={styles.formGroup}>
                         <label>Descripción</label>
                         <input
@@ -168,14 +182,18 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
                             placeholder="Ej: Pago a repartidor, ajuste..."
                             required
                             autoFocus
+                            maxLength={200} // Límite
                         />
+                        {/* Contador */}
+                        <small className={styles.charCounter}>{descripcion.length} / 200</small>
                     </div>
+
                     <div className={styles.formGroup}>
                         <label>Monto ($)</label>
                         <input
                             type="number"
                             value={monto}
-                            onChange={(e) => setMonto(e.target.value)}
+                            onChange={handleMontoChange} // Validación
                             className={styles.input}
                             placeholder="Ej: 500.00"
                             step="0.01"
@@ -183,6 +201,7 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
                             required
                         />
                     </div>
+
                     <div className={styles.buttons}>
                         <button type="button" onClick={onClose} className={styles.cancelButton} disabled={isLoading}>
                             Cancelar
@@ -198,14 +217,9 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
 };
 
 
-// --- NUEVO: Componente Modal para Detalle de Caja ---
-// (Este componente reemplaza a CajaDetalleView)
+// --- NUEVO: Componente Modal para Detalle de Caja (Sin cambios lógicos) ---
 const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorialRefresh }) => {
-
-    // El modal maneja su propio estado de 'caja'
-    // Se inicializa con la caja que le pasó el padre
     const [caja, setCaja] = useState(cajaInicial);
-
     const [movimientos, setMovimientos] = useState({ ingresos: [], egresos: [] });
     const [loadingMov, setLoadingMov] = useState(true);
     const [activeTab, setActiveTab] = useState('ingresos');
@@ -214,7 +228,6 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
 
     const isReadOnly = !caja.caja_estado;
 
-    // Función para refrescar la lista de movimientos
     const fetchMovimientos = useCallback(async () => {
         if (!caja.id) return;
         setLoadingMov(true);
@@ -234,24 +247,18 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
         }
     }, [caja.id]);
 
-    // Carga los movimientos cuando el modal se monta
     useEffect(() => {
         fetchMovimientos();
     }, [fetchMovimientos]);
 
-    // --- LÓGICA DE ACTUALIZACIÓN INTERNA ---
-
-    // Función para refrescar solo los datos de ESTE modal (los totales)
     const refreshCajaData = async () => {
         console.log("Refrescando datos internos del modal...");
         try {
-            // Usamos la API de historial para buscar el objeto 'caja' actualizado
             const resHistorial = await apiClient.get('/caja/historial/');
             const cajaActualizada = resHistorial.data.find(c => c.id === caja.id);
             if (cajaActualizada) {
-                setCaja(cajaActualizada); // Actualiza el estado interno del modal
+                setCaja(cajaActualizada);
             }
-            // También le decimos al padre (CajasPage) que actualice su lista
             if (onHistorialRefresh) {
                 onHistorialRefresh();
             }
@@ -265,29 +272,25 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
         setIsMovimientoModalOpen(true);
     };
 
-    // Esta función se llama cuando MovimientoModal tiene éxito
     const handleMovimientoExitoso = () => {
-        fetchMovimientos(); // 1. Refresca la lista de movimientos
-        refreshCajaData();  // 2. Refresca los totales de ESTE modal (y del historial)
+        fetchMovimientos();
+        refreshCajaData();
     };
 
-    // Pasa la llamada al padre para abrir el modal de CIERRE
     const handleCerrarClick = () => {
         if (onCerrarCajaClick) {
             onCerrarCajaClick();
         }
-        onClose(); // Cierra este modal de detalle
+        onClose();
     };
 
     return (
         <div className={styles.modalBackdrop}>
-            {/* Usamos modalContent pero con un tamaño más grande */}
             <div className={`${styles.modalContent} ${styles.modalDetalleLg}`}>
                 <div className={styles.closeButtonModalContainer}>
                     <button onClick={onClose} className={styles.closeButtonModal}>&times;</button>
                 </div>
 
-                {/* El contenido de la antigua CajaDetalleView va aquí */}
                 <div className={styles.detalleContainer}>
                     <div className={styles.detalleHeader}>
                         <h3>Detalle de Caja N°{caja.id}</h3>
@@ -420,7 +423,7 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
 };
 
 
-// --- Componente Modal para Confirmar Cierre (Sin cambios) ---
+// --- Componente Modal para Confirmar Cierre (CORREGIDO) ---
 const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     const [observacion, setObservacion] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -434,10 +437,12 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                <div className={styles.closeButtonContainer}>
-                    <button onClick={onClose} className={styles.closeButton} disabled={isLoading}>&times;</button>
-
+                {/* --- CORRECCIÓN BOTÓN CERRAR --- */}
+                <div className={styles.closeButtonModalContainer}>
+                    <button onClick={onClose} className={styles.closeButtonModal} disabled={isLoading}>&times;</button>
                 </div>
+                {/* ------------------------------- */}
+
                 <h2>Confirmar Cierre de Caja</h2>
                 <p>Estás cerrando la <strong>Caja N°{caja.id}</strong>.</p>
                 <p>El sistema usará el siguiente cálculo de efectivo para el Saldo Final:</p>
@@ -463,7 +468,10 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
                             onChange={(e) => setObservacion(e.target.value)}
                             placeholder="Añade notas sobre el cierre..."
                             rows={3}
+                            maxLength={200} // Límite
                         />
+                        {/* Contador */}
+                        <small className={styles.charCounter}>{observacion.length} / 200</small>
                     </div>
                 </form>
 
@@ -485,41 +493,28 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     );
 };
 
-
-// --- Componente Principal de la Página de Cajas ---
+// --- Componente Principal (Sin cambios mayores) ---
 const CajasPage = () => {
     const [cajaAbierta, setCajaAbierta] = useState(null);
     const [cajasHistorial, setCajasHistorial] = useState([]);
-
-    // --- ESTADO MODIFICADO ---
-    // Ya no es 'cajaEnDetalle', sino 'detalleModalCaja'
     const [detalleModalCaja, setDetalleModalCaja] = useState(null);
-
     const [montoSugeridoApertura, setMontoSugeridoApertura] = useState(0);
     const [isPrimeraCaja, setIsPrimeraCaja] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState(true);
     const [loadingHistorial, setLoadingHistorial] = useState(true);
-
     const [isCerrarModalOpen, setIsCerrarModalOpen] = useState(false);
     const [cajaParaCerrar, setCajaParaCerrar] = useState(null);
 
-
-    // --- fetchData (Simplificado) ---
-    // - Ya no maneja 'cajaEnDetalle'
-    // - Sigue siendo 'estable' (sin dependencias)
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoadingStatus(true);
             setLoadingHistorial(true);
         }
-
         console.log("fetchData: Verificando estado y historial...");
         let data = { estado: null, historial: [] };
-
         try {
             const resEstado = await apiClient.get('/caja/estado/');
             data.estado = resEstado.data;
-
             if (resEstado.data && resEstado.data.id && resEstado.data.caja_estado === true) {
                 setCajaAbierta(resEstado.data);
                 setIsPrimeraCaja(false);
@@ -529,11 +524,9 @@ const CajasPage = () => {
                 setMontoSugeridoApertura(monto);
                 setIsPrimeraCaja(monto === 0 && resEstado.data.caja_estado === false);
             }
-
             const resHistorial = await apiClient.get('/caja/historial/');
             data.historial = resHistorial.data;
             setCajasHistorial(resHistorial.data);
-
         } catch (err) {
             console.error("Error cargando datos de caja:", err);
             Swal.fire('Error', 'No se pudo conectar con el servidor de caja.', 'error');
@@ -544,49 +537,30 @@ const CajasPage = () => {
         }
     }, []);
 
-    // --- useEffect (Carga inicial y Refresco) ---
-    // - Ya no actualiza el detalle, solo el historial
     useEffect(() => {
-        fetchData(true); // Carga inicial
-
+        fetchData(true);
         const intervalId = setInterval(() => {
             console.log("--- Refresco automático (15s) ---");
-            // El refresco ahora solo llama a fetchData.
-            // No interfiere con el modal de detalle.
             fetchData(false);
         }, 15000);
-
         return () => clearInterval(intervalId);
     }, [fetchData]);
 
-
-    // --- Handlers ---
-
-    // --- handleCajaAbierta (Corregido) ---
     const handleCajaAbierta = async (cajaNuevaIncompleta) => {
         console.log("Caja abierta, refrescando datos para obtener objeto completo...");
-
-        // 1. Poner la UI en estado de carga
         setLoadingStatus(true);
         setLoadingHistorial(true);
-
-        // 2. Llamar a fetchData(true) y ESPERAR que termine
         const datosNuevos = await fetchData(true);
-
-        // 3. 'datosNuevos.estado' AHORA tiene la caja abierta completa
         if (datosNuevos.estado && datosNuevos.estado.caja_estado === true) {
             console.log("Datos completos recibidos. Mostrando detalle.", datosNuevos.estado);
-            // 4. Poner el objeto COMPLETO en el estado del modal de detalle
             setDetalleModalCaja(datosNuevos.estado);
         } else {
             console.error("FetchData no devolvió una caja abierta después de crearla.");
         }
     };
 
-    // --- handleCerrarCaja (Sin cambios, abre el modal de confirmación) ---
     const handleCerrarCaja = async () => {
         console.log("1. Botón 'Cerrar Caja' presionado. Verificando estado...");
-
         Swal.fire({
             title: 'Verificando estado...',
             text: 'Consultando la base de datos...',
@@ -595,60 +569,46 @@ const CajasPage = () => {
                 Swal.showLoading();
             }
         });
-
         let cajaActualizada;
         try {
             const resEstado = await apiClient.get('/caja/estado/');
-
             if (!resEstado.data || !resEstado.data.id || resEstado.data.caja_estado !== true) {
                 console.error("Error de desincronización: La API dice que la caja ya está cerrada.");
                 Swal.fire('Error', 'La caja ya ha sido cerrada. Refrescando...', 'error');
                 fetchData(true);
                 return;
             }
-
             cajaActualizada = resEstado.data;
             console.log("3. Estado verificado. Abriendo modal de cierre.");
-
             setCajaParaCerrar(cajaActualizada);
             setIsCerrarModalOpen(true);
             Swal.close();
-
         } catch (err) {
             console.error("Error al verificar estado antes de cerrar:", err);
             Swal.fire('Error', 'No se pudo verificar el estado de la caja. Intente de nuevo.', 'error');
         }
     };
 
-    // --- handleConfirmarCierre (Sin cambios, lógica de PATCH) ---
     const handleConfirmarCierre = async (observacion) => {
         console.log("4. Usuario confirmó cierre. Enviando PATCH a /api/caja/cerrar/.");
-
         try {
             const response = await apiClient.patch('/caja/cerrar/', {
                 caja_observacion: observacion || ""
             });
-
             const { caja_saldo_final } = response.data;
             console.log("5. Cierre exitoso en backend. Saldo final:", caja_saldo_final);
-
             setIsCerrarModalOpen(false);
             setCajaParaCerrar(null);
-
             await Swal.fire(
                 'Caja Cerrada',
                 `La caja se cerró con un Saldo Final (Efectivo) de: $${formatCurrency(caja_saldo_final)}`,
                 'success'
             );
-
             fetchData(true);
-
         } catch (err) {
             console.error("Error al *confirmar* el cierre:", err.response?.data || err);
             const errorMsg = err.response?.data?.detail || "No se pudo cerrar la caja.";
-
             Swal.fire('Error', errorMsg, 'error');
-
             if (err.response?.status === 400) {
                 fetchData(true);
                 setIsCerrarModalOpen(false);
@@ -657,20 +617,16 @@ const CajasPage = () => {
         }
     };
 
-    // --- handleViewDetalle (AHORA ABRE EL MODAL) ---
     const handleViewDetalle = (caja) => {
         setDetalleModalCaja(caja);
     };
-
 
     if (loadingStatus || loadingHistorial) {
         return <div className={styles.loading}>Cargando Cajas...</div>;
     }
 
-    // --- Renderizado (Ahora solo muestra el historial) ---
     return (
         <div className={styles.cajaContainer}>
-
             <div className={styles.historialContainer}>
                 <div className={styles.toolbar}>
                     {!cajaAbierta && (
@@ -743,17 +699,15 @@ const CajasPage = () => {
                 </table>
             </div>
 
-            {/* --- RENDERIZADO DEL NUEVO MODAL DE DETALLE --- */}
             {detalleModalCaja && (
                 <CajaDetalleModal
                     cajaInicial={detalleModalCaja}
                     onClose={() => setDetalleModalCaja(null)}
                     onCerrarCajaClick={handleCerrarCaja}
-                    onHistorialRefresh={() => fetchData(false)} // Le dice al padre que refresque el historial
+                    onHistorialRefresh={() => fetchData(false)}
                 />
             )}
 
-            {/* --- RENDERIZADO DEL MODAL DE CIERRE (Sin cambios) --- */}
             {isCerrarModalOpen && cajaParaCerrar && (
                 <CerrarCajaModal
                     caja={cajaParaCerrar}
@@ -764,10 +718,8 @@ const CajasPage = () => {
                     onConfirm={handleConfirmarCierre}
                 />
             )}
-
         </div>
     );
 };
 
 export default CajasPage;
-

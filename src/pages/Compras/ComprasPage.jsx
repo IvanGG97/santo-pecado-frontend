@@ -5,6 +5,9 @@ import styles from './ComprasPage.module.css';
 import Swal from 'sweetalert2';
 import AddCompraModal from '../../components/AddCompraModal/AddCompraModal';
 
+
+
+const today = new Date().toISOString().split('T')[0];
 // --- Constantes para Filtros ---
 const METODOS_PAGO_FILTRO = [
     { value: 'todos', label: 'Todos' },
@@ -14,7 +17,7 @@ const METODOS_PAGO_FILTRO = [
 
 // --- NUEVO: Componente Modal para Ver Detalle de Compra ---
 const CompraDetalleModal = ({ compra, onClose }) => {
-    
+
     const formatCurrency = (value) => new Intl.NumberFormat('es-AR').format(value || 0);
 
     return (
@@ -75,12 +78,12 @@ const CompraDetalleModal = ({ compra, onClose }) => {
 
 // --- Componente Principal ComprasPage ---
 const ComprasPage = () => {
-    const [allCompras, setAllCompras] = useState([]); 
-    const [loading, setLoading] = useState(true); 
+    const [allCompras, setAllCompras] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false); 
-    
-    const [selectedCompraDetalle, setSelectedCompraDetalle] = useState(null); 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [selectedCompraDetalle, setSelectedCompraDetalle] = useState(null);
 
     const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
     const navigate = useNavigate();
@@ -128,7 +131,7 @@ const ComprasPage = () => {
             try {
                 const res = await apiClient.get('/caja/estado/');
                 if (res.data && res.data.caja_estado === true) {
-                    setIsVerifyingCaja(false); 
+                    setIsVerifyingCaja(false);
                 } else {
                     Swal.fire({
                         title: 'Caja Cerrada',
@@ -139,7 +142,7 @@ const ComprasPage = () => {
                         allowEscapeKey: false,
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            navigate('/cajas'); 
+                            navigate('/cajas');
                         }
                     });
                 }
@@ -153,7 +156,7 @@ const ComprasPage = () => {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                 }).then(() => {
-                    navigate('/inicio'); 
+                    navigate('/inicio');
                 });
             }
         };
@@ -166,7 +169,7 @@ const ComprasPage = () => {
         if (!isVerifyingCaja) {
             fetchCompras(true);
         }
-    }, [fetchCompras, isVerifyingCaja]); 
+    }, [fetchCompras, isVerifyingCaja]);
 
     // --- Lógica de Filtrado (sin cambios) ---
     const filteredCompras = useMemo(() => {
@@ -216,7 +219,7 @@ const ComprasPage = () => {
         });
     }, [allCompras, activeFilters]);
 
-    
+
     // --- Handlers para Filtros ---
     const handleDateChange = (e) => {
         const { name, value } = e.target;
@@ -249,7 +252,7 @@ const ComprasPage = () => {
             metodoPago: 'todos',
         });
     };
-    
+
     // --- Handlers para Modales (sin cambios) ---
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -261,9 +264,9 @@ const ComprasPage = () => {
 
     const handleCompraSuccess = () => {
         handleCloseModal();
-        fetchCompras(false); 
+        fetchCompras(false);
     };
-    
+
     const handleViewDetalle = (compra) => {
         setSelectedCompraDetalle(compra);
     };
@@ -289,7 +292,7 @@ const ComprasPage = () => {
 
             {/* --- BARRA DE FILTROS --- */}
             <div className={styles.filtrosContainer}>
-                
+
                 {/* ID Compra */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="idCompraSearch">ID Compra:</label>
@@ -349,27 +352,28 @@ const ComprasPage = () => {
 
                 {/* Fechas */}
                 <div className={styles.filtroGrupo}>
-                     <label>Fecha:</label>
-                     <div className={styles.inputsFecha}>
-                         <label htmlFor="desde">Desde:</label>
-                         <input
-                             type="date"
-                             id="desde"
-                             name="desde"
-                             value={inputDateRange.desde} 
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                         <label htmlFor="hasta">Hasta:</label>
-                         <input
-                             type="date"
-                             id="hasta"
-                             name="hasta"
-                             value={inputDateRange.hasta} 
-                             onChange={handleDateChange}
-                             className={styles.inputFecha}
-                         />
-                     </div>
+                    <label>Fecha:</label>
+                    <div className={styles.inputsFecha}>
+                        <label htmlFor="desde">Desde:</label>
+                        <input
+                            type="date"
+                            id="desde"
+                            name="desde"
+                            value={inputDateRange.desde}
+                            onChange={handleDateChange}
+                            className={styles.inputFecha}
+                        />
+                        <label htmlFor="hasta">Hasta:</label>
+                        <input
+                            type="date"
+                            id="hasta"
+                            name="hasta"
+                            value={inputDateRange.hasta}
+                            onChange={handleDateChange}
+                            className={styles.inputFecha}
+                            max={today}
+                        />
+                    </div>
                 </div>
 
                 {/* Botones */}
@@ -378,7 +382,7 @@ const ComprasPage = () => {
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
-            
+
             {/* Toolbar (Botón de Añadir) */}
             <div className={styles.toolbar}>
                 <button className={styles.addButton} onClick={handleOpenModal}>
@@ -402,7 +406,7 @@ const ComprasPage = () => {
                                 <th>Empleado</th>
                                 <th>Total</th>
                                 <th>Método de Pago</th>
-                                <th>Acciones</th> 
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -420,8 +424,8 @@ const ComprasPage = () => {
                                         <td>${new Intl.NumberFormat('es-AR').format(compra.compra_total)}</td>
                                         <td>{compra.compra_metodo_pago}</td>
                                         <td className={styles.actions}>
-                                            <button 
-                                                className={styles.viewButton} 
+                                            <button
+                                                className={styles.viewButton}
                                                 onClick={() => handleViewDetalle(compra)}
                                             >
                                                 Ver Detalles

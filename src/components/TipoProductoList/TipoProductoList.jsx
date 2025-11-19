@@ -21,18 +21,50 @@ const TipoProductoList = () => {
 
     useEffect(() => { fetchTipos(); }, []);
 
+    // --- FUNCIÓN AUXILIAR PARA NORMALIZAR TEXTO ---
+    const normalizeString = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    };
+
     const handleAdd = async () => {
         const { value: nombre } = await Swal.fire({
             title: 'Añadir Nuevo Tipo de Producto',
             input: 'text',
             inputLabel: 'Nombre del tipo',
             inputPlaceholder: 'Ej: Bebidas sin alcohol',
+            // --- 1. HTML para el contador ---
+            html: `
+                <div style="text-align: right; font-size: 0.8em; color: #888; margin-top: 5px;">
+                    <span id="swal-char-count">0</span> / 100
+                </div>
+            `,
             showCancelButton: true,
             confirmButtonText: 'Guardar',
             cancelButtonText: 'Cancelar',
+            inputAttributes: {
+                maxlength: 100 // Límite del navegador
+            },
+            // --- 2. Lógica para actualizar el contador ---
+            didOpen: () => {
+                const input = Swal.getInput();
+                const counter = Swal.getHtmlContainer().querySelector('#swal-char-count');
+
+                if (input && counter) {
+                    input.oninput = () => {
+                        counter.textContent = input.value.length;
+                    };
+                }
+            },
             inputValidator: (value) => {
                 if (!value) {
                     return '¡Necesitas escribir un nombre!';
+                }
+                // --- VALIDACIÓN DE DUPLICADOS ---
+                const normalizedNewName = normalizeString(value);
+                const isDuplicate = tipos.some(t => normalizeString(t.tipo_producto_nombre) === normalizedNewName);
+
+                if (isDuplicate) {
+                    return '¡Este tipo de producto ya existe!';
                 }
             }
         });
@@ -47,26 +79,54 @@ const TipoProductoList = () => {
             }
         }
     };
-    
+
     const handleEdit = async (tipo) => {
         const { value: nombre } = await Swal.fire({
             title: 'Editar Tipo de Producto',
             input: 'text',
             inputLabel: 'Nuevo nombre',
             inputValue: tipo.tipo_producto_nombre,
+            // --- 1. HTML para el contador ---
+            html: `
+                <div style="text-align: right; font-size: 0.8em; color: #888; margin-top: 5px;">
+                    <span id="swal-char-count">0</span> / 100
+                </div>
+            `,
             showCancelButton: true,
             confirmButtonText: 'Actualizar',
             cancelButtonText: 'Cancelar',
+            inputAttributes: {
+                maxlength: 100
+            },
+            // --- 2. Lógica para actualizar el contador (con valor inicial) ---
+            didOpen: () => {
+                const input = Swal.getInput();
+                const counter = Swal.getHtmlContainer().querySelector('#swal-char-count');
+
+                if (input && counter) {
+                    counter.textContent = input.value.length; // Valor inicial
+                    input.oninput = () => {
+                        counter.textContent = input.value.length;
+                    };
+                }
+            },
             inputValidator: (value) => {
                 if (!value) {
                     return '¡El nombre no puede estar vacío!';
+                }
+                // --- VALIDACIÓN DE DUPLICADOS (Excluyendo el actual) ---
+                const normalizedNewName = normalizeString(value);
+                const otherTypes = tipos.filter(t => t.id !== tipo.id);
+                const isDuplicate = otherTypes.some(t => normalizeString(t.tipo_producto_nombre) === normalizedNewName);
+
+                if (isDuplicate) {
+                    return '¡Ya existe otro tipo de producto con este nombre!';
                 }
             }
         });
 
         if (nombre && nombre !== tipo.tipo_producto_nombre) {
             try {
-                // Llama al endpoint de detalle para actualizar
                 await apiClient.put(`/inventario/tipos-producto/${tipo.id}/`, { tipo_producto_nombre: nombre });
                 Swal.fire('¡Actualizado!', 'El tipo de producto ha sido actualizado.', 'success');
                 fetchTipos();
@@ -89,7 +149,6 @@ const TipoProductoList = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    // Llama al endpoint de detalle para eliminar
                     await apiClient.delete(`/inventario/tipos-producto/${tipo.id}/`);
                     Swal.fire('¡Eliminado!', 'El tipo de producto ha sido eliminado.', 'success');
                     fetchTipos();
@@ -133,4 +192,3 @@ const TipoProductoList = () => {
 };
 
 export default TipoProductoList;
-

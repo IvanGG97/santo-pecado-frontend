@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import apiClient from '../../services/api';
-// Importamos los nuevos estilos
 import styles from './EmpleadoPage.module.css'; 
 import Swal from 'sweetalert2';
 import EditEmployeeModal from '../../components/EditEmployeeModal/EditEmployeeModal';
+// 1. Importamos useAuth
+import { useAuth } from '../../contexts/AuthContext'; 
 
-// --- Constantes para Filtros de Rol (similar a ComprasPage) ---
+// --- Constantes para Filtros ---
 const ROLES_FILTRO = [
     { value: 'todos', label: 'Todos' },
     { value: 'Admin', label: 'Admin' },
     { value: 'Encargado/Cajero', label: 'Encargado/Cajero' },
     { value: 'Cocina', label: 'Cocina' },
     { value: 'Cliente', label: 'Cliente'}
-    // Puedes añadir más roles aquí si es necesario
 ];
 
-// --- Mapa de Prioridad para Ordenar ---
 const ROLES_PRIORITARIOS = {
     'Admin': 1,
     'Encargado/Cajero': 2,
@@ -23,20 +22,22 @@ const ROLES_PRIORITARIOS = {
 };
 
 const EmpleadoPage = () => {
+    // 2. Obtenemos el usuario logueado
+    const { user } = useAuth(); 
+    
     const [allEmpleados, setAllEmpleados] = useState([]);
-    const [loading, setLoading] = useState(true); // Inicia en true para la carga inicial
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-    // --- Estados para los INPUTS de filtro ---
+    // --- Estados para Filtros ---
     const [inputNombre, setInputNombre] = useState('');
     const [inputApellido, setInputApellido] = useState('');
     const [inputUsername, setInputUsername] = useState('');
-    const [inputRol, setInputRol] = useState('todos'); // Default 'todos'
+    const [inputRol, setInputRol] = useState('todos');
 
-    // --- Estado para los FILTROS ACTIVOS ---
     const [activeFilters, setActiveFilters] = useState({
         nombre: '',
         apellido: '',
@@ -44,7 +45,7 @@ const EmpleadoPage = () => {
         rol: 'todos',
     });
 
-    // --- Carga de Datos (con useCallback) ---
+    // --- Carga de Datos ---
     const fetchEmpleados = useCallback(async () => {
         setLoading(true);
         setError('');
@@ -60,56 +61,49 @@ const EmpleadoPage = () => {
         }
     }, []);
 
-    // --- Carga Inicial (Eliminamos showList) ---
     useEffect(() => {
         fetchEmpleados();
     }, [fetchEmpleados]);
 
-    // --- Lógica de Filtrado y Orden (useMemo) ---
-    const filteredEmpleados = useMemo(() => {
+    // --- 3. Separar Usuario Actual y Lista Filtrada ---
+    const { currentUserEmployee, otherEmployeesFiltered } = useMemo(() => {
+        if (!user) return { currentUserEmployee: null, otherEmployeesFiltered: [] };
+
+        // Encontrar al usuario actual en la lista de empleados (por username o ID)
+        // Asumiendo que 'user.username' del AuthContext coincide con 'emp.username'
+        const current = allEmpleados.find(emp => emp.username === user.username);
+        
+        // Filtrar el resto
+        const others = allEmpleados.filter(emp => emp.username !== user.username);
+
+        // Aplicar filtros SOLO a los "otros"
         const termNombre = activeFilters.nombre.toLowerCase().trim();
         const termApellido = activeFilters.apellido.toLowerCase().trim();
         const termUsername = activeFilters.username.toLowerCase().trim();
         const termRol = activeFilters.rol;
 
-        return allEmpleados
-            .filter(emp => {
-                const nombreCompleto = `${emp.first_name || ''} ${emp.last_name || ''}`.toLowerCase().trim();
+        const filtered = others.filter(emp => {
+            const nombreCompleto = `${emp.first_name || ''} ${emp.last_name || ''}`.toLowerCase().trim();
 
-                // Filtro por Nombre (busca en nombre y apellido)
-                if (termNombre && !nombreCompleto.includes(termNombre)) {
-                    return false;
-                }
-                // Filtro por Apellido (busca en nombre y apellido)
-                if (termApellido && !nombreCompleto.includes(termApellido)) {
-                    return false;
-                }
-                // Filtro por Username
-                if (termUsername && !(emp.username || '').toLowerCase().includes(termUsername)) {
-                    return false;
-                }
-                // Filtro por Rol
-                if (termRol !== 'todos' && (emp.rol || 'No asignado') !== termRol) {
-                    return false;
-                }
-                return true;
-            })
-            .sort((a, b) => {
-                // Lógica de Orden por Prioridad (Goal 3)
-                const priorityA = ROLES_PRIORITARIOS[a.rol] || 99;
-                const priorityB = ROLES_PRIORITARIOS[b.rol] || 99;
+            if (termNombre && !nombreCompleto.includes(termNombre)) return false;
+            if (termApellido && !nombreCompleto.includes(termApellido)) return false;
+            if (termUsername && !(emp.username || '').toLowerCase().includes(termUsername)) return false;
+            if (termRol !== 'todos' && (emp.rol || 'No asignado') !== termRol) return false;
+            
+            return true;
+        }).sort((a, b) => {
+            const priorityA = ROLES_PRIORITARIOS[a.rol] || 99;
+            const priorityB = ROLES_PRIORITARIOS[b.rol] || 99;
+            if (priorityA !== priorityB) return priorityA - priorityB;
+            return (a.first_name || '').localeCompare(b.first_name || '');
+        });
 
-                if (priorityA !== priorityB) {
-                    return priorityA - priorityB; // Ordena por prioridad (1, 2, 3... 99)
-                }
-                
-                // Si tienen la misma prioridad, ordena alfabéticamente
-                return (a.first_name || '').localeCompare(b.first_name || '');
-            });
-    }, [allEmpleados, activeFilters]);
+        return { currentUserEmployee: current, otherEmployeesFiltered: filtered };
+
+    }, [allEmpleados, activeFilters, user]);
 
 
-    // --- Handlers para Filtros (NUEVO) ---
+    // --- Handlers ---
     const handleAplicarFiltros = () => {
         setActiveFilters({
             nombre: inputNombre,
@@ -132,7 +126,6 @@ const EmpleadoPage = () => {
         });
     };
 
-    // --- Lógica de Modales (Sin cambios, excepto onSuccess) ---
     const handleEditClick = (employee) => {
         setSelectedEmployee(employee);
         setIsEditModalOpen(true);
@@ -146,57 +139,57 @@ const EmpleadoPage = () => {
     const handleModalSuccess = () => {
         setIsEditModalOpen(false);
         setSelectedEmployee(null);
-        fetchEmpleados(); // Refresca la lista
+        fetchEmpleados(); 
     };
 
 
     return (
-        <div className={styles.container}> {/* Renombrado de .comprasContainer */}
+        <div className={styles.container}>
             <h1>Gestión de Empleados</h1>
 
-            {/* --- BARRA DE FILTROS (NUEVA) --- */}
+            {/* --- 4. SECCIÓN USUARIO ACTUAL (Perfil Propio) --- */}
+            {currentUserEmployee && (
+                <div className={styles.currentUserSection}>
+                    <h3>Mi Perfil</h3>
+                    <div className={styles.currentUserCard}>
+                        <div className={styles.userInfo}>
+                            <span className={styles.userName}>
+                                {currentUserEmployee.first_name} {currentUserEmployee.last_name} 
+                                <span className={styles.meBadge}>(Tú)</span>
+                            </span>
+                            <span className={styles.userUsername}>@{currentUserEmployee.username}</span>
+                            <span className={`${styles.userRole} ${styles[currentUserEmployee.rol?.replace('/','_') || 'default']}`}>
+                                {currentUserEmployee.rol || 'Sin Rol'}
+                            </span>
+                        </div>
+                        <div className={styles.userActions}>
+                            <button 
+                                className={`${styles.actionButton} ${styles.editButton}`}
+                                onClick={() => handleEditClick(currentUserEmployee)}
+                            >
+                                Editar Mis Datos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- BARRA DE FILTROS --- */}
             <div className={styles.filtrosContainer}>
-                
-                {/* Filtro Nombre */}
+                {/* ... (Inputs de filtro Nombre, Apellido, Usuario - IGUAL QUE ANTES) ... */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="nombreSearch">Nombre:</label>
-                    <input
-                        type="text"
-                        id="nombreSearch"
-                        placeholder="Buscar por Nombre..."
-                        value={inputNombre}
-                        onChange={(e) => setInputNombre(e.target.value)}
-                        className={styles.filtroInput}
-                    />
+                    <input type="text" id="nombreSearch" placeholder="Buscar..." value={inputNombre} onChange={(e) => setInputNombre(e.target.value)} className={styles.filtroInput} />
                 </div>
-
-                {/* Filtro Apellido */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="apellidoSearch">Apellido:</label>
-                    <input
-                        type="text"
-                        id="apellidoSearch"
-                        placeholder="Buscar por Apellido..."
-                        value={inputApellido}
-                        onChange={(e) => setInputApellido(e.target.value)}
-                        className={styles.filtroInput}
-                    />
+                    <input type="text" id="apellidoSearch" placeholder="Buscar..." value={inputApellido} onChange={(e) => setInputApellido(e.target.value)} className={styles.filtroInput} />
                 </div>
-
-                {/* Filtro Username */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="userSearch">Usuario:</label>
-                    <input
-                        type="text"
-                        id="userSearch"
-                        placeholder="Nombre de Usuario..."
-                        value={inputUsername}
-                        onChange={(e) => setInputUsername(e.target.value)}
-                        className={styles.filtroInput}
-                    />
+                    <input type="text" id="userSearch" placeholder="Buscar..." value={inputUsername} onChange={(e) => setInputUsername(e.target.value)} className={styles.filtroInput} />
                 </div>
-
-                {/* Filtro Rol (Botones) */}
+                
                 <div className={styles.filtroGrupo}>
                     <label>Rol:</label>
                     <div className={styles.botonesFiltroEstado}>
@@ -213,15 +206,13 @@ const EmpleadoPage = () => {
                     </div>
                 </div>
 
-                {/* Botones de Acción */}
                 <div className={styles.filtroAcciones}>
                     <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
                 </div>
             </div>
 
-            {/* --- Vista de Tabla (Modificada) --- */}
-            {/* Ya no hay 'initialView' ni 'showList' */}
+            {/* --- TABLA DE OTROS EMPLEADOS --- */}
             <div className={styles.tableContainer}>
                 {loading && <p>Cargando...</p>}
                 {error && <p className={styles.errorText}>{error}</p>}
@@ -236,14 +227,14 @@ const EmpleadoPage = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredEmpleados.length === 0 ? (
+                            {otherEmployeesFiltered.length === 0 ? (
                                 <tr>
                                     <td colSpan={4} style={{ textAlign: 'center' }}>
-                                        No se encontraron empleados con esos filtros.
+                                        No se encontraron otros empleados con esos filtros.
                                     </td>
                                 </tr>
                             ) : (
-                                filteredEmpleados.map(emp => (
+                                otherEmployeesFiltered.map(emp => (
                                     <tr key={emp.id}>
                                         <td>{emp.first_name} {emp.last_name}</td>
                                         <td>{emp.username}</td>
@@ -255,7 +246,6 @@ const EmpleadoPage = () => {
                                             >
                                                 Editar
                                             </button>
-                                            {/* --- Botón Eliminar REMOVIDO (Goal 4) --- */}
                                         </td>
                                     </tr>
                                 ))
@@ -265,7 +255,6 @@ const EmpleadoPage = () => {
                 )}
             </div>
 
-            {/* --- Modal de Edición (Modificado para nuevos handlers) --- */}
             {isEditModalOpen && (
                 <EditEmployeeModal
                     employee={selectedEmployee}

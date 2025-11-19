@@ -19,21 +19,31 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const isEditMode = Boolean(product);
 
-    // --- NUEVOS ESTADOS PARA LA RECETA ---
+    // --- NUEVOS ESTADOS ---
     const [allInsumos, setAllInsumos] = useState([]);
+    const [existingProducts, setExistingProducts] = useState([]); // Para validar duplicados
     const [receta, setReceta] = useState({}); // { insumoId: cantidad }
     const [insumoSearch, setInsumoSearch] = useState('');
 
     useEffect(() => {
-        // Cargar tipos de producto
-        apiClient.get('/inventario/tipos-producto/')
-            .then(res => setTiposProducto(res.data))
-            .catch(err => console.error("Error al cargar tipos de producto", err));
+        // Cargar datos necesarios: Tipos, Insumos y PRODUCTOS EXISTENTES
+        const fetchData = async () => {
+            try {
+                const [resTipos, resInsumos, resProductos] = await Promise.all([
+                    apiClient.get('/inventario/tipos-producto/'),
+                    apiClient.get('/inventario/insumos/'),
+                    apiClient.get('/inventario/productos/') // Cargamos todos los productos
+                ]);
 
-        // Cargar todos los insumos disponibles para la receta
-        apiClient.get('/inventario/insumos/')
-            .then(res => setAllInsumos(res.data))
-            .catch(err => console.error("Error al cargar insumos", err));
+                setTiposProducto(resTipos.data);
+                setAllInsumos(resInsumos.data);
+                setExistingProducts(resProductos.data); // Guardamos para validar después
+
+            } catch (err) {
+                console.error("Error al cargar datos iniciales", err);
+            }
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -134,17 +144,43 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
         });
     };
 
-    // --- handleSubmit (CON VALIDACIÓN) ---
+    // --- Función auxiliar para normalizar strings ---
+    const normalizeString = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
+    // --- handleSubmit (CON VALIDACIÓN DE DUPLICADOS) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // --- RECOMENDACIÓN DE VALIDACIÓN (NUEVO) ---
+        // 1. Validación nativa del navegador
         if (!e.target.checkValidity()) {
             e.target.reportValidity();
             Swal.fire('Datos Inválidos', 'Por favor, corrige los errores marcados en el formulario.', 'warning');
+            return;
+        }
+
+        // 2. Validación de Duplicados
+        const normalizedNewName = normalizeString(formData.producto_nombre.trim());
+
+        const isDuplicate = existingProducts.some(existingProd => {
+            // Si estamos editando, ignoramos el producto actual
+            if (isEditMode && existingProd.id === product.id) {
+                return false;
+            }
+            const normalizedExistingName = normalizeString(existingProd.producto_nombre);
+            return normalizedExistingName === normalizedNewName;
+        });
+
+        if (isDuplicate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Producto Duplicado',
+                text: 'Ya existe un producto con este nombre. Por favor, elige otro.',
+            });
             return; // Detiene el envío
         }
-        // --- FIN RECOMENDACIÓN ---
+        // --- FIN VALIDACIÓN ---
 
         setLoading(true);
 
@@ -175,10 +211,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                 payload.producto_imagen = null;
                 payload.producto_imagen_url = null;
             } else if (isEditMode && previewImage) {
-                // Si la imagen de vista previa existe y no es un archivo nuevo, 
-                // no enviamos nada de imagen para que el backend mantenga la existente.
                 delete payload.producto_imagen;
-                // Mantenemos la URL si es la que vino del producto
                 if (payload.producto_imagen_url === product.producto_imagen_url) {
                     delete payload.producto_imagen_url;
                 }
@@ -222,9 +255,8 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                             onChange={handleChange}
                             className={styles.input}
                             required
-                            maxLength={100} // --- NUEVO (Goal 1) ---
+                            maxLength={100}
                         />
-                        {/* --- NUEVO: Contador de Caracteres (Goal 1) --- */}
                         <small className={styles.charCounter}>
                             {formData.producto_nombre.length} / 100
                         </small>
@@ -232,16 +264,14 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
 
                     <div className={styles.formGroup}>
                         <label>Descripción</label>
-                        {/* --- NUEVO: Cambiado a <textarea> (Goal 2) --- */}
                         <textarea
                             name="producto_descripcion"
                             value={formData.producto_descripcion}
                             onChange={handleChange}
                             className={styles.input}
-                            maxLength={250} // Límite de 250
-                            rows={3} // Altura inicial
+                            maxLength={250}
+                            rows={3}
                         />
-                        {/* --- NUEVO: Contador de Caracteres (Goal 2) --- */}
                         <small className={styles.charCounter}>
                             {formData.producto_descripcion.length} / 250
                         </small>
@@ -257,7 +287,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                             type="number"
                             step="0.01"
                             min="0"
-                            max="10000000" // --- NUEVO (Goal 3) ---
+                            max="10000000"
                             required
                         />
                     </div>
@@ -269,7 +299,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         </select>
                     </div>
 
-                    {/* SECCIÓN DE IMAGEN (sin cambios) */}
+                    {/* SECCIÓN DE IMAGEN */}
                     {previewImage && (
                         <div className={styles.imagePreviewContainer}>
                             <label>Imagen Actual</label>
@@ -286,7 +316,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         <input name="producto_imagen_url" value={formData.producto_imagen_url} onChange={handleChange} className={styles.input} type="text" placeholder="https://ejemplo.com/imagen.jpg" autoComplete="off" />
                     </div>
 
-                    {/* --- SECCIÓN DE RECETA (INSUMOS) (sin cambios) --- */}
+                    {/* --- SECCIÓN DE RECETA (INSUMOS) --- */}
                     <div className={styles.formGroup}>
                         <label>Receta / Insumos</label>
                         <input
@@ -333,7 +363,6 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                         </div>
                     </div>
 
-                    {/* Switch de "Disponible" (sin cambios) */}
                     <div className={`${styles.formGroup} ${styles.switchGroup}`}>
                         <label>Disponible</label>
                         <div>
@@ -341,7 +370,7 @@ const AddEditProductModal = ({ product, onClose, onSuccess }) => {
                             <label htmlFor="disponible-switch" className={styles.switchLabel}></label>
                         </div>
                     </div>
-                    {/* Botones de acción (sin cambios) */}
+
                     <div className={styles.buttons}>
                         <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
                         <button type="submit" disabled={loading} className={styles.saveButton}>{loading ? 'Guardando...' : 'Guardar'}</button>

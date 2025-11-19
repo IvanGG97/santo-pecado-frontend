@@ -582,7 +582,13 @@
     text-align: center;
     font-size: var(--font-size-sm);
 }
-
+.charCounter {
+    text-align: right;
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 4px;
+    display: block; /* Asegura que baje de línea */
+}
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .resumenFinanciero {

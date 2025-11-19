@@ -22,8 +22,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
     padding: 0 var(--spacing-md);
-    border-bottom: 1px solid var(--border-color-dark);
+    margin-bottom: 1rem;
     background-color: rgba(0, 0, 0, 0.2); /* Fondo ligeramente más oscuro para el header del sidebar */
 }
 
@@ -107,7 +108,55 @@
 .nav::-webkit-scrollbar-thumb:hover {
     background: var(--color-neutral-hover);
 }
+.cajaStatus {
+    margin-top: 5px; /* Menos espacio arriba */
+    padding: 2px 8px; /* Mucho menos relleno para que sea delgado */
+    border-radius: 12px; /* Bordes redondeados más sutiles */
+    font-size: 0.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Menos espacio entre el punto y el texto */
+    justify-content: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    transition: all 0.3s ease;
+    text-transform: uppercase; /* Opcional: se ve más profesional en pequeño */
+    letter-spacing: 0.5px;
+}
 
+.statusDot {
+    width: 6px; /* Punto más pequeño */
+    height: 6px;
+    border-radius: 50%;
+    display: block;
+    flex-shrink: 0; /* Evita que el punto se aplaste */
+}
+
+/* --- MANTENER LOS COLORES IGUAL QUE ANTES --- */
+
+/* Estado Abierto */
+.cajaOpen {
+    background-color: rgba(40, 167, 69, 0.1); /* Verde muy transparente */
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+.cajaOpen .statusDot {
+    background-color: #28a745;
+    box-shadow: 0 0 4px #28a745;
+}
+
+/* Estado Cerrado */
+.cajaClosed {
+    background-color: rgba(220, 53, 69, 0.1); /* Rojo muy transparente */
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+.cajaClosed .statusDot {
+    background-color: #dc3545;
+    box-shadow: 0 0 4px #dc3545;
+}
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     /* En móvil el sidebar suele ocultarse o convertirse en un drawer */

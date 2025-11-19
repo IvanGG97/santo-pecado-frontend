@@ -4,6 +4,7 @@ import apiClient from '../../services/api';
 import styles from './VentasPage.module.css';
 import Swal from 'sweetalert2';
 
+const today = new Date().toISOString().split('T')[0];
 // --- Constantes (Sin cambios) ---
 const ESTADO_FINAL_PAGADO = 'Pagado';
 const ESTADO_FINAL_CANCELADO = 'Cancelado';
@@ -586,6 +587,7 @@ const VentasPage = () => {
                             value={inputDateRange.hasta}
                             onChange={handleDateChange}
                             className={styles.inputFecha}
+                            max={today}
                         />
                     </div>
                 </div>

@@ -224,27 +224,40 @@
 
 /* Para la lista de requisitos de contraseña */
 .passwordCriteria {
-    padding: 10px;
-    margin-top: -5px;
-    margin-bottom: 10px;
-    border: 1px solid #444; /* Asumiendo tema oscuro */
-    border-radius: 5px;
-    background-color: #333; /* Asumiendo tema oscuro */
+    margin-top: 5px; /* Pequeña separación con el input */
+    margin-bottom: 15px;
+    background-color: rgba(0, 0, 0, 0.3); /* Fondo un poco más oscuro */
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color-dark);
+    
+    /* Usamos Flexbox para controlar el espaciado exacto */
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Solo 4px de espacio entre cada requisito */
 }
 
 .passwordCriteria p {
-    margin: 4px 0;
-    font-size: 0.85rem;
-    transition: color 0.2s ease-in-out;
-}
-
-.invalid {
-    color: #ff6b6b; /* Rojo para no válido */
+    font-size: 0.8rem; /* Letra un poco más pequeña */
+    margin: 0; /* IMPORTANTE: Elimina el margen por defecto que causa el espacio gigante */
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el ícono (✓) y el texto */
+    transition: color var(--transition-fast);
 }
 
 .valid {
-    color: #63e6be; /* Verde para válido */
-    text-decoration: line-through;
+    color: var(--color-success);
+    font-weight: var(--font-weight-semibold);
+}
+
+.invalid {
+    color: var(--text-tertiary);
+    opacity: 0.8;
+}
+.passwordCriteria p{
+    padding: 0;
 }
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {

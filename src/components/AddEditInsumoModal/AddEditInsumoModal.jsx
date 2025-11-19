@@ -14,15 +14,27 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
     });
     const [imageFile, setImageFile] = useState(null);
     const [categorias, setCategorias] = useState([]);
+    // Nuevo estado para almacenar todos los insumos y verificar duplicados
+    const [existingInsumos, setExistingInsumos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
     const isEditMode = Boolean(insumo);
 
-    // Carga las categorías de insumo
+    // Carga las categorías de insumo y la lista de insumos existentes
     useEffect(() => {
-        apiClient.get('/inventario/categorias-insumo/')
-            .then(res => setCategorias(res.data))
-            .catch(err => console.error("Error al cargar categorías", err));
+        const fetchData = async () => {
+            try {
+                const [resCategorias, resInsumos] = await Promise.all([
+                    apiClient.get('/inventario/categorias-insumo/'),
+                    apiClient.get('/inventario/insumos/') // Asumiendo que esta ruta devuelve todos los insumos
+                ]);
+                setCategorias(resCategorias.data);
+                setExistingInsumos(resInsumos.data);
+            } catch (err) {
+                console.error("Error al cargar datos iniciales", err);
+            }
+        };
+        fetchData();
     }, []);
 
     // Efecto 1: Rellena los datos básicos (Corregido)
@@ -57,7 +69,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
         const { name, value } = e.target;
 
         // --- VALIDACIÓN EN TIEMPO REAL (Para evitar valores > 50000) ---
-        // (Aunque el navegador lo previene, esto evita que el estado se actualice)
         if (name === "insumo_stock" || name === "insumo_stock_minimo") {
             if (value === "") {
                 setFormData(prev => ({ ...prev, [name]: "" }));
@@ -65,7 +76,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
             }
             const numValue = parseFloat(value);
             if (numValue > 50000) {
-                // Si el valor excede 50000, no actualices el estado
                 return;
             }
         }
@@ -91,18 +101,42 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
         if (fileInput) fileInput.value = '';
     };
 
+    // Función auxiliar para normalizar strings (quitar acentos y minúsculas)
+    const normalizeString = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // --- RECOMENDACIÓN DE VALIDACIÓN (NUEVO) ---
-        // Verifica todos los campos (max, min, required) antes de enviar
+        // --- VALIDACIÓN DE FORMULARIO ---
         if (!e.target.checkValidity()) {
-            // Fuerza al navegador a mostrar los mensajes de error
             e.target.reportValidity();
             Swal.fire('Datos Inválidos', 'Por favor, corrige los errores marcados en el formulario.', 'warning');
-            return; // Detiene el envío
+            return;
         }
-        // --- FIN DE RECOMENDACIÓN ---
+
+        // --- VALIDACIÓN DE DUPLICADOS ---
+        const normalizedNewName = normalizeString(formData.insumo_nombre.trim());
+
+        const isDuplicate = existingInsumos.some(existingInsumo => {
+            // Si estamos editando, ignoramos el insumo actual
+            if (isEditMode && existingInsumo.id === insumo.id) {
+                return false;
+            }
+            const normalizedExistingName = normalizeString(existingInsumo.insumo_nombre);
+            return normalizedExistingName === normalizedNewName;
+        });
+
+        if (isDuplicate) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Insumo Duplicado',
+                text: 'Este insumo ya existe (o tiene un nombre muy similar). Por favor verifica.',
+            });
+            return; // Detenemos el envío
+        }
+        // --- FIN VALIDACIÓN DUPLICADOS ---
 
         setLoading(true);
 
@@ -151,7 +185,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                 <button onClick={onClose} className={styles.closeButton}>&times;</button>
                 <h2>{isEditMode ? 'Editar' : 'Añadir'} Insumo</h2>
 
-                {/* Añadimos 'noValidate' para que nuestra validación personalizada en handleSubmit funcione */}
                 <form onSubmit={handleSubmit} className={styles.form} noValidate>
                     <div className={styles.formGroup}>
                         <label>Nombre</label>
@@ -161,9 +194,8 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                             onChange={handleChange}
                             className={styles.input}
                             required
-                            maxLength={100} // --- NUEVO (Goal 1) ---
+                            maxLength={100}
                         />
-                        {/* --- NUEVO: Contador de Caracteres (Goal 2) --- */}
                         <small className={styles.charCounter}>
                             {formData.insumo_nombre.length} / 100
                         </small>
@@ -202,7 +234,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                             type="number"
                             step="0.01"
                             min="0"
-                            max="50000" // --- NUEVO (Goal 3) ---
+                            max="50000"
                             className={styles.input}
                             required
                         />
@@ -216,7 +248,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                             type="number"
                             step="0.01"
                             min="0"
-                            max="50000" // --- NUEVO (Goal 4) ---
+                            max="50000"
                             className={styles.input}
                             required
                         />
