@@ -118,14 +118,30 @@ const AdminDashboard = () => {
 
     // 2. Procesamiento de Datos (Gráficos)
     const handleGenerarGrafico = useCallback(() => {
-        if (!fechas.desde || !fechas.hasta) return;
-        const fechaDesde = new Date(fechas.desde + 'T00:00:00');
+        // --- CORRECCIÓN AQUÍ ---
+        // Solo requerimos que 'hasta' tenga valor. 'desde' es opcional.
+        if (!fechas.hasta) return;
+
         const fechaHasta = new Date(fechas.hasta + 'T23:59:59');
+
+        // Si hay fecha desde, la parseamos, si no, es null
+        let fechaDesde = null;
+        if (fechas.desde) {
+            fechaDesde = new Date(fechas.desde + 'T00:00:00');
+        }
 
         const ventasFiltradas = allVentas.filter(venta => {
             const fechaVenta = new Date(venta.venta_fecha_hora);
-            return fechaVenta >= fechaDesde && fechaVenta <= fechaHasta;
+
+            // 1. Verificar fecha límite (Hasta)
+            if (fechaVenta > fechaHasta) return false;
+
+            // 2. Verificar fecha inicio (Desde) SOLO si existe
+            if (fechaDesde && fechaVenta < fechaDesde) return false;
+
+            return true;
         });
+        // --- FIN CORRECCIÓN ---
 
         // -- A. Medios de Pago --
         const mapMediosPago = {};
@@ -197,64 +213,47 @@ const AdminDashboard = () => {
         }
     };
 
-    // --- FUNCIÓN DE PDF CORREGIDA ---
+    // --- FUNCIÓN DE PDF ---
     const handleDownloadPDF = () => {
         const doc = new jsPDF();
-
-        // --- 1. CONFIGURACIÓN ---
-        const margin = 15; // Margen (en mm)
+        const margin = 15;
         const pageHeight = doc.internal.pageSize.getHeight();
         const pageWidth = doc.internal.pageSize.getWidth();
         const usableWidth = pageWidth - (margin * 2);
-        let y = 0; // Posición Y inicial
+        let y = 0;
 
-        // --- 2. TÍTULO Y FECHA ---
         doc.setFontSize(18);
-        doc.setTextColor(165, 0, 0); // Rojo
+        doc.setTextColor(165, 0, 0);
         doc.text("Informe Estratégico - Santo Pecado", margin, 20);
-        y = 30; // Mover Y hacia abajo
+        y = 30;
 
         doc.setFontSize(10);
         doc.setTextColor(100);
         doc.text(`Generado el: ${new Date().toLocaleString()}`, margin, y);
-        y += 5; // Mover Y
+        y += 5;
 
         doc.setLineWidth(0.5);
-        doc.line(margin, y, pageWidth - margin, y); // Línea separadora
-        y += 10; // Espacio después de la línea
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
 
-        // --- 3. CONTENIDO (CON PAGINACIÓN) ---
-
-        // Usamos una fuente monoespaciada para que coincida con el <pre>
         doc.setFont('courier', 'normal');
         doc.setFontSize(11);
         doc.setTextColor(0);
 
-        // Dividir el texto en líneas que quepan en el ancho
         const splitText = doc.splitTextToSize(aiReport, usableWidth);
-
-        // Altura aproximada de cada línea (en mm)
         const lineHeight = 6;
 
-        // Loop por cada línea
         splitText.forEach(line => {
-            // Revisar si la línea entra en la página actual
             if (y + lineHeight > pageHeight - margin) {
-                doc.addPage(); // Añadir página nueva
-                y = margin; // Resetear Y al margen superior
+                doc.addPage();
+                y = margin;
             }
-
-            // Escribir la línea
             doc.text(line, margin, y);
-
-            // Mover Y para la siguiente línea
             y += lineHeight;
         });
 
-        // --- 4. GUARDAR ---
         doc.save(`Reporte_Estrategico_${today}.pdf`);
     };
-    // --- FIN DE LA CORRECCIÓN ---
 
 
     // --- Renders Auxiliares ---
@@ -281,8 +280,8 @@ const AdminDashboard = () => {
         <div className={styles.dashboardContainer}>
             <div className={styles.headerRow}>
                 <h1 className={styles.welcomeMessage}>Dashboard de Resumen</h1>
-
-                {/* <button
+                
+                <button
                     className={styles.aiButton}
                     onClick={handleGenerateRecommendation}
                     disabled={isGeneratingAI}
@@ -292,7 +291,7 @@ const AdminDashboard = () => {
                     ) : (
                         <><Bot size={20} /> Generar Recomendación con IA</>
                     )}
-                </button> */}
+                </button>
             </div>
 
             {/* Filtros */}
@@ -300,11 +299,27 @@ const AdminDashboard = () => {
                 <div className={styles.chartFilterBar}>
                     <div className={styles.formGroup}>
                         <label>Desde:</label>
-                        <input type="date" name="desde" value={fechas.desde} onChange={handleDateChange} className={styles.dateInput} />
+                        {/* --- MODIFICACIÓN: max={today} --- */}
+                        <input
+                            type="date"
+                            name="desde"
+                            value={fechas.desde}
+                            max={today}
+                            onChange={handleDateChange}
+                            className={styles.dateInput}
+                        />
                     </div>
                     <div className={styles.formGroup}>
                         <label>Hasta:</label>
-                        <input type="date" name="hasta" value={fechas.hasta} max={today} onChange={handleDateChange} className={styles.dateInput} />
+                        {/* --- MODIFICACIÓN: max={today} --- */}
+                        <input
+                            type="date"
+                            name="hasta"
+                            value={fechas.hasta}
+                            max={today}
+                            onChange={handleDateChange}
+                            className={styles.dateInput}
+                        />
                     </div>
                     <button className={styles.generarButton} onClick={handleGenerarGrafico}>Actualizar</button>
                 </div>

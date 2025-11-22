@@ -15,8 +15,144 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   ESTILOS DE FILTROS (Copiados de Compras/Ventas)
+   ============================================ */
+.filtrosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background-color: var(--bg-dark-card);
+    /* O var(--bg-dark-card) si usas tema oscuro en filtros */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    /* Ya tiene gap el contenedor padre */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    align-items: flex-end;
+}
+
+.filtroGrupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+    min-width: 150px;
+}
+
+.filtroGrupo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-on-dark);
+    /* Ajustar a var(--text-on-dark) si el fondo es oscuro */
+}
+
+/* Inputs específicos de filtros */
+.filtroInput,
+.inputFecha,
+.filtroGrupo select {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.95rem;
+    background-color: #fdfdfd;
+    color: #333;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.inputsFecha {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.inputsFecha label {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Botones de estado (tipo pills) */
+.botonesFiltroEstado {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.botonFiltro {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: #f8f9fa;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.botonFiltro:hover:not(.activo) {
+    background-color: #e9ecef;
+}
+
+.botonFiltro.activo {
+    background-color: #A50000;
+    /* Color Primario */
+    color: white;
+    border-color: #A50000;
+}
+
+/* Botones de Acción (Limpiar/Aplicar) */
+.filtroAcciones {
+    display: flex;
+    gap: 0.75rem;
+    margin-left: auto;
+    flex-basis: 100%;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.botonLimpiar,
+.botonAplicar {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.botonLimpiar {
+    background-color: #6c757d;
+    color: white;
+}
+
+.botonLimpiar:hover {
+    color: var(--text-white);
+    background-color: var(--color-accent);
+}
+
+.botonAplicar {
+    background-color: var(--color-info);
+    color: white;
+}
+
+.botonAplicar:hover {
+    background-color: var(--color-info-hover);
+    box-shadow: var(--shadow-neon-accent);
 }
 
 /* ============================================
@@ -27,9 +163,9 @@
     padding: var(--spacing-xl);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border-color-primary); /* Borde de color primario para destacar */
+    border: 1px solid var(--border-color-primary);
     max-width: 500px;
-    margin: 0 auto; /* Centrado */
+    margin: 0 auto;
     text-align: center;
 }
 
@@ -61,8 +197,11 @@
     gap: var(--spacing-md);
 }
 
+/* Estilos genéricos de formulario (usados en modales también) */
 .formGroup {
     text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .formGroup label {
@@ -72,7 +211,7 @@
     color: var(--text-primary);
 }
 
-/* Inputs */
+/* Input genérico (usado en modales, NO en filtros) */
 .input {
     width: 100%;
     padding: var(--input-padding);
@@ -135,7 +274,7 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--bg-dark-card); /* Tabla oscura */
+    background-color: var(--bg-dark-card);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-md);
@@ -169,7 +308,7 @@
 
 /* Filas destacadas */
 .filaAbierta td {
-    background-color: rgba(40, 167, 69, 0.05); /* Tinte verde muy sutil */
+    background-color: rgba(40, 167, 69, 0.05);
 }
 
 .filaCerrada td {
@@ -257,7 +396,7 @@
 .modalContent {
     background-color: var(--bg-dark);
     color: var(--text-white);
-    padding: var(--spacing-lg); /* Menos padding interno para ganar espacio */
+    padding: var(--spacing-lg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-primary);
     width: 100%;
@@ -271,7 +410,7 @@
 }
 
 .modalDetalleLg {
-    max-width: 900px; /* Modal ancho para el detalle completo */
+    max-width: 900px;
 }
 
 .closeButtonModalContainer {
@@ -327,7 +466,7 @@
     margin-left: 5px;
 }
 
-/* Resumen Financiero (Dos columnas) */
+/* Resumen Financiero */
 .resumenFinanciero {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -437,7 +576,7 @@
 }
 
 .movimientoAddButton {
-    background-color: var(--color-neutral); /* Base neutra */
+    background-color: var(--color-neutral);
     color: var(--text-white);
     border: none;
     padding: var(--spacing-sm);
@@ -452,11 +591,11 @@
 }
 
 .movimientoAddButton.saveButton {
-    background-color: var(--color-success); /* Verde para ingresos */
+    background-color: var(--color-success);
 }
 
 .movimientoAddButton.deleteButton {
-    background-color: var(--color-error); /* Rojo para egresos */
+    background-color: var(--color-error);
 }
 
 .movimientoAddButton:hover {
@@ -500,9 +639,13 @@
     margin-left: 5px;
 }
 
-/* Colores específicos para items de la lista */
-.ingreso strong { color: var(--color-success); }
-.egreso strong { color: var(--color-error); }
+.ingreso strong {
+    color: var(--color-success);
+}
+
+.egreso strong {
+    color: var(--color-error);
+}
 
 .noMovimientos {
     text-align: center;
@@ -511,7 +654,7 @@
     padding: var(--spacing-md);
 }
 
-/* Modal Simple (Cierre / Movimiento Manual) */
+/* Modal Simple */
 .formSimple {
     display: flex;
     flex-direction: column;
@@ -521,7 +664,7 @@
 .textarea {
     width: 100%;
     padding: var(--input-padding);
-    background-color: var(--bg-light-alt); /* Fondo claro para escribir */
+    background-color: var(--bg-light-alt);
     border: 1px solid var(--border-color-input);
     border-radius: var(--radius-md);
     color: var(--text-primary);
@@ -582,17 +725,19 @@
     text-align: center;
     font-size: var(--font-size-sm);
 }
+
 .charCounter {
     text-align: right;
     font-size: 0.75rem;
     color: #999;
     margin-top: 4px;
-    display: block; /* Asegura que baje de línea */
+    display: block;
 }
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .resumenFinanciero {
-        grid-template-columns: 1fr; /* Una columna en móvil */
+        grid-template-columns: 1fr;
     }
 
     .infoGrid {
@@ -603,7 +748,19 @@
         flex-direction: column-reverse;
     }
 
-    .cancelButton, .saveButton, .deleteButton {
+    .cancelButton,
+    .saveButton,
+    .deleteButton {
         width: 100%;
+    }
+
+    .filtroAcciones {
+        flex-basis: 100%;
+        justify-content: stretch;
+    }
+
+    .botonLimpiar,
+    .botonAplicar {
+        flex: 1;
     }
 }

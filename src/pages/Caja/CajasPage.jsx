@@ -1,9 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import apiClient from '../../services/api';
 import styles from './CajasPage.module.css';
 import Swal from 'sweetalert2';
 
-// --- Iconos (Sin cambios) ---
+// --- Helpers de Fecha ---
+const getToday = () => new Date().toISOString().split('T')[0];
+const getYesterday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+};
+
+// --- Constantes de Filtro ---
+const ESTADOS_CAJA = [
+    { value: 'todos', label: 'Todos' },
+    { value: 'abierta', label: 'Abierta' },
+    { value: 'cerrada', label: 'Cerrada' }
+];
+
+const formatCurrency = (value) => new Intl.NumberFormat('es-AR').format(value || 0);
+
+// --- Iconos ---
 const IconoIngreso = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-plus-circle-fill" viewBox="0 0 16 16">
         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
@@ -15,9 +32,7 @@ const IconoEgreso = () => (
     </svg>
 );
 
-const formatCurrency = (value) => new Intl.NumberFormat('es-AR').format(value || 0);
-
-// --- Formulario para ABRIR Caja (Sin cambios) ---
+// --- Formulario para ABRIR Caja ---
 const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
     const [montoInicial, setMontoInicial] = useState(esPrimeraCaja ? '' : (montoSugerido || 0).toString());
     const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +53,7 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
                 return;
             }
             montoPayload = { caja_monto_inicial: monto };
-        }
-        else {
+        } else {
             montoPayload = {};
         }
 
@@ -59,7 +73,6 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
     return (
         <div className={styles.abrirCajaContainer}>
             <h2>Abrir Caja</h2>
-
             {esPrimeraCaja ? (
                 <>
                     <p>Es la primera vez que se abre la caja. Ingresa el monto inicial.</p>
@@ -101,7 +114,7 @@ const AbrirCajaForm = ({ onCajaAbierta, montoSugerido, esPrimeraCaja }) => {
     );
 };
 
-// --- Modal para INGRESOS/EGRESOS (CORREGIDO) ---
+// --- Modal para INGRESOS/EGRESOS ---
 const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     const [monto, setMonto] = useState('');
     const [descripcion, setDescripcion] = useState('');
@@ -111,7 +124,6 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     const endpoint = tipo === 'ingreso' ? '/movimiento_caja/ingresos/' : '/movimiento_caja/egresos/';
     const title = tipo === 'ingreso' ? 'Registrar Ingreso Manual' : 'Registrar Egreso Manual';
 
-    // Validación en tiempo real para monto positivo
     const handleMontoChange = (e) => {
         const val = e.target.value;
         if (val === '') {
@@ -162,16 +174,14 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                {/* --- CORRECCIÓN BOTÓN CERRAR --- */}
                 <div className={styles.closeButtonModalContainer}>
                     <button onClick={onClose} className={styles.closeButtonModal} disabled={isLoading}>&times;</button>
                 </div>
-                {/* ------------------------------- */}
 
                 <h2>{title}</h2>
                 <form onSubmit={handleSubmit} className={styles.formSimple}>
                     {error && <p className={styles.errorText}>{error}</p>}
-
+                    
                     <div className={styles.formGroup}>
                         <label>Descripción</label>
                         <input
@@ -182,9 +192,8 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
                             placeholder="Ej: Pago a repartidor, ajuste..."
                             required
                             autoFocus
-                            maxLength={200} // Límite
+                            maxLength={200} 
                         />
-                        {/* Contador */}
                         <small className={styles.charCounter}>{descripcion.length} / 200</small>
                     </div>
 
@@ -193,7 +202,7 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
                         <input
                             type="number"
                             value={monto}
-                            onChange={handleMontoChange} // Validación
+                            onChange={handleMontoChange}
                             className={styles.input}
                             placeholder="Ej: 500.00"
                             step="0.01"
@@ -216,8 +225,7 @@ const MovimientoModal = ({ tipo, cajaId, onClose, onMovimientoSuccess }) => {
     );
 };
 
-
-// --- NUEVO: Componente Modal para Detalle de Caja (Sin cambios lógicos) ---
+// --- Modal Detalle de Caja ---
 const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorialRefresh }) => {
     const [caja, setCaja] = useState(cajaInicial);
     const [movimientos, setMovimientos] = useState({ ingresos: [], egresos: [] });
@@ -252,12 +260,11 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
     }, [fetchMovimientos]);
 
     const refreshCajaData = async () => {
-        console.log("Refrescando datos internos del modal...");
         try {
             const resHistorial = await apiClient.get('/caja/historial/');
             const cajaActualizada = resHistorial.data.find(c => c.id === caja.id);
             if (cajaActualizada) {
-                setCaja(cajaActualizada);
+                setCaja(cajaActualizada); 
             }
             if (onHistorialRefresh) {
                 onHistorialRefresh();
@@ -273,15 +280,15 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
     };
 
     const handleMovimientoExitoso = () => {
-        fetchMovimientos();
-        refreshCajaData();
+        fetchMovimientos(); 
+        refreshCajaData(); 
     };
 
     const handleCerrarClick = () => {
         if (onCerrarCajaClick) {
             onCerrarCajaClick();
         }
-        onClose();
+        onClose(); 
     };
 
     return (
@@ -423,7 +430,7 @@ const CajaDetalleModal = ({ cajaInicial, onClose, onCerrarCajaClick, onHistorial
 };
 
 
-// --- Componente Modal para Confirmar Cierre (CORREGIDO) ---
+// --- Modal Confirmar Cierre ---
 const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     const [observacion, setObservacion] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -437,12 +444,10 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     return (
         <div className={styles.modalBackdrop}>
             <div className={styles.modalContent}>
-                {/* --- CORRECCIÓN BOTÓN CERRAR --- */}
                 <div className={styles.closeButtonModalContainer}>
                     <button onClick={onClose} className={styles.closeButtonModal} disabled={isLoading}>&times;</button>
                 </div>
-                {/* ------------------------------- */}
-
+                
                 <h2>Confirmar Cierre de Caja</h2>
                 <p>Estás cerrando la <strong>Caja N°{caja.id}</strong>.</p>
                 <p>El sistema usará el siguiente cálculo de efectivo para el Saldo Final:</p>
@@ -468,9 +473,8 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
                             onChange={(e) => setObservacion(e.target.value)}
                             placeholder="Añade notas sobre el cierre..."
                             rows={3}
-                            maxLength={200} // Límite
+                            maxLength={200} 
                         />
-                        {/* Contador */}
                         <small className={styles.charCounter}>{observacion.length} / 200</small>
                     </div>
                 </form>
@@ -493,7 +497,7 @@ const CerrarCajaModal = ({ caja, onClose, onConfirm }) => {
     );
 };
 
-// --- Componente Principal (Sin cambios mayores) ---
+// --- COMPONENTE PRINCIPAL CAJAS PAGE (CORREGIDO) ---
 const CajasPage = () => {
     const [cajaAbierta, setCajaAbierta] = useState(null);
     const [cajasHistorial, setCajasHistorial] = useState([]);
@@ -505,16 +509,29 @@ const CajasPage = () => {
     const [isCerrarModalOpen, setIsCerrarModalOpen] = useState(false);
     const [cajaParaCerrar, setCajaParaCerrar] = useState(null);
 
+    // --- ESTADOS DE FILTRO ---
+    const [inputDateRange, setInputDateRange] = useState({ desde: getYesterday(), hasta: getToday() });
+    const [inputSortOrder, setInputSortOrder] = useState('desc');
+    const [inputIdCaja, setInputIdCaja] = useState('');
+    const [inputStatusFilter, setInputStatusFilter] = useState('todos'); // 'todos', 'abierta', 'cerrada'
+
+    const [activeFilters, setActiveFilters] = useState({
+        desde: getYesterday(),
+        hasta: getToday(),
+        sortOrder: 'desc',
+        idCaja: '',
+        status: 'todos'
+    });
+
     const fetchData = useCallback(async (isInitialLoad = false) => {
         if (isInitialLoad) {
             setLoadingStatus(true);
             setLoadingHistorial(true);
         }
-        console.log("fetchData: Verificando estado y historial...");
-        let data = { estado: null, historial: [] };
         try {
             const resEstado = await apiClient.get('/caja/estado/');
-            data.estado = resEstado.data;
+            const resHistorial = await apiClient.get('/caja/historial/');
+            
             if (resEstado.data && resEstado.data.id && resEstado.data.caja_estado === true) {
                 setCajaAbierta(resEstado.data);
                 setIsPrimeraCaja(false);
@@ -524,8 +541,8 @@ const CajasPage = () => {
                 setMontoSugeridoApertura(monto);
                 setIsPrimeraCaja(monto === 0 && resEstado.data.caja_estado === false);
             }
-            const resHistorial = await apiClient.get('/caja/historial/');
-            data.historial = resHistorial.data;
+            
+            // Orden inicial de API
             setCajasHistorial(resHistorial.data);
         } catch (err) {
             console.error("Error cargando datos de caja:", err);
@@ -533,54 +550,113 @@ const CajasPage = () => {
         } finally {
             setLoadingStatus(false);
             setLoadingHistorial(false);
-            return data;
         }
     }, []);
 
     useEffect(() => {
         fetchData(true);
-        const intervalId = setInterval(() => {
-            console.log("--- Refresco automático (15s) ---");
-            fetchData(false);
-        }, 15000);
+        const intervalId = setInterval(() => fetchData(false), 15000);
         return () => clearInterval(intervalId);
     }, [fetchData]);
 
-    const handleCajaAbierta = async (cajaNuevaIncompleta) => {
-        console.log("Caja abierta, refrescando datos para obtener objeto completo...");
+    // --- Lógica de Filtrado y Ordenamiento ---
+    const filteredCajas = useMemo(() => {
+        const { desde, hasta, sortOrder, idCaja, status } = activeFilters;
+        const termIdCaja = idCaja.trim();
+        
+        let result = cajasHistorial.filter(caja => {
+            const fechaApertura = new Date(caja.caja_fecha_hora_apertura);
+
+            if (termIdCaja && !String(caja.id).startsWith(termIdCaja)) return false;
+
+            if (status === 'abierta' && !caja.caja_estado) return false;
+            if (status === 'cerrada' && caja.caja_estado) return false;
+
+            if (desde) {
+                try {
+                    const fechaDesde = new Date(desde + 'T00:00:00');
+                    if (fechaApertura < fechaDesde) return false;
+                } catch (e) { console.warn("Fecha 'desde' inválida"); }
+            }
+            if (hasta) {
+                try {
+                    const fechaHasta = new Date(hasta + 'T23:59:59');
+                    if (fechaApertura > fechaHasta) return false;
+                } catch (e) { console.warn("Fecha 'hasta' inválida"); }
+            }
+            return true;
+        });
+
+        result.sort((a, b) => {
+            const dateA = new Date(a.caja_fecha_hora_apertura);
+            const dateB = new Date(b.caja_fecha_hora_apertura);
+            if (sortOrder === 'asc') {
+                return dateA - dateB; 
+            } else {
+                return dateB - dateA; 
+            }
+        });
+
+        return result;
+    }, [cajasHistorial, activeFilters]);
+
+    // --- Handlers de Filtro ---
+    const handleDateChange = (e) => {
+        const { name, value } = e.target;
+        setInputDateRange(prev => ({ ...prev, [name]: value }));
+    };
+    
+    const handleSortOrderChange = (e) => setInputSortOrder(e.target.value);
+    const handleIdCajaChange = (e) => setInputIdCaja(e.target.value);
+    const handleStatusChange = (status) => setInputStatusFilter(status);
+
+    const handleAplicarFiltros = () => {
+        setActiveFilters({
+            desde: inputDateRange.desde,
+            hasta: inputDateRange.hasta,
+            sortOrder: inputSortOrder,
+            idCaja: inputIdCaja,
+            status: inputStatusFilter
+        });
+    };
+
+    const handleLimpiarFiltros = () => {
+        setInputDateRange({ desde: getYesterday(), hasta: getToday() });
+        setInputSortOrder('desc');
+        setInputIdCaja('');
+        setInputStatusFilter('todos');
+        
+        setActiveFilters({
+            desde: getYesterday(),
+            hasta: getToday(),
+            sortOrder: 'desc',
+            idCaja: '',
+            status: 'todos'
+        });
+    };
+
+    // --- Handlers de Caja ---
+    const handleCajaAbierta = async () => {
         setLoadingStatus(true);
         setLoadingHistorial(true);
-        const datosNuevos = await fetchData(true);
-        if (datosNuevos.estado && datosNuevos.estado.caja_estado === true) {
-            console.log("Datos completos recibidos. Mostrando detalle.", datosNuevos.estado);
-            setDetalleModalCaja(datosNuevos.estado);
-        } else {
-            console.error("FetchData no devolvió una caja abierta después de crearla.");
-        }
+        await fetchData(true); 
     };
 
     const handleCerrarCaja = async () => {
-        console.log("1. Botón 'Cerrar Caja' presionado. Verificando estado...");
         Swal.fire({
             title: 'Verificando estado...',
             text: 'Consultando la base de datos...',
             allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+            didOpen: () => Swal.showLoading()
         });
-        let cajaActualizada;
         try {
             const resEstado = await apiClient.get('/caja/estado/');
             if (!resEstado.data || !resEstado.data.id || resEstado.data.caja_estado !== true) {
-                console.error("Error de desincronización: La API dice que la caja ya está cerrada.");
                 Swal.fire('Error', 'La caja ya ha sido cerrada. Refrescando...', 'error');
                 fetchData(true);
                 return;
             }
-            cajaActualizada = resEstado.data;
-            console.log("3. Estado verificado. Abriendo modal de cierre.");
-            setCajaParaCerrar(cajaActualizada);
+            setCajaParaCerrar(resEstado.data);
             setIsCerrarModalOpen(true);
             Swal.close();
         } catch (err) {
@@ -590,23 +666,14 @@ const CajasPage = () => {
     };
 
     const handleConfirmarCierre = async (observacion) => {
-        console.log("4. Usuario confirmó cierre. Enviando PATCH a /api/caja/cerrar/.");
         try {
-            const response = await apiClient.patch('/caja/cerrar/', {
-                caja_observacion: observacion || ""
-            });
+            const response = await apiClient.patch('/caja/cerrar/', { caja_observacion: observacion || "" });
             const { caja_saldo_final } = response.data;
-            console.log("5. Cierre exitoso en backend. Saldo final:", caja_saldo_final);
             setIsCerrarModalOpen(false);
             setCajaParaCerrar(null);
-            await Swal.fire(
-                'Caja Cerrada',
-                `La caja se cerró con un Saldo Final (Efectivo) de: $${formatCurrency(caja_saldo_final)}`,
-                'success'
-            );
+            await Swal.fire('Caja Cerrada', `Saldo Final (Efectivo): $${formatCurrency(caja_saldo_final)}`, 'success');
             fetchData(true);
         } catch (err) {
-            console.error("Error al *confirmar* el cierre:", err.response?.data || err);
             const errorMsg = err.response?.data?.detail || "No se pudo cerrar la caja.";
             Swal.fire('Error', errorMsg, 'error');
             if (err.response?.status === 400) {
@@ -617,17 +684,91 @@ const CajasPage = () => {
         }
     };
 
-    const handleViewDetalle = (caja) => {
-        setDetalleModalCaja(caja);
-    };
+    const handleViewDetalle = (caja) => setDetalleModalCaja(caja);
 
-    if (loadingStatus || loadingHistorial) {
-        return <div className={styles.loading}>Cargando Cajas...</div>;
-    }
+    if (loadingStatus || loadingHistorial) return <div className={styles.loading}>Cargando Cajas...</div>;
 
     return (
         <div className={styles.cajaContainer}>
             <div className={styles.historialContainer}>
+                
+                {/* --- BARRA DE FILTROS (CORREGIDA) --- */}
+                <div className={styles.filtrosContainer}>
+                    {/* Filtro ID Caja */}
+                    <div className={styles.filtroGrupo}>
+                        <label htmlFor="idCajaSearch">ID Caja:</label>
+                        <input 
+                            type="number" 
+                            id="idCajaSearch"
+                            placeholder="N°..."
+                            value={inputIdCaja}
+                            onChange={handleIdCajaChange}
+                            className={styles.filtroInput}
+                        />
+                    </div>
+
+                    {/* Filtro Estado */}
+                    <div className={styles.filtroGrupo}>
+                         <label>Estado:</label>
+                         <div className={styles.botonesFiltroEstado}>
+                            {ESTADOS_CAJA.map(estado => (
+                                <button 
+                                    key={estado.value}
+                                    onClick={() => handleStatusChange(estado.value)}
+                                    className={`${styles.botonFiltro} ${inputStatusFilter === estado.value ? styles.activo : ''}`}
+                                >
+                                    {estado.label}
+                                </button>
+                            ))}
+                         </div>
+                    </div>
+
+                    {/* Filtro Fechas */}
+                    <div className={styles.filtroGrupo}>
+                        <label>Fecha:</label>
+                        <div className={styles.inputsFecha}>
+                            <label htmlFor="desde">Desde:</label>
+                            <input 
+                                type="date" 
+                                name="desde" 
+                                id="desde"
+                                value={inputDateRange.desde} 
+                                onChange={handleDateChange} 
+                                className={styles.inputFecha} 
+                            />
+                            <label htmlFor="hasta">Hasta:</label>
+                            <input 
+                                type="date" 
+                                name="hasta" 
+                                id="hasta"
+                                value={inputDateRange.hasta} 
+                                onChange={handleDateChange} 
+                                className={styles.inputFecha} 
+                            />
+                        </div>
+                    </div>
+
+                    {/* Filtro Orden */}
+                    <div className={styles.filtroGrupo}>
+                        <label htmlFor="sortOrder">Orden:</label>
+                        <select 
+                            id="sortOrder"
+                            value={inputSortOrder} 
+                            onChange={handleSortOrderChange} 
+                            className={styles.filtroInput} 
+                        >
+                            <option value="desc">Más Reciente</option>
+                            <option value="asc">Más Antiguo</option>
+                        </select>
+                    </div>
+                    
+                    <div className={styles.filtroAcciones}>
+                        <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
+                        <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
+                    </div>
+                </div>
+                {/* ------------------------------ */}
+
                 <div className={styles.toolbar}>
                     {!cajaAbierta && (
                         <AbrirCajaForm
@@ -656,12 +797,12 @@ const CajasPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {cajasHistorial.length === 0 ? (
+                        {filteredCajas.length === 0 ? (
                             <tr>
-                                <td colSpan={7} style={{ textAlign: 'center' }}>No hay historial de cajas.</td>
+                                <td colSpan={7} style={{ textAlign: 'center' }}>No hay historial de cajas que coincida.</td>
                             </tr>
                         ) : (
-                            cajasHistorial.map(caja => (
+                            filteredCajas.map(caja => (
                                 <tr key={caja.id} className={caja.caja_estado ? styles.filaAbierta : styles.filaCerrada}>
                                     <td>Caja N°{caja.id}</td>
                                     <td>{new Date(caja.caja_fecha_hora_apertura).toLocaleString()}</td>

@@ -26,7 +26,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
             try {
                 const [resCategorias, resInsumos] = await Promise.all([
                     apiClient.get('/inventario/categorias-insumo/'),
-                    apiClient.get('/inventario/insumos/') // Asumiendo que esta ruta devuelve todos los insumos
+                    apiClient.get('/inventario/insumos/') 
                 ]);
                 setCategorias(resCategorias.data);
                 setExistingInsumos(resInsumos.data);
@@ -37,7 +37,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
         fetchData();
     }, []);
 
-    // Efecto 1: Rellena los datos básicos (Corregido)
+    // Efecto 1: Rellena los datos básicos
     useEffect(() => {
         if (isEditMode && insumo) {
             setFormData(prev => ({
@@ -52,7 +52,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
         }
     }, [insumo, isEditMode]);
 
-    // Efecto 2: Rellena la categoría (Corregido)
+    // Efecto 2: Rellena la categoría
     useEffect(() => {
         if (isEditMode && insumo && categorias.length > 0) {
             const categoria = categorias.find(c => c.categoria_insumo_nombre === insumo.categoria_insumo);
@@ -68,19 +68,45 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // --- VALIDACIÓN EN TIEMPO REAL (Para evitar valores > 50000) ---
+        // --- VALIDACIÓN DE STOCK ---
         if (name === "insumo_stock" || name === "insumo_stock_minimo") {
             if (value === "") {
                 setFormData(prev => ({ ...prev, [name]: "" }));
                 return;
             }
+            
+            // 1. Validación de Máximo (existente)
             const numValue = parseFloat(value);
             if (numValue > 50000) {
                 return;
             }
+
+            // 2. Validación de Enteros para 'Unidad' (NUEVO)
+            if (formData.insumo_unidad === 'Unidad') {
+                // Si intenta escribir un punto o coma, no actualizamos el estado
+                if (value.includes('.') || value.includes(',')) {
+                    return;
+                }
+            }
         }
 
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // --- NUEVO: Formateo al salir del input (onBlur) ---
+    const handleStockBlur = (e) => {
+        const { name, value } = e.target;
+        // Solo aplicamos si es Gramos y hay un valor
+        if (formData.insumo_unidad === 'Gramos' && value !== '') {
+            const num = parseFloat(value);
+            if (!isNaN(num)) {
+                // Formatea a 1 decimal (ej: 1000 -> 1000.0)
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: num.toFixed(1) 
+                }));
+            }
+        }
     };
 
     const handleFileChange = (e) => {
@@ -101,7 +127,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
         if (fileInput) fileInput.value = '';
     };
 
-    // Función auxiliar para normalizar strings (quitar acentos y minúsculas)
     const normalizeString = (str) => {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     };
@@ -109,7 +134,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // --- VALIDACIÓN DE FORMULARIO ---
         if (!e.target.checkValidity()) {
             e.target.reportValidity();
             Swal.fire('Datos Inválidos', 'Por favor, corrige los errores marcados en el formulario.', 'warning');
@@ -118,9 +142,7 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
 
         // --- VALIDACIÓN DE DUPLICADOS ---
         const normalizedNewName = normalizeString(formData.insumo_nombre.trim());
-
         const isDuplicate = existingInsumos.some(existingInsumo => {
-            // Si estamos editando, ignoramos el insumo actual
             if (isEditMode && existingInsumo.id === insumo.id) {
                 return false;
             }
@@ -134,9 +156,8 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                 title: 'Insumo Duplicado',
                 text: 'Este insumo ya existe (o tiene un nombre muy similar). Por favor verifica.',
             });
-            return; // Detenemos el envío
+            return;
         }
-        // --- FIN VALIDACIÓN DUPLICADOS ---
 
         setLoading(true);
 
@@ -151,7 +172,6 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
             payload.set('insumo_imagen_url', '');
         } else {
             payload = { ...formData };
-
             if (isEditMode && !previewImage) {
                 payload.insumo_imagen = null;
                 payload.insumo_imagen_url = null;
@@ -231,8 +251,11 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                             name="insumo_stock"
                             value={formData.insumo_stock}
                             onChange={handleChange}
+                            // --- NUEVO: onBlur para autocompletar .0 en Gramos ---
+                            onBlur={handleStockBlur}
                             type="number"
-                            step="0.01"
+                            // --- NUEVO: Step dinámico según la unidad ---
+                            step={formData.insumo_unidad === 'Unidad' ? "1" : "0.1"}
                             min="0"
                             max="50000"
                             className={styles.input}
@@ -245,8 +268,11 @@ const AddEditInsumoModal = ({ insumo, onClose, onSuccess }) => {
                             name="insumo_stock_minimo"
                             value={formData.insumo_stock_minimo}
                             onChange={handleChange}
+                            // --- NUEVO: onBlur para autocompletar .0 en Gramos ---
+                            onBlur={handleStockBlur}
                             type="number"
-                            step="0.01"
+                            // --- NUEVO: Step dinámico según la unidad ---
+                            step={formData.insumo_unidad === 'Unidad' ? "1" : "0.1"}
                             min="0"
                             max="50000"
                             className={styles.input}

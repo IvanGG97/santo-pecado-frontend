@@ -151,17 +151,21 @@
 }
 
 .botonLimpiar {
-    background: none;
+    background: #6c757d;
     border: none;
-    color: var(--text-tertiary);
+    color: white;
     text-decoration: underline;
     cursor: pointer;
     font-size: var(--font-size-sm);
     padding: var(--button-padding);
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 .botonLimpiar:hover {
     color: var(--text-white);
+    background-color: var(--color-accent);
 }
 
 .botonAplicar {

@@ -1,35 +1,39 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'; // 1. IMPORTAR useRef
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'; // Importamos useRef
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../services/api';
 import styles from './VentasPage.module.css';
 import Swal from 'sweetalert2';
 
-const today = new Date().toISOString().split('T')[0];
-// --- Constantes (Sin cambios) ---
+// --- Helpers de Fecha ---
+const getToday = () => new Date().toISOString().split('T')[0];
+const getYesterday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+};
+
+// --- Constantes ---
 const ESTADO_FINAL_PAGADO = 'Pagado';
 const ESTADO_FINAL_CANCELADO = 'Cancelado';
 
-// --- Mapeo de Colores (Sin cambios) ---
 const estadoColorMap = {
     'Pagado': 'pagado',
     'Cancelado': 'cancelado',
     'No Pagado': 'pendiente',
 };
 
-// --- Opciones de Pago (Sin cambios) ---
 const MEDIOS_DE_PAGO = [
     { value: 'efectivo', label: 'Efectivo' },
     { value: 'transferencia', label: 'Transferencia' },
 ];
 
-// --- Componente Modal (MODIFICADO) ---
+// --- Componente Modal (Con Imprimir) ---
 const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
     const [editableEstadoId, setEditableEstadoId] = useState(venta.estado_venta?.id || '');
     const [editableMedioPago, setEditableMedioPago] = useState(venta.venta_medio_pago || 'efectivo');
     const [isLoading, setIsLoading] = useState(false);
-
-    // --- 2. CREAR REFERENCIA AL CONTENIDO DEL MODAL ---
-    const modalContentRef = useRef(null);
+    
+    const modalContentRef = useRef(null); // Referencia para imprimir
 
     const isReadOnly =
         venta.estado_venta?.estado_venta_nombre === ESTADO_FINAL_PAGADO ||
@@ -54,11 +58,8 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
         }
     };
 
-    // --- 3. FUNCIÓN PARA IMPRIMIR ---
     const handlePrint = () => {
         const printContent = modalContentRef.current.innerHTML;
-        
-        // Crear un iframe temporal para no afectar la página actual
         const iframe = document.createElement('iframe');
         iframe.style.position = 'absolute';
         iframe.style.width = '0';
@@ -68,115 +69,50 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
         
         const doc = iframe.contentWindow.document;
         doc.open();
-        // Escribimos el HTML del modal y algunos estilos básicos para la impresión
         doc.write(`
             <html>
                 <head>
                     <title>Comprobante Venta #${venta.id}</title>
                     <style>
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            margin: 20px; 
-                            color: #000;
-                        }
-                        h2 { 
-                            color: #000; 
-                            border-bottom: 2px solid #000; 
-                            padding-bottom: 5px; 
-                        }
-                        h4 { 
-                            border-bottom: 1px solid #ccc; 
-                            padding-bottom: 3px; 
-                            margin-top: 20px;
-                        }
-                        
-                        /* Estilos para simular el grid de info */
-                        .gestionGridInfo { 
-                            display: grid; 
-                            grid-template-columns: 1fr 1fr; 
-                            gap: 5px; 
-                            margin-bottom: 10px; 
-                            font-size: 0.9em;
-                        }
-                        .gridItemFull { 
-                            grid-column: 1 / -1; 
-                        }
-                        
-                        /* Estilos para la lista de detalles */
-                        .detalleVentaList { 
-                            margin-top: 10px; 
-                        }
-                        .detalleVentaItem { 
-                            display: flex; 
-                            justify-content: space-between; 
-                            border-bottom: 1px dashed #ccc; 
-                            padding: 8px 0; 
-                            font-size: 0.9em;
-                        }
-                        .detalleQty { 
-                            font-weight: bold; 
-                            margin-right: 10px; 
-                        }
-                        .itemInfo { 
-                            flex-grow: 1; 
-                        }
-                        .detalleNombre { 
-                            font-weight: bold; 
-                        }
-                        .notas { 
-                            font-style: italic; 
-                            color: #555; 
-                            font-size: 0.9em; 
-                            display: block;
-                        }
-                        .detallePrecio { 
-                            font-weight: bold; 
-                            white-space: nowrap;
-                        }
-                        .detalleTotal { 
-                            text-align: right; 
-                            font-size: 1.3em; 
-                            font-weight: bold; 
-                            margin-top: 15px; 
-                        }
-                        
-                        /* Ocultar botones en la impresión */
-                        .no-print { 
-                            display: none !important; 
-                        }
+                        body { font-family: Arial, sans-serif; margin: 20px; color: #000; }
+                        h2 { color: #000; border-bottom: 2px solid #000; padding-bottom: 5px; }
+                        h4 { border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-top: 20px; }
+                        .gestionGridInfo { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; font-size: 0.9em; }
+                        .gridItemFull { grid-column: 1 / -1; }
+                        .detalleVentaList { margin-top: 10px; }
+                        .detalleVentaItem { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; padding: 8px 0; font-size: 0.9em; }
+                        .detalleQty { font-weight: bold; margin-right: 10px; }
+                        .itemInfo { flex-grow: 1; }
+                        .detalleNombre { font-weight: bold; }
+                        .notas { font-style: italic; color: #555; font-size: 0.9em; display: block; }
+                        .detallePrecio { font-weight: bold; white-space: nowrap; }
+                        .detalleTotal { text-align: right; font-size: 1.3em; font-weight: bold; margin-top: 15px; }
+                        .no-print { display: none !important; }
                     </style>
                 </head>
-                <body>
-                    ${printContent}
-                </body>
+                <body>${printContent}</body>
             </html>
         `);
         doc.close();
 
-        // Ocultar los botones dentro del iframe antes de imprimir
-        // Usamos la clase de CSS module como un string selector
+        // Ocultar botones al imprimir
         const modalActions = doc.querySelector(`.${styles.modalActions}`);
-        if (modalActions) {
-            modalActions.classList.add('no-print');
-        }
+        if (modalActions) modalActions.classList.add('no-print');
         const closeButton = doc.querySelector(`.${styles.closeButton}`);
-        if (closeButton) {
-            closeButton.classList.add('no-print');
-        }
+        if (closeButton) closeButton.classList.add('no-print');
+        // Ocultar controles de edición también si es necesario
+        const controls = doc.querySelector(`.${styles.gestionGridControls}`);
+        if(controls) controls.classList.add('no-print');
+
 
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
-        
-        // Limpiar
         document.body.removeChild(iframe);
     };
 
-
     return (
         <div className={styles.modalBackdrop}>
-            {/* --- 4. ASIGNAR LA REFERENCIA AL DIV QUE QUEREMOS IMPRIMIR --- */}
             <div className={styles.modalContent} ref={modalContentRef}>
-                {/* 5. AÑADIR CLASE 'no-print' AL BOTÓN DE CERRAR */}
                 <button onClick={onClose} className={`${styles.closeButton} no-print`}>&times;</button>
                 <h2>Detalle de Venta #{venta.id}</h2>
 
@@ -219,7 +155,6 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                         <div className={styles.gridItemFull}><strong>Fecha:</strong> {new Date(venta.venta_fecha_hora).toLocaleString()}</div>
                     </div>
 
-                    {/* Controles de Gestión (Se ocultan al imprimir) */}
                     <div className={`${styles.gestionGridControls} no-print`}>
                         {isReadOnly ? (
                             <>
@@ -263,27 +198,13 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
                     </div>
                 </div>
 
-                {/* --- 6. MODIFICAR LA SECCIÓN DE ACCIONES --- */}
                 <div className={`${styles.modalActions} no-print`}>
-                    
-                    {/* Botón de Imprimir (Alineado a la izquierda) */}
-                    <button 
-                        type="button"
-                        onClick={handlePrint}
-                        className={styles.cancelButton} // Reusamos el estilo del botón "cancelar"
-                        style={{ marginRight: 'auto' }} // Esto lo empuja a la izquierda
-                    >
+                    <button type="button" onClick={handlePrint} className={styles.cancelButton} style={{ marginRight: 'auto' }}>
                         Imprimir Comprobante
                     </button>
-                    
-                    {/* Botones originales (Alineados a la derecha) */}
                     <button onClick={onClose} className={styles.cancelButton}>Cerrar</button>
                     {!isReadOnly && (
-                        <button
-                            onClick={handleSaveClick}
-                            className={styles.saveButton}
-                            disabled={isLoading}
-                        >
+                        <button onClick={handleSaveClick} className={styles.saveButton} disabled={isLoading}>
                             {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                         </button>
                     )}
@@ -295,7 +216,7 @@ const ManageVentaModal = ({ venta, estadosVenta, onClose, onSaveSuccess }) => {
 };
 
 
-// --- Componente Principal VentasPage (Sin cambios) ---
+// --- Componente Principal VentasPage ---
 const VentasPage = () => {
     const [allVentas, setAllVentas] = useState([]);
     const [estadosVenta, setEstadosVenta] = useState([]);
@@ -303,23 +224,28 @@ const VentasPage = () => {
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVenta, setSelectedVenta] = useState(null);
-
     const [isVerifyingCaja, setIsVerifyingCaja] = useState(true);
     const navigate = useNavigate();
 
+    // --- Estados de Filtros ---
     const [inputStatusFilter, setInputStatusFilter] = useState('No Pagado');
     const [inputEmpleadoSearch, setInputEmpleadoSearch] = useState('');
-    const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
+    // POR DEFECTO: Ayer y Hoy
+    const [inputDateRange, setInputDateRange] = useState({ desde: getYesterday(), hasta: getToday() });
     const [inputIdVenta, setInputIdVenta] = useState('');
     const [inputIdPedido, setInputIdPedido] = useState('');
+    // POR DEFECTO: 'desc' (Más reciente a más antiguo)
+    const [inputSortOrder, setInputSortOrder] = useState('desc');
 
+    // --- Estado Filtros Activos ---
     const [activeFilters, setActiveFilters] = useState({
         status: 'No Pagado',
         empleado: '',
-        desde: '',
-        hasta: '',
+        desde: getYesterday(),
+        hasta: getToday(),
         idVenta: '',
-        idPedido: ''
+        idPedido: '',
+        sortOrder: 'desc'
     });
 
     const STATUS_FILTERS = useMemo(() => ['No Pagado', 'Pagado', 'Cancelado', 'Todos'], []);
@@ -331,20 +257,18 @@ const VentasPage = () => {
                 apiClient.get('/venta/ventas/'),
                 apiClient.get('/venta/estados-venta/')
             ]);
+            // Orden inicial que viene de API (aunque el filtro lo reordenará luego)
             setAllVentas(resVentas.data.sort((a, b) => new Date(b.venta_fecha_hora) - new Date(a.venta_fecha_hora)));
             setEstadosVenta(resEstados.data);
             setError(null);
         } catch (error) {
             console.error("Error al cargar datos de ventas:", error);
             setError("No se pudieron cargar los datos de ventas.");
-            if (isInitialLoad) {
-                Swal.fire('Error', 'No se pudieron cargar los datos de ventas.', 'error');
-            }
+            if (isInitialLoad) Swal.fire('Error', 'No se pudieron cargar los datos de ventas.', 'error');
         } finally {
             if (isInitialLoad) setLoading(false);
         }
     }, []);
-
 
     useEffect(() => {
         const checkCajaStatus = async () => {
@@ -361,9 +285,7 @@ const VentasPage = () => {
                         allowOutsideClick: false,
                         allowEscapeKey: false,
                     }).then((result) => {
-                        if (result.isConfirmed) {
-                            navigate('/cajas');
-                        }
+                        if (result.isConfirmed) navigate('/cajas');
                     });
                 }
             } catch (err) {
@@ -375,88 +297,79 @@ const VentasPage = () => {
                     confirmButtonText: 'Ir a Inicio',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                }).then(() => {
-                    navigate('/inicio');
-                });
+                }).then(() => navigate('/inicio'));
             }
         };
-
         checkCajaStatus();
     }, [navigate]);
 
-
     useEffect(() => {
-        if (!isVerifyingCaja) {
-            fetchVentasYEstados(true);
-        }
+        if (!isVerifyingCaja) fetchVentasYEstados(true);
     }, [fetchVentasYEstados, isVerifyingCaja]);
 
-
+    // --- Lógica de Filtrado y Orden ---
     const filteredVentas = useMemo(() => {
-        const termEmpleado = activeFilters.empleado.toLowerCase().trim();
-        const termIdVenta = activeFilters.idVenta.trim();
-        const termIdPedido = activeFilters.idPedido.trim();
+        const { empleado, idVenta, idPedido, status, desde, hasta, sortOrder } = activeFilters;
+        const termEmpleado = empleado.toLowerCase().trim();
+        const termIdVenta = idVenta.trim();
+        const termIdPedido = idPedido.trim();
 
-        return allVentas.filter(venta => {
-            if (activeFilters.status !== 'Todos' && venta.estado_venta?.estado_venta_nombre !== activeFilters.status) {
-                return false;
-            }
+        // 1. Filtrado
+        let result = allVentas.filter(venta => {
+            // Estado
+            if (status !== 'Todos' && venta.estado_venta?.estado_venta_nombre !== status) return false;
+            
+            // Empleado
             if (termEmpleado) {
                 const nombreCompleto = `${venta.empleado?.first_name || ''} ${venta.empleado?.last_name || ''}`.toLowerCase().trim();
-                if (!nombreCompleto.includes(termEmpleado)) {
-                    return false;
-                }
+                if (!nombreCompleto.includes(termEmpleado)) return false;
             }
-            if (activeFilters.desde) {
+            
+            // Fechas
+            // Si "desde" o "hasta" están vacíos, ignoramos ese límite
+            if (desde) {
                 try {
-                    const fechaDesde = new Date(activeFilters.desde + 'T00:00:00');
+                    const fechaDesde = new Date(desde + 'T00:00:00');
                     const fechaVenta = new Date(venta.venta_fecha_hora);
-                    if (fechaVenta < fechaDesde) {
-                        return false;
-                    }
-                } catch (e) { console.warn("Fecha 'desde' inválida:", activeFilters.desde); }
+                    if (fechaVenta < fechaDesde) return false;
+                } catch (e) { console.warn("Fecha 'desde' inválida"); }
             }
-            if (activeFilters.hasta) {
+            if (hasta) {
                 try {
-                    const fechaHasta = new Date(activeFilters.hasta + 'T23:59:59');
+                    const fechaHasta = new Date(hasta + 'T23:59:59');
                     const fechaVenta = new Date(venta.venta_fecha_hora);
-                    if (fechaVenta > fechaHasta) {
-                        return false;
-                    }
-                } catch (e) { console.warn("Fecha 'hasta' inválida:", activeFilters.hasta); }
+                    if (fechaVenta > fechaHasta) return false;
+                } catch (e) { console.warn("Fecha 'hasta' inválida"); }
             }
-            if (termIdVenta) {
-                if (!String(venta.id).startsWith(termIdVenta)) {
-                    return false;
-                }
-            }
-            if (termIdPedido) {
-                if (!String(venta.pedido?.id || '').startsWith(termIdPedido)) {
-                    return false;
-                }
-            }
+            
+            // IDs
+            if (termIdVenta && !String(venta.id).startsWith(termIdVenta)) return false;
+            if (termIdPedido && !String(venta.pedido?.id || '').startsWith(termIdPedido)) return false;
+            
             return true;
         });
+
+        // 2. Ordenamiento
+        result.sort((a, b) => {
+            const dateA = new Date(a.venta_fecha_hora);
+            const dateB = new Date(b.venta_fecha_hora);
+            
+            if (sortOrder === 'asc') {
+                return dateA - dateB; // Más antiguo a más reciente
+            } else {
+                return dateB - dateA; // Más reciente a más antiguo (desc)
+            }
+        });
+
+        return result;
     }, [allVentas, activeFilters]);
 
-    const handleDateChange = (e) => {
-        const { name, value } = e.target;
-        setInputDateRange(prevRange => ({
-            ...prevRange,
-            [name]: value
-        }));
-    };
-
-    const handleEmpleadoSearchChange = (e) => {
-        setInputEmpleadoSearch(e.target.value);
-    };
-    
-    const handleIdVentaChange = (e) => {
-        setInputIdVenta(e.target.value);
-    };
-    const handleIdPedidoChange = (e) => {
-        setInputIdPedido(e.target.value);
-    };
+    // --- Handlers ---
+    const handleDateChange = (e) => setInputDateRange(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const handleEmpleadoSearchChange = (e) => setInputEmpleadoSearch(e.target.value);
+    const handleIdVentaChange = (e) => setInputIdVenta(e.target.value);
+    const handleIdPedidoChange = (e) => setInputIdPedido(e.target.value);
+    const handleSortOrderChange = (e) => setInputSortOrder(e.target.value);
 
     const handleAplicarFiltros = () => {
         setActiveFilters({
@@ -465,45 +378,37 @@ const VentasPage = () => {
             desde: inputDateRange.desde,
             hasta: inputDateRange.hasta,
             idVenta: inputIdVenta,
-            idPedido: inputIdPedido
+            idPedido: inputIdPedido,
+            sortOrder: inputSortOrder
         });
     };
 
     const handleLimpiarFiltros = () => {
         setInputStatusFilter('No Pagado');
         setInputEmpleadoSearch('');
-        setInputDateRange({ desde: '', hasta: '' });
+        // Reset a "Ayer - Hoy"
+        setInputDateRange({ desde: getYesterday(), hasta: getToday() });
         setInputIdVenta('');
         setInputIdPedido('');
+        setInputSortOrder('desc');
+        
         setActiveFilters({
             status: 'No Pagado',
             empleado: '',
-            desde: '',
-            hasta: '',
+            desde: getYesterday(),
+            hasta: getToday(),
             idVenta: '',
-            idPedido: ''
+            idPedido: '',
+            sortOrder: 'desc'
         });
     };
 
-    const handleManageClick = (venta) => {
-        setSelectedVenta(venta);
-        setIsModalOpen(true);
-    };
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedVenta(null);
-    };
-    const handleSaveVenta = () => {
-        handleCloseModal();
-        fetchVentasYEstados(false);
-    };
+    const handleManageClick = (venta) => { setSelectedVenta(venta); setIsModalOpen(true); };
+    const handleCloseModal = () => { setIsModalOpen(false); setSelectedVenta(null); };
+    const handleSaveVenta = () => { handleCloseModal(); fetchVentasYEstados(false); };
 
     if (isVerifyingCaja) {
-        return (
-            <div className={styles.ventasContainer} style={{ padding: '2rem', textAlign: 'center' }}>
-                Verificando estado de la caja...
-            </div>
-        );
+        return <div className={styles.ventasContainer} style={{ padding: '2rem', textAlign: 'center' }}>Verificando estado de la caja...</div>;
     }
 
     return (
@@ -511,7 +416,7 @@ const VentasPage = () => {
             <h1>Gestión de Ventas</h1>
 
             <div className={styles.filtrosContainer}>
-                {/* Filtros de Estado */}
+                
                 <div className={styles.filtroGrupo}>
                     <label>Estado Venta:</label>
                     <div className={styles.botonesFiltroEstado}>
@@ -527,72 +432,39 @@ const VentasPage = () => {
                     </div>
                 </div>
 
-                {/* Filtro por ID Venta */}
                 <div className={styles.filtroGrupo}>
-                    <label htmlFor="idVentaSearch">ID Venta:</label>
-                    <input
-                        type="number"
-                        id="idVentaSearch"
-                        placeholder="Buscar por ID Venta..."
-                        value={inputIdVenta}
-                        onChange={handleIdVentaChange}
-                        className={styles.filtroInput}
-                    />
+                    <label>ID Venta:</label>
+                    <input type="number" placeholder="Buscar..." value={inputIdVenta} onChange={handleIdVentaChange} className={styles.filtroInput} />
                 </div>
 
-                {/* Filtro por ID Pedido */}
                 <div className={styles.filtroGrupo}>
-                    <label htmlFor="idPedidoSearch">ID Pedido:</label>
-                    <input
-                        type="number"
-                        id="idPedidoSearch"
-                        placeholder="Buscar por ID Pedido..."
-                        value={inputIdPedido}
-                        onChange={handleIdPedidoChange}
-                        className={styles.filtroInput}
-                    />
+                    <label>ID Pedido:</label>
+                    <input type="number" placeholder="Buscar..." value={inputIdPedido} onChange={handleIdPedidoChange} className={styles.filtroInput} />
                 </div>
 
-                {/* Filtro por Empleado */}
                 <div className={styles.filtroGrupo}>
-                    <label htmlFor="empleadoSearch">Empleado:</label>
-                    <input
-                        type="text"
-                        id="empleadoSearch"
-                        placeholder="Nombre o Apellido..."
-                        value={inputEmpleadoSearch}
-                        onChange={handleEmpleadoSearchChange}
-                        className={styles.filtroInput}
-                    />
+                    <label>Empleado:</label>
+                    <input type="text" placeholder="Nombre..." value={inputEmpleadoSearch} onChange={handleEmpleadoSearchChange} className={styles.filtroInput} />
                 </div>
 
-                {/* Filtros de Fecha */}
                 <div className={styles.filtroGrupo}>
                     <label>Fecha:</label>
                     <div className={styles.inputsFecha}>
-                        <label htmlFor="desde">Desde:</label>
-                        <input
-                            type="date"
-                            id="desde"
-                            name="desde"
-                            value={inputDateRange.desde}
-                            onChange={handleDateChange}
-                            className={styles.inputFecha}
-                        />
-                        <label htmlFor="hasta">Hasta:</label>
-                        <input
-                            type="date"
-                            id="hasta"
-                            name="hasta"
-                            value={inputDateRange.hasta}
-                            onChange={handleDateChange}
-                            className={styles.inputFecha}
-                            max={today}
-                        />
+                        <label>Desde:</label>
+                        <input type="date" name="desde" value={inputDateRange.desde} onChange={handleDateChange} className={styles.inputFecha} />
+                        <label>Hasta:</label>
+                        <input type="date" name="hasta" value={inputDateRange.hasta} onChange={handleDateChange} className={styles.inputFecha} />
                     </div>
                 </div>
 
-                {/* Botones de Acción de Filtro */}
+                <div className={styles.filtroGrupo}>
+                    <label>Orden:</label>
+                    <select value={inputSortOrder} onChange={handleSortOrderChange} className={styles.filtroInput}>
+                        <option value="desc">Más Reciente a Más Antiguo</option>
+                        <option value="asc">Más Antiguo a Más Reciente</option>
+                    </select>
+                </div>
+
                 <div className={styles.filtroAcciones}>
                     <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
@@ -622,9 +494,7 @@ const VentasPage = () => {
                         </thead>
                         <tbody>
                             {filteredVentas.length === 0 ? (
-                                <tr>
-                                    <td colSpan={10} style={{ textAlign: 'center' }}>No se encontraron ventas que coincidan con los filtros.</td>
-                                </tr>
+                                <tr><td colSpan={10} style={{ textAlign: 'center' }}>No se encontraron ventas que coincidan con los filtros.</td></tr>
                             ) : (
                                 filteredVentas.map(venta => {
                                     const estadoNombreVenta = venta.estado_venta?.estado_venta_nombre || 'N/A';

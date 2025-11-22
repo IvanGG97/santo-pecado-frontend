@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-// Asegúrate que esta ruta a tu archivo api.js sea correcta desde src/pages/Cocina/
 import apiClient from '../../services/api';
-// Asegúrate que este archivo CSS exista en la misma carpeta (src/pages/Cocina/)
 import styles from './CocinaPage.module.css';
+import Swal from 'sweetalert2'; // Importamos Swal para la alerta de cancelación
 
+// --- Helpers de Fecha ---
+const getToday = () => new Date().toISOString().split('T')[0];
+const getYesterday = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+};
 
-
-const today = new Date().toISOString().split('T')[0];
 // --- Componente Simple de Mensajes ---
 const MessageBox = ({ message, type, onClose }) => {
     if (!message) return null;
@@ -26,18 +30,16 @@ const estadoColorMap = {
     'Cancelado': 'cancelado'
 };
 
-// --- NUEVO: Jerarquía de Estados (Workflow) ---
-// Define el orden lógico de los estados
+// --- Jerarquía de Estados (Workflow) ---
 const estadoOrden = {
     'Recibido En Cocina': 1,
     'En Preparación': 2,
-    'Completado': 3, // Estado final
-    'Cancelado': 99, // Estado final (número alto)
-    // 'Pendiente' tendría 0, por eso no se muestra
+    'Completado': 3, 
+    'Cancelado': 99, 
 };
 
 
-// --- Componente ComandaCard (ACTUALIZADO con workflow y teléfono) ---
+// --- Componente ComandaCard ---
 const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
 
     const estadoActual = estadosDisponibles.find(e => e.estado_pedido_nombre === pedido.estado_pedido) || { estado_pedido_nombre: 'Desconocido' };
@@ -46,11 +48,8 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
         ? styles[`estado-${estadoColorMap[estadoActual.estado_pedido_nombre]}-bg`]
         : '';
 
-    // --- LÓGICA WORKFLOW: Determinar orden y si es estado final ---
     const ordenActual = estadoOrden[estadoActual.estado_pedido_nombre] || 0;
-    // Es estado final si es Completado o Cancelado
     const isFinalState = ordenActual === estadoOrden['Completado'] || ordenActual === estadoOrden['Cancelado'];
-    // --- FIN LÓGICA WORKFLOW ---
 
     return (
         <div className={`${styles.comandaCard} ${cardBgClass}`}>
@@ -59,13 +58,12 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
                 <span className={styles.estadoActualBadge}>{estadoActual.estado_pedido_nombre}</span>
             </div>
 
-            {/* --- Sección Cliente (Actualizada con Teléfono) --- */}
+            {/* --- Sección Cliente --- */}
             {pedido.cliente && (
                 <div className={styles.clienteInfoSection}>
                     <span className={styles.clienteNombre}>
                         👤 {pedido.cliente.cliente_nombre} {pedido.cliente.cliente_apellido || ''}
                     </span>
-                    {/* NUEVO: Mostrar teléfono si existe */}
                     {pedido.cliente.cliente_telefono && (
                         <span className={styles.clienteTelefono}>
                             📞 {pedido.cliente.cliente_telefono}
@@ -78,7 +76,6 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
                     )}
                 </div>
             )}
-            {/* --- FIN Sección Cliente --- */}
 
             <div className={styles.cardBody}>
                 {pedido.detalles.map((item, index) => (
@@ -95,7 +92,6 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
             </div>
 
             <div className={styles.cardFooter}>
-                {/* --- LÓGICA WORKFLOW: Mostrar botones solo si no es estado final --- */}
                 {!isFinalState ? (
                     <>
                         <span>Cambiar estado a:</span>
@@ -105,33 +101,24 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
                                     ? styles[`boton-${estadoColorMap[estado.estado_pedido_nombre]}`]
                                     : '';
 
-                                // --- LÓGICA WORKFLOW: Filtrar botones ---
                                 const ordenNuevo = estadoOrden[estado.estado_pedido_nombre] || 0;
 
                                 // 1. No mostrar si es el estado actual
-                                if (ordenNuevo === ordenActual) {
-                                    return null;
-                                }
+                                if (ordenNuevo === ordenActual) return null;
 
                                 // 2. Definir las excepciones (siempre se puede cancelar)
                                 const esCancelado = estado.estado_pedido_nombre === 'Cancelado';
 
                                 // 3. Definir el paso lógico siguiente
-                                // (Ej: Si ordenActual=1, esSiguientePaso es true solo si ordenNuevo=2)
                                 const esSiguientePaso = ordenNuevo === ordenActual + 1;
 
                                 // 4. Mostrar el botón SOLAMENTE si es "Cancelado" O si es el "Siguiente Paso"
-                                if (!esCancelado && !esSiguientePaso) {
-                                    return null;
-                                }
-                                // --- FIN LÓGICA WORKFLOW ---
-
-                                const estadoIdParaUpdate = estado.id;
+                                if (!esCancelado && !esSiguientePaso) return null;
 
                                 return (
                                     <button
                                         key={estado.id}
-                                        onClick={() => onUpdateStatus(pedido.id, estadoIdParaUpdate, estado.estado_pedido_nombre)}
+                                        onClick={() => onUpdateStatus(pedido.id, estado.id, estado.estado_pedido_nombre)}
                                         className={`${styles.botonEstado} ${buttonColorClass}`}
                                     >
                                         {estado.estado_pedido_nombre}
@@ -141,7 +128,6 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
                         </div>
                     </>
                 ) : (
-                    // Si es estado final, solo mostrar el texto
                     <span className={styles.estadoFinalizado}>Pedido {estadoActual.estado_pedido_nombre}</span>
                 )}
 
@@ -154,9 +140,9 @@ const ComandaCard = ({ pedido, estadosDisponibles, onUpdateStatus }) => {
 };
 
 
-// --- Componente Principal CocinaPage (ACTUALIZADO con Filtros) ---
+// --- Componente Principal CocinaPage ---
 const CocinaPage = () => {
-    const [allPedidos, setAllPedidos] = useState([]); // Guarda TODOS los pedidos
+    const [allPedidos, setAllPedidos] = useState([]); 
     const [estados, setEstados] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isFetching, setIsFetching] = useState(false);
@@ -164,21 +150,29 @@ const CocinaPage = () => {
 
     // --- ESTADOS PARA LOS INPUTS DE FILTRO ---
     const defaultStatus = 'Recibido En Cocina';
+    
+    // Inicializamos fechas con Ayer y Hoy por defecto
+    const [inputDateRange, setInputDateRange] = useState({ 
+        desde: getYesterday(), 
+        hasta: getToday() 
+    });
+    
     const [inputStatusFilter, setInputStatusFilter] = useState(defaultStatus);
-    const [inputDateRange, setInputDateRange] = useState({ desde: '', hasta: '' });
-    const [inputPedidoId, setInputPedidoId] = useState(''); // Nuevo estado para input Pedido ID
+    const [inputPedidoId, setInputPedidoId] = useState('');
+    
+    // --- CAMBIO AQUÍ: Orden por defecto 'asc' (Antiguo a Reciente) ---
+    const [inputSortOrder, setInputSortOrder] = useState('asc'); 
 
     // --- ESTADO PARA LOS FILTROS APLICADOS ---
     const [activeFilters, setActiveFilters] = useState({
         status: defaultStatus,
-        desde: '',
-        hasta: '',
-        pedidoId: '' // Nuevo campo de filtro activo
+        desde: getYesterday(), 
+        hasta: getToday(),     
+        pedidoId: '',
+        sortOrder: 'asc' // --- CAMBIO AQUÍ TAMBIÉN ---
     });
 
-    // Definir filtros de estado disponibles
     const STATUS_FILTERS = useMemo(() => ['Recibido En Cocina', 'En Preparación', 'Completado', 'Cancelado', 'Todos'], []);
-
 
     const showMessage = (text, type = 'info', duration = 5000) => {
         setMessage({ text, type });
@@ -209,8 +203,7 @@ const CocinaPage = () => {
                 .map(p => ({
                     ...p,
                     estado_pedido_id: estadosData.find(e => e.estado_pedido_nombre === p.estado_pedido)?.id || null
-                }))
-                .sort((a, b) => new Date(a.pedido_fecha_hora) - new Date(b.pedido_fecha_hora));
+                }));
 
             setAllPedidos(currentPedidos => {
                 const currentSignature = JSON.stringify(currentPedidos.map(p => ({ id: p.id, estado: p.estado_pedido_id, cliente: p.cliente?.id })));
@@ -243,10 +236,9 @@ const CocinaPage = () => {
 
     // --- LÓGICA DE FILTRADO COMBINADO ---
     const filteredPedidos = useMemo(() => {
-        // Lee desde activeFilters
-        const { status, pedidoId, desde, hasta } = activeFilters;
+        const { status, pedidoId, desde, hasta, sortOrder } = activeFilters;
 
-        return allPedidos.filter(pedido => {
+        let result = allPedidos.filter(pedido => {
 
             // 1. Filtro por Estado
             if (status !== 'Todos' && pedido.estado_pedido !== status) {
@@ -260,12 +252,13 @@ const CocinaPage = () => {
                 }
             }
 
+            const fechaPedido = new Date(pedido.pedido_fecha_hora);
+
             // 3. Filtro por Fecha "Desde"
             if (desde) {
                 try {
-                    const fechaDesde = new Date(desde);
-                    fechaDesde.setHours(0, 0, 0, 0);
-                    const fechaPedido = new Date(pedido.pedido_fecha_hora);
+                    // Creamos la fecha local al inicio del día (00:00:00)
+                    const fechaDesde = new Date(desde + 'T00:00:00');
                     if (fechaPedido < fechaDesde) {
                         return false;
                     }
@@ -275,9 +268,8 @@ const CocinaPage = () => {
             // 4. Filtro por Fecha "Hasta"
             if (hasta) {
                 try {
-                    const fechaHasta = new Date(hasta);
-                    fechaHasta.setHours(23, 59, 59, 999);
-                    const fechaPedido = new Date(pedido.pedido_fecha_hora);
+                    // Creamos la fecha local al final del día (23:59:59)
+                    const fechaHasta = new Date(hasta + 'T23:59:59');
                     if (fechaPedido > fechaHasta) {
                         return false;
                     }
@@ -286,7 +278,22 @@ const CocinaPage = () => {
 
             return true;
         });
-    }, [allPedidos, activeFilters]); // Depende de allPedidos y activeFilters
+
+        // 5. Ordenamiento
+        result.sort((a, b) => {
+            const dateA = new Date(a.pedido_fecha_hora);
+            const dateB = new Date(b.pedido_fecha_hora);
+            
+            if (sortOrder === 'asc') {
+                return dateA - dateB; // Más antiguo primero (ahora default)
+            } else {
+                return dateB - dateA; // Más reciente primero
+            }
+        });
+
+        return result;
+
+    }, [allPedidos, activeFilters]);
 
     // --- Handlers para inputs de filtros ---
     const handleDateChange = (e) => {
@@ -305,34 +312,60 @@ const CocinaPage = () => {
         setInputStatusFilter(status);
     };
 
+    const handleSortOrderChange = (e) => {
+        setInputSortOrder(e.target.value);
+    };
+
     // --- Handlers para botones de Aplicar/Limpiar ---
     const handleAplicarFiltros = () => {
         setActiveFilters({
             status: inputStatusFilter,
             desde: inputDateRange.desde,
             hasta: inputDateRange.hasta,
-            pedidoId: inputPedidoId.trim()
+            pedidoId: inputPedidoId.trim(),
+            sortOrder: inputSortOrder // Aplicar orden
         });
     };
 
     const handleLimpiarFiltros = () => {
-        // Resetear inputs
+        // Resetear inputs a defaults
         setInputStatusFilter(defaultStatus);
-        setInputDateRange({ desde: '', hasta: '' });
+        setInputDateRange({ desde: getYesterday(), hasta: getToday() });
         setInputPedidoId('');
-        // Resetear filtros activos
+        // --- CAMBIO AQUÍ: Resetear a 'asc' ---
+        setInputSortOrder('asc');
+        
+        // Resetear filtros activos a defaults
         setActiveFilters({
             status: defaultStatus,
-            desde: '',
-            hasta: '',
-            pedidoId: ''
+            desde: getYesterday(),
+            hasta: getToday(),
+            pedidoId: '',
+            sortOrder: 'asc' // --- CAMBIO AQUÍ TAMBIÉN ---
         });
     };
-    // --- FIN Handlers Filtros ---
 
-
-    // Manejador para actualizar el estado
+    // --- Handler Actualizar Estado (CON CONFIRMACIÓN PARA CANCELAR) ---
     const handleUpdateStatus = async (pedidoId, nuevoEstadoId, nuevoEstadoNombre) => {
+        
+        // Confirmación si es "Cancelado"
+        if (nuevoEstadoNombre === 'Cancelado') {
+            const result = await Swal.fire({
+                title: '¿Cancelar Pedido?',
+                text: `¿Estás seguro que deseas cancelar el Pedido #${pedidoId}? Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, cancelar',
+                cancelButtonText: 'No, volver'
+            });
+
+            if (!result.isConfirmed) {
+                return; 
+            }
+        }
+        
         let shouldUpdate = true;
         setIsFetching(currentFetching => {
             if (currentFetching) shouldUpdate = false;
@@ -356,18 +389,16 @@ const CocinaPage = () => {
             showMessage(`Pedido #${pedidoId} actualizado a ${nuevoEstadoNombre}.`, 'success', 3000);
 
         } catch (err) {
-            // --- NUEVO: Manejo de error de stock desde el backend ---
-            // @ts-ignore
+            // Manejo de error
             const errorMessage = err.response?.data?.detail || `Error al actualizar estado del Pedido #${pedidoId}.`;
-            showMessage(errorMessage, 'error', 6000); // Mostrar error de backend (ej. "Stock insuficiente...")
+            showMessage(errorMessage, 'error', 6000);
 
-            // Revertir cambio optimista en caso de error
+            // Revertir cambio optimista
             if (pedidoOriginal) {
                 setAllPedidos(prevPedidos => prevPedidos.map(p =>
                     p.id === pedidoId ? pedidoOriginal : p
                 ));
             } else {
-                console.warn("No se encontró el pedido original para revertir estado.");
                 fetchData();
             }
         } finally {
@@ -386,8 +417,9 @@ const CocinaPage = () => {
                 onClose={() => setMessage({ text: null, type: 'info' })}
             />
 
-            {/* --- CONTROLES DE FILTRO ACTUALIZADOS --- */}
+            {/* --- CONTROLES DE FILTRO --- */}
             <div className={styles.filtrosContainer}>
+                
                 {/* Filtros de Estado */}
                 <div className={styles.filtroGrupo}>
                     <label>Estado Pedido:</label>
@@ -396,7 +428,7 @@ const CocinaPage = () => {
                             <button
                                 key={status}
                                 className={`${styles.botonFiltro} ${inputStatusFilter === status ? styles.activo : ''}`}
-                                onClick={() => handleStatusFilterChange(status)} // Actualiza el INPUT state
+                                onClick={() => handleStatusFilterChange(status)}
                             >
                                 {status}
                             </button>
@@ -404,14 +436,14 @@ const CocinaPage = () => {
                     </div>
                 </div>
 
-                {/* NUEVO: Filtro por N° Pedido */}
+                {/* Filtro por N° Pedido */}
                 <div className={styles.filtroGrupo}>
                     <label htmlFor="pedidoIdSearch">N° Pedido:</label>
                     <input
-                        type="number" // Cambiado a 'number' para mejor UX
+                        type="number"
                         id="pedidoIdSearch"
                         placeholder="Buscar ID..."
-                        value={inputPedidoId} // Controlado por INPUT state
+                        value={inputPedidoId}
                         onChange={handlePedidoIdChange}
                         className={styles.filtroInput}
                     />
@@ -426,7 +458,7 @@ const CocinaPage = () => {
                             type="date"
                             id="desde"
                             name="desde"
-                            value={inputDateRange.desde} // Controlado por INPUT state
+                            value={inputDateRange.desde}
                             onChange={handleDateChange}
                             className={styles.inputFecha}
                         />
@@ -435,15 +467,28 @@ const CocinaPage = () => {
                             type="date"
                             id="hasta"
                             name="hasta"
-                            value={inputDateRange.hasta} // Controlado por INPUT state
+                            value={inputDateRange.hasta}
                             onChange={handleDateChange}
                             className={styles.inputFecha}
-                            max={today} 
                         />
                     </div>
                 </div>
 
-                {/* NUEVO: Botones de Acción de Filtro */}
+                {/* Filtro de Ordenamiento */}
+                <div className={styles.filtroGrupo}>
+                    <label htmlFor="sortOrder">Orden:</label>
+                    <select
+                        id="sortOrder"
+                        value={inputSortOrder}
+                        onChange={handleSortOrderChange}
+                        className={styles.filtroInput}
+                    >
+                        <option value="asc">Más Antiguo a Más Reciente</option>
+                        <option value="desc">Más Reciente a Más Antiguo</option>
+                    </select>
+                </div>
+
+                {/* Botones de Acción */}
                 <div className={styles.filtroAcciones}>
                     <button className={styles.botonLimpiar} onClick={handleLimpiarFiltros}>Limpiar</button>
                     <button className={styles.botonAplicar} onClick={handleAplicarFiltros}>Aplicar Filtros</button>
