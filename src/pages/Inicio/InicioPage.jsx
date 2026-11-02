@@ -207,7 +207,7 @@ const AdminDashboard = () => {
             setIsReportModalOpen(true);
 
         } catch (error) {
-            Swal.fire('Error IA', 'No se pudo generar el reporte. Verifica tu conexión o API Key.', 'error');
+            Swal.fire('Error IA', 'No se pudo generar el reporte. Verifica tu conexión o intenta de nuevo más tarde.', 'error');
         } finally {
             setIsGeneratingAI(false);
         }
