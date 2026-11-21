@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# Santo Pecado · Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Interfaz del sistema de gestión de **Santo Pecado**, una hamburguesería artesanal de Salta: punto de venta, monitor de cocina, stock, caja, compras, ventas y personal. **Está en producción**, en uso diario en el local.
 
-## Available Scripts
+> Backend (Django REST): [santo-pecado-backend](https://github.com/IvanGG97/santo-pecado-backend) · Caso de estudio completo: [ivan-gutierrez.netlify.app](https://ivan-gutierrez.netlify.app/es/projects/santo-pecado/)
 
-In the project directory, you can run:
+![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB) ![React Router](https://img.shields.io/badge/React_Router_7-CA4245?logo=reactrouter&logoColor=white) ![Axios](https://img.shields.io/badge/Axios-5A29E4?logo=axios&logoColor=white) ![Recharts](https://img.shields.io/badge/Recharts-22B5BF) ![JWT](https://img.shields.io/badge/JWT-000?logo=jsonwebtokens&logoColor=white)
 
-### `npm start`
+## Pantallas
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+| Punto de venta | Monitor de cocina |
+|---|---|
+| ![Punto de venta](docs/screenshots/pos.webp) | ![Monitor de cocina](docs/screenshots/cocina.webp) |
+| **Personalizar un producto** | **Control de stock** |
+| ![Personalizar producto](docs/screenshots/personalizar.webp) | ![Control de stock](docs/screenshots/stock.webp) |
+| **Dashboard** | **Caja** |
+| ![Dashboard](docs/screenshots/panel.webp) | ![Caja](docs/screenshots/caja.webp) |
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+*Capturas con datos ficticios.*
 
-### `npm test`
+## Qué hace
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Punto de venta:** toma de pedidos por categoría, promociones y personalización de cada producto (quitar ingredientes o agregar extras). Lo que se quita no se descuenta del stock.
+- **Monitor de cocina:** muestra los pedidos por estado y se actualiza solo cada 5 segundos. Al pasar un pedido a *En Preparación*, el backend descuenta los insumos de la receta.
+- **Stock:** insumos con stock mínimo y alertas, productos y recetas.
+- **Caja:** apertura, cierre e ingresos y egresos del día.
+- **Compras, ventas y empleados.**
+- **Dashboard:** productos más vendidos, medios de pago y días con más ingresos, más un **reporte estratégico con IA** (Gemini, a través del backend) que se descarga en PDF.
+- **Cuentas:** login con JWT, registro, activación por mail y recuperación de contraseña.
 
-### `npm run build`
+## Roles
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Las rutas se protegen según el rol que viaja en el JWT (`ProtectedRoute` + `AuthContext`):
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+| Rol | Acceso |
+|---|---|
+| `Admin` | Todo, incluida la gestión de empleados |
+| `Encargado/Cajero` | Pedidos, cocina, caja, ventas, compras, productos y stock |
+| `Cocina` | Monitor de cocina y carta |
+| `Cliente` | Carta |
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Correr en local
 
-### `npm run eject`
+Requisitos: Node 18 o superior y el [backend](https://github.com/IvanGG97/santo-pecado-backend) corriendo en `http://localhost:8000`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm install
+npm start          # http://localhost:3000
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+La URL de la API está en [`src/services/api.js`](src/services/api.js).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Estructura
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```
+src/
+  pages/        una carpeta por pantalla (Caja, Cocina, Stock, Ventas, Dashboard…)
+  components/   modales, listas, layout y ProtectedRoute
+  contexts/     AuthContext: sesión, tokens y rol
+  services/     cliente Axios con el token y servicio del reporte con IA
+  styles/       tokens de diseño
+```
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Desarrollado por **Iván Gutiérrez** · [Portfolio](https://ivan-gutierrez.netlify.app) · [LinkedIn](https://www.linkedin.com/in/ivan-gutierrez-analista) · [GitHub](https://github.com/IvanGG97)
